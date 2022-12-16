@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  {% include 'header.html' %}
+</head>
+
+<body>
+  {% include 'nav.html' %}
+
+  {% raw %}
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        <span id="app">{{ message }}</span>
+      </h1>
+      <p class="subtitle">
+        My first website with
+        <strong>Bulma</strong>
+        !
+      </p>
+    </div>
+  </section>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue.js!'
+      }
+    })
+  </script>
+  {% endraw %}
+
+  {% include 'footer.html' %}
+
+</body>
+
+</html>

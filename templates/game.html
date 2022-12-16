@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% include 'header.html' %}
+</head>
+
+<body>
+    {% include 'nav.html' %}
+
+    <section class="section">
+        <div id="app" class="columns is-max-widescreen">
+            <div class="column is-two-thirds container">
+                <div class="card">
+                    <div class="card-image">
+                        <figure class="image is-4by3">
+                            <img ref="image" v-bind:src="image_url" alt="image">
+                        </figure>
+                    </div>
+                </div>
+            </div>
+            <div class="column container">
+                <div class="card">
+                    <header class="card-header-title">
+                        <p class="card-header-title">{{ guess_the_image }}</p>
+                    </header>
+                    <div class="card-content">
+                        <progress class="progress is-success" value="60" max="100">60%</progress>
+                        {% raw %}
+                        <article class="message">
+                            <div class="message-body">
+                                {{ description }}
+                            </div>
+                        </article>
+
+                        <div class="content">
+                            <div class="card p-4">
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：</span>
+                                    <div class="control">
+                                        <div class="tags has-addons">
+                                            <span class="tag is-light">张三</span>
+                                            <span class="tag is-info is-light">1500</span>
+                                        </div>
+                                    </div>
+                                    <div class="control">
+                                        <div class="tags has-addons">
+                                            <span class="tag is-light">李四</span>
+                                            <span class="tag is-info is-light">1000</span>
+                                        </div>
+                                    </div>
+                                    <span class="is-size-6">加入了房间</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline">
+                                    <div class="control">
+                                        <div class="tags has-addons">
+                                            <span class="tag is-light">张三</span>
+                                            <span class="tag is-info is-light">1500</span>
+                                        </div>
+                                    </div>
+                                    <span class="is-size-6">蓝色猫猫头</span>
+                                </div>
+
+                                <div class="icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span>{{ hint_prefix }}{{ hint }}</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline">
+                                    <div class="control">
+                                        <div class="tags has-addons">
+                                            <span class="tag is-light">张三</span>
+                                            <span class="tag is-info is-light">1500</span>
+                                        </div>
+                                    </div>
+                                    <span class="is-size-6">气功波</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline">
+                                    <div class="control">
+                                        <div class="tags has-addons">
+                                            <span class="tag is-light">李四</span>
+                                            <span class="tag is-info is-light">1000</span>
+                                        </div>
+                                    </div>
+                                    <span class="is-size-6">加波</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline">
+                                    <div class="control">
+                                        <div class="tags has-addons">
+                                            <span class="tag is-light">张三</span>
+                                            <span class="tag is-info is-light">1500</span>
+                                        </div>
+                                    </div>
+                                    <span class="is-size-6">咖波</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：</span>
+                                    <div class="control">
+                                        <div class="tags has-addons">
+                                            <span class="tag is-light">张三</span>
+                                            <span class="tag is-info is-light">1500</span>
+                                        </div>
+                                    </div>
+                                    <span class="is-size-6">回答正确</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="control">
+                                <input ref="content" class="input" maxlength="16">
+                            </div>
+                        </div>
+                        {% endraw %}
+                    </div>
+                    <footer class="card-footer">
+                        <a href="#" class="card-footer-item is-success">{{ submit }}</a>
+                        <a href="#" class="card-footer-item is-danger">{{ abandon }}</a>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                image_url: '/static/loading.png',
+                hint_prefix: '{{ hint_prefix }}',
+                hint: '？波',
+                description: '我是图片描述'
+            },
+            mounted: function () {
+                this.$http.get('/api/game/core/image').then(function (res) {
+                    console.log(res.body);
+                    if (res.body.code == 0) {
+                        this.image_url = res.body.url;
+                    } else {
+                        alert(res.body.message);
+                    }
+                }, function (res) {
+                    alert(res.status);
+                });
+            },
+        })
+    </script>
+
+    {% include 'footer.html' %}
+
+</body>
+
+</html>

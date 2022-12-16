@@ -1,0 +1,59 @@
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item is-size-4 m-4 has-text-weight-bold" href="/">
+      {{ app_name }}
+    </a>
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="{{ url_for('page_index') }}">
+        {{ home_page }}
+      </a>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-item">
+          {{ game_menu }}
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item">
+            {{ match_mode }}
+          </a>
+          <a class="navbar-item">
+            {{ custom_mode }}
+          </a>
+          <hr class="navbar-divider">
+          <a class="navbar-item">
+            {{ ranking }}
+          </a>
+        </div>
+      </div>
+      <a class="navbar-item">
+        {{ about_page }}
+      </a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <a class="button is-info">
+            <strong>{{ register }}</strong>
+          </a>
+          <a class="button is-light" href="{{ url_for('page_login') }}?src={{ base_url }}">
+            {{ login }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(document).ready(function () {
+      $(".navbar-burger").click(function () {
+        $(".navbar-burger").toggleClass("is-active");
+        $(".navbar-menu").toggleClass("is-active");
+      });
+    });
+  </script>
+</nav>
