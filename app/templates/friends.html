@@ -21,7 +21,7 @@
               好友列表
             </p>
           </header>
-          
+
           <p class="control has-icons-left">
             <input class="input" style="border-color: #ffffff;" type="text" placeholder="搜索用户">
             <span class="icon is-left">
@@ -62,8 +62,9 @@
           <p class="panel-heading align-center capoo-color">
             Friend Name
           </p>
-          
-          <ul class="panel-block" style="display: block; align-items: start; position: absolute; top: 68px; bottom: 70px; left: 10px; right: 10px;">
+
+          <ul class="panel-block"
+            style="display: block; align-items: start; position: absolute; top: 68px; bottom: 70px; left: 10px; right: 10px;">
             <li style="height: auto; width: 100%;">
               <img src="">
               <p class="message-text">aaa</p>
@@ -79,45 +80,34 @@
             <a class="button capoo-color" style="margin-left: 10px;">发送</a>
             </button>
           </div>
-          
+
         </div>
 
       </div>
     </div>
   </section>
   <script>
-    $(document).ready(function () {
-      $(".friends_page").toggleClass("is-active");
-      
-      $(".capoo-color").css("color", "#ffffff");
-      $(".capoo-color").css("background-color", "#5ac9e8");
-
-      $(".align-center").css("display", "block");
-      $(".align-center").css("text-align", "center");
-
-      $(".message-text").css("display", "inline");
-    });
     new Vue({
-            el: '#app',
-            data: {
-                image_url: '/static/loading.png',
-                hint_prefix: '{{ hint_prefix }}',
-                hint: '？波',
-                description: '我是图片描述'
-            },
-            mounted: function () {
-                this.$http.get('/api/game/core/image').then(function (res) {
-                    console.log(res.body);
-                    if (res.body.code == 0) {
-                        this.image_url = res.body.url;
-                    } else {
-                        alert(res.body.message);
-                    }
-                }, function (res) {
-                    alert(res.status);
-                });
-            },
-        })
+      el: '#app',
+      data: {
+        image_url: '/static/loading.png',
+        hint_prefix: '{{ hint_prefix }}',
+        hint: '？波',
+        description: '我是图片描述'
+      },
+      mounted: function () {
+        this.$http.get('/api/game/core/image').then(function (res) {
+          console.log(res.body);
+          if (res.body.code == 0) {
+            this.image_url = res.body.url;
+          } else {
+            alert(res.body.message);
+          }
+        }, function (res) {
+          alert(res.status);
+        });
+      },
+    })
   </script>
   {% endraw %}
 
