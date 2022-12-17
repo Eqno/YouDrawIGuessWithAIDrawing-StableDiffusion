@@ -9,9 +9,6 @@ def app_init():
     app = flask.Flask(__name__,
                       template_folder='../app/templates',
                       static_folder='../app/static')
-    # init
-    app.config["DEBUG"] = True
-    app.config["PORT"] = 80
 
     # set global templates
     app.context_processor(lambda: utils.template_variables)
@@ -29,4 +26,4 @@ def app_init():
 
 if __name__ == '__main__':
     app = app_init()
-    app.run('127.0.0.1')
+    app.run('127.0.0.1', port=80, debug=True)
