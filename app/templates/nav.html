@@ -1,7 +1,7 @@
 <nav class="navbar" role="navigation" aria-label="main navigation">
   
   <div class="navbar-brand">
-    <a class="navbar-item is-size-4 m-4 has-text-weight-bold" href="/">
+    <a class="navbar-item is-size-4 m-4 has-text-weight-bold is-capoo-3" href="/">
       {{ app_name }}
     </a>
     <a role="button" class="navbar-burger my-4" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
@@ -15,7 +15,7 @@
     <div class="navbar-start">
 
       <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
+        <a class="navbar-link is-capoo-3">
           {{ game_menu }}
         </a>
         <div class="navbar-dropdown">
@@ -32,11 +32,11 @@
         </div>
       </div>
 
-      <a class="navbar-item is-light" href="{{ url_for('friends') }}">
+      <a class="navbar-item is-light is-capoo-3" href="{{ url_for('friends') }}">
         {{ friends_page }}
       </a>
 
-      <a class="navbar-item">
+      <a class="navbar-item is-capoo-3">
         {{ about_page }}
       </a>
 
@@ -46,7 +46,7 @@
       <div class="navbar-item">
         <div class="buttons">
 
-          <a class="button is-info">
+          <a class="button is-capoo">
             <strong>{{ register }}</strong>
           </a>
 

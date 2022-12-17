@@ -12,9 +12,29 @@
         padding-top: 1rem;
     }
 
-    .capoo-color {
+    .is-capoo {
         color: white;
         background-color: #5ac9e8;
+    }
+
+    .is-capoo-2 {
+        color: #5ac9e8;
+        font-weight: bold;
+    }
+
+    .is-capoo-2:hover {
+        color: #485fc7;
+        font-weight: bold;
+    }
+
+    .is-capoo-3 {
+        color: #4a4a4a;
+        font-weight: bold;
+    }
+
+    .is-capoo-3:hover {
+        color: #5ac9e8 !important;
+        font-weight: bold;
     }
 
     .align-center {
@@ -22,7 +42,68 @@
         text-align: center;
     }
 
-    .message-text {
-        display: inline;
+    .message-block {
+        position: relative;
+        height: auto;
+        width: 100%;
+    }
+
+    .message-head-other {
+        display: block;
+        width: 40px;
+        height: 40px;
+        margin-right: auto;
+    }
+
+    .message-head-mine {
+        display: block;
+        width: 40px;
+        height: 40px;
+        margin-left: auto;
+    }
+
+    .message-text-other {
+        display: block;
+        word-wrap: break-word;
+        text-align: start;
+        margin-right: auto;
+        margin-bottom: 10px;
+        padding: 10px 10px 10px 0px;
+    }
+
+    .message-text-mine {
+        display: block;
+        word-wrap: normal;
+        text-align: end;
+        margin-left: auto;
+        margin-bottom: 10px;
+        padding: 10px 0px 10px 10px;
+    }
+
+    .message-span {
+        display: inline-block;
+        background-color: #5ac9e8;
+        border-radius: 10px;
+        padding: 10px;
+        max-width: 90%;
+        color: #ffffff;
+    }
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    .normal-color {
+        background-color: #ffffff;
+        border-color: #dbdbdb !important;
+        border: 1px solid;
+    }
+
+    a.button:hover {
+        color: #ffffff;
+    }
+
+    .navbar-link::after {
+        border-color: #5ac9e8 !important;
     }
 </style>
