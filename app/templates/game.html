@@ -20,7 +20,7 @@
                 </div>
             </div>
             <div class="column container">
-                <div class="card">
+                <div class="card" style="position: relative; height: 100%;">
                     <header class="card-header-title">
                         <p class="card-header-title">{{ guess_the_image }}</p>
                     </header>
@@ -34,7 +34,7 @@
                         </article>
 
                         <div class="content">
-                            <div class="card p-4">
+                            <div id="msgbox" class="card p-4" style="position: absolute; overflow-y: scroll;">
 
                                 <div class="field is-grouped is-grouped-multiline icon-text my-2">
                                     <span class="icon has-text-info">
@@ -117,17 +117,108 @@
                                     <span class="is-size-6">回答正确</span>
                                 </div>
 
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
+                                    <span class="icon has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                </div>
+
                             </div>
                         </div>
 
-                        <div class="field">
+                        <div id="inputbox" class="field" style="position: absolute;">
                             <div class="control">
                                 <input ref="content" class="input" maxlength="16">
                             </div>
                         </div>
                         {% endraw %}
                     </div>
-                    <footer class="card-footer">
+                    <footer id="submit" class="card-footer" style="position: absolute; left: 0; right: 0; bottom: 0;">
                         <a href="#" class="card-footer-item is-success">{{ submit }}</a>
                         <a href="#" class="card-footer-item is-danger">{{ abandon }}</a>
                     </footer>
@@ -135,6 +226,22 @@
             </div>
         </div>
     </section>
+    <script>
+        var inputbox = $('#inputbox');
+        var msgbox = $("#msgbox");
+        var submit = $('#submit');
+
+        // padding = 1.5rem
+        const padding_val = msgbox.parent().parent().css('padding');
+        const padding = parseInt(padding_val.substr(0, padding_val.length));
+        inputbox.css('left', padding_val);
+        inputbox.css('right', padding_val);
+        inputbox.css('bottom', submit.height() + padding);
+        msgbox.css('top', msgbox.css('top'));
+        msgbox.css('left', padding_val);
+        msgbox.css('right', padding_val);
+        msgbox.css('bottom', submit.height() + inputbox.height() + 2 * padding);
+    </script>
 
     <script>
         new Vue({
