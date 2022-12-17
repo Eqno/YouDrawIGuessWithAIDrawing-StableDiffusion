@@ -16,11 +16,18 @@
 
         <div class="card">
 
-          <header class="card-header" style="vertical-align: middle;">
-            <p class="card-header-title" style="display: inline-block; text-align: center;">
+          <header class="card-header">
+            <p class="card-header-title align-center capoo-color">
               好友列表
             </p>
           </header>
+          
+          <p class="control has-icons-left">
+            <input class="input" style="border-color: #ffffff;" type="text" placeholder="搜索用户">
+            <span class="icon is-left">
+              <i class="fas fa-search" aria-hidden="true"></i>
+            </span>
+          </p>
 
           <div class="card-content">
             <div class="content">
@@ -28,17 +35,14 @@
                 <p class="menu-label">
                   在线
                 </p>
-                <ul class="menu-list">
-                  <li><a>Dashboard</a></li>
-                  <li><a>Customers</a></li>
+                <ul class="menu-list" style="margin-left: 0; list-style: none;">
+                  <li><a>小明</a></li>
                 </ul>
                 <p class="menu-label">
                   离线
                 </p>
-                <ul class="menu-list">
-                  <li><a>Payments</a></li>
-                  <li><a>Transfers</a></li>
-                  <li><a>Balance</a></li>
+                <ul class="menu-list" style="margin-left: 0; list-style: none;">
+                  <li><a>小红</a></li>
                 </ul>
               </aside>
             </div>
@@ -53,89 +57,67 @@
         </div>
 
       </div>
-      <div class="column">
-        <div class="container">
+      <div class="column" style="position: relative;">
+        <div class="panel" style="height: 100%;">
+          <p class="panel-heading align-center capoo-color">
+            Friend Name
+          </p>
           
-          <nav class="panel">
-            <p class="panel-heading">
-              Friend Name
-            </p>
-            <div class="panel-block">
-              <p class="control has-icons-left">
-                <input class="input" type="text" placeholder="Search">
-                <span class="icon is-left">
-                  <i class="fas fa-search" aria-hidden="true"></i>
-                </span>
-              </p>
-            </div>
-            <p class="panel-tabs">
-              <a class="is-active">All</a>
-              <a>Public</a>
-              <a>Private</a>
-              <a>Sources</a>
-              <a>Forks</a>
-            </p>
-            <a class="panel-block is-active">
-              <span class="panel-icon">
-                <i class="fas fa-book" aria-hidden="true"></i>
-              </span>
-              bulma
-            </a>
-            <a class="panel-block">
-              <span class="panel-icon">
-                <i class="fas fa-book" aria-hidden="true"></i>
-              </span>
-              marksheet
-            </a>
-            <a class="panel-block">
-              <span class="panel-icon">
-                <i class="fas fa-book" aria-hidden="true"></i>
-              </span>
-              minireset.css
-            </a>
-            <a class="panel-block">
-              <span class="panel-icon">
-                <i class="fas fa-book" aria-hidden="true"></i>
-              </span>
-              jgthms.github.io
-            </a>
-            <a class="panel-block">
-              <span class="panel-icon">
-                <i class="fas fa-code-branch" aria-hidden="true"></i>
-              </span>
-              daniellowtw/infboard
-            </a>
-            <a class="panel-block">
-              <span class="panel-icon">
-                <i class="fas fa-code-branch" aria-hidden="true"></i>
-              </span>
-              mojs
-            </a>
-            <label class="panel-block">
-              <input type="checkbox">
-              remember me
-            </label>
-            <div class="panel-block">
-              <button class="button is-link is-outlined is-fullwidth">
-                Reset all filters
-              </button>
-            </div>
-          </nav>
+          <ul class="panel-block" style="display: block; align-items: start; position: absolute; top: 68px; bottom: 70px; left: 10px; right: 10px;">
+            <li style="height: auto; width: 100%;">
+              <img src="">
+              <p class="message-text">aaa</p>
+            </li>
+            <li style="height: auto; width: 100%;">
+              <img>
+              <p class="message-text">aaa</p>
+            </li>
+          </ul>
 
+          <div class="panel-block" style="position: absolute; left: 10px; right: 10px; bottom: 15px;">
+            <input class="input" type="text">
+            <a class="button capoo-color" style="margin-left: 10px;">发送</a>
+            </button>
+          </div>
+          
         </div>
+
       </div>
     </div>
   </section>
   <script>
-    new Vue({
-      el: '#app',
-      data: {
-        message: 'Hello Vue.js!'
-      }
-    })
     $(document).ready(function () {
       $(".friends_page").toggleClass("is-active");
+      
+      $(".capoo-color").css("color", "#ffffff");
+      $(".capoo-color").css("background-color", "#5ac9e8");
+
+      $(".align-center").css("display", "block");
+      $(".align-center").css("text-align", "center");
+
+      $(".message-text").css("display", "inline");
     });
+    new Vue({
+            el: '#app',
+            data: {
+                image_url: '/static/loading.png',
+                hint_prefix: '{{ hint_prefix }}',
+                hint: '？波',
+                description: '我是图片描述'
+            },
+            mounted: function () {
+                this.$http.get('/api/game/core/image').then(function (res) {
+                    console.log(res.body);
+                    if (res.body.code == 0) {
+                        this.image_url = res.body.url;
+                    } else {
+                        alert(res.body.message);
+                    }
+                }, function (res) {
+                    alert(res.status);
+                });
+            },
+        })
   </script>
   {% endraw %}
 
