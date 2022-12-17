@@ -32,7 +32,7 @@
         </div>
       </div>
 
-      <a class="navbar-item is-light" href="{{ url_for('page_friends') }}">
+      <a class="navbar-item is-light" href="{{ url_for('friends') }}">
         {{ friends_page }}
       </a>
 
@@ -50,7 +50,7 @@
             <strong>{{ register }}</strong>
           </a>
 
-          <a class="button is-light" href="{{ url_for('page_login') }}?src={{ base_url }}">
+          <a class="button is-light" href="{{ url_for('login') }}?src={{ base_url }}">
             {{ login }}
           </a>
 
