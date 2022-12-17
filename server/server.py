@@ -7,7 +7,7 @@ import json
 import flask
 from enum import IntEnum
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, template_folder='../app/templates', static_folder='../app/static')
 
 # ---- init ----
 
@@ -15,14 +15,17 @@ app = flask.Flask(__name__)
 @app.context_processor
 def template_global_variables():
     vars = {}
-    vars['title_suffix'] = '你说我猜'
-    vars['app_name'] = '你说我猜'
-    vars['home_page'] = '首页'
+    vars['title_suffix'] = '你画我猜'
+    vars['app_name'] = '你画我猜'
+    
     vars['game_menu'] = '游戏'
+    vars['friends_page'] = '好友'
+    vars['about_page'] = '关于'
+    
     vars['match_mode'] = '匹配模式'
     vars['custom_mode'] = '自定义模式'
+    
     vars['ranking'] = '排行榜'
-    vars['about_page'] = '关于'
     vars['login'] = '登录'
     vars['register'] = '注册'
     vars['username'] = '账号'
@@ -32,6 +35,7 @@ def template_global_variables():
     vars['hint_prefix'] = '提示：'
     vars['submit'] = '提交'
     vars['abandon'] = '放弃'
+    
     return vars
 
 
@@ -51,11 +55,16 @@ def page_login():
                                  title='登录',
                                  base_url=flask.request.base_url)
 
-
 @app.route('/game')
 def page_game():
     return flask.render_template('game.html',
                                  title='游戏',
+                                 base_url=flask.request.base_url)
+
+@app.route('/friends')
+def page_friends():
+    return flask.render_template('friends.html',
+                                 title='好友',
                                  base_url=flask.request.base_url)
 
 

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  {% include 'header.html' %}
+</head>
+
+<body>
+  {% include 'nav.html' %}
+
+  {% raw %}
+  <section class="section">
+
+    <div class="columns">
+      <div class="column is-one-quarter">
+
+        <div class="card">
+
+          <header class="card-header" style="vertical-align: middle;">
+            <p class="card-header-title" style="display: inline-block; text-align: center;">
+              好友列表
+            </p>
+          </header>
+
+          <div class="card-content">
+            <div class="content">
+              <aside class="menu">
+                <p class="menu-label">
+                  在线
+                </p>
+                <ul class="menu-list">
+                  <li><a>Dashboard</a></li>
+                  <li><a>Customers</a></li>
+                </ul>
+                <p class="menu-label">
+                  离线
+                </p>
+                <ul class="menu-list">
+                  <li><a>Payments</a></li>
+                  <li><a>Transfers</a></li>
+                  <li><a>Balance</a></li>
+                </ul>
+              </aside>
+            </div>
+          </div>
+
+          <footer class="card-footer">
+            <a href="#" class="card-footer-item">Save</a>
+            <a href="#" class="card-footer-item">Edit</a>
+            <a href="#" class="card-footer-item">Delete</a>
+          </footer>
+
+        </div>
+
+      </div>
+      <div class="column">
+        <div class="container">
+          
+          <nav class="panel">
+            <p class="panel-heading">
+              Friend Name
+            </p>
+            <div class="panel-block">
+              <p class="control has-icons-left">
+                <input class="input" type="text" placeholder="Search">
+                <span class="icon is-left">
+                  <i class="fas fa-search" aria-hidden="true"></i>
+                </span>
+              </p>
+            </div>
+            <p class="panel-tabs">
+              <a class="is-active">All</a>
+              <a>Public</a>
+              <a>Private</a>
+              <a>Sources</a>
+              <a>Forks</a>
+            </p>
+            <a class="panel-block is-active">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              bulma
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              marksheet
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              minireset.css
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-book" aria-hidden="true"></i>
+              </span>
+              jgthms.github.io
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-code-branch" aria-hidden="true"></i>
+              </span>
+              daniellowtw/infboard
+            </a>
+            <a class="panel-block">
+              <span class="panel-icon">
+                <i class="fas fa-code-branch" aria-hidden="true"></i>
+              </span>
+              mojs
+            </a>
+            <label class="panel-block">
+              <input type="checkbox">
+              remember me
+            </label>
+            <div class="panel-block">
+              <button class="button is-link is-outlined is-fullwidth">
+                Reset all filters
+              </button>
+            </div>
+          </nav>
+
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue.js!'
+      }
+    })
+    $(document).ready(function () {
+      $(".friends_page").toggleClass("is-active");
+    });
+  </script>
+  {% endraw %}
+
+  {% include 'footer.html' %}
+
+</body>
+
+</html>
