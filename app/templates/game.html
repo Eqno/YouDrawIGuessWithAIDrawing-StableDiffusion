@@ -218,10 +218,10 @@
                     if (res.body.code == 0) {
                         this.image_url = res.body.url;
                     } else {
-                        alert(res.body.message);
+                        console.log('Getting image fails, message:', res.body.message);
                     }
                 }, function (res) {
-                    alert(res.status);
+                    console.log('Request fails, status:', res);
                 });
             },
         })

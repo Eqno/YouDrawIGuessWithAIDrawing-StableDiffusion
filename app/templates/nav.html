@@ -1,10 +1,11 @@
 <nav class="navbar" role="navigation" aria-label="main navigation">
-  
+
   <div class="navbar-brand">
     <a class="navbar-item is-size-4 m-4 has-text-weight-bold is-capoo-3" href="/">
       {{ app_name }}
     </a>
-    <a role="button" class="navbar-burger my-4" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+    <a role="button" class="navbar-burger my-4" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
@@ -20,7 +21,7 @@
         </a>
         <div class="navbar-dropdown">
           <a href="{{ url_for('game') }}" class="navbar-item">
-            测试页面
+            {{ test_page }}
           </a>
           <hr class="navbar-divider">
           <a class="navbar-item">
@@ -45,9 +46,26 @@
       </a>
 
     </div>
-    <div class="navbar-end">
+    <div id="nav" class="navbar-end">
 
-      <div class="navbar-item">
+      <div v-if="logined" class="navbar-item has-dropdown is-hoverable mx-4">
+        {% raw %}
+        <a class="navbar-link is-capoo-3">
+          {{ username }}
+        </a>
+        {% endraw %}
+        <div class="navbar-dropdown">
+          <a :href="user_link" class="navbar-item">
+            {{ user_info }}
+          </a>
+          <hr class="navbar-divider">
+          <a href="#" v-on:click="logout" class="navbar-item">
+            {{ logout }}
+          </a>
+        </div>
+      </div>
+
+      <div v-if="!logined" class="navbar-item">
         <div class="buttons">
 
           <a class="button is-capoo">
@@ -62,14 +80,52 @@
       </div>
     </div>
   </div>
-  
+
   <script>
     $(document).ready(function () {
-
       $(".navbar-burger").click(function () {
         $(".navbar-burger").toggleClass("is-active");
         $(".navbar-menu").toggleClass("is-active");
       });
+    });
+  </script>
+
+  <script>
+    new Vue({
+      el: '#nav',
+      data: {
+        username: '',
+        user_link: '',
+        logined: false,
+      },
+      mounted: function () {
+        this.$http.get('/api/account/username').then(function (res) {
+          console.log(res.body);
+          if (res.body.code == 0) {
+            this.username = res.body.username;
+            this.user_link = '/user/' + this.username;
+            this.logined = true;
+          } else {
+            console.log('There is not logined user.');
+          }
+        }, function(res) {
+          console.log('Request fails, status:', res);
+        });
+      },
+      methods: {
+        logout: function (event) {
+          this.$http.get('/api/account/logout').then(function (res) {
+          console.log(res.body);
+          if (res.body.code == 0) {
+            location.reload();
+          } else {
+            console.log(res.body.message);
+          }
+        }, function(res) {
+          console.log('Request fails, status:', res);
+        });
+        }
+      }
     });
   </script>
 </nav>

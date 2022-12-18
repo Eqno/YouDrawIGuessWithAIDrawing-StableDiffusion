@@ -88,13 +88,12 @@
 
   <section class="section">
 
-    {% raw %}
     <div id="app" class="columns">
       <div class="column is-one-quarter" style="position: relative; min-height: 30rem;">
         <div class="panel" style="height: 100%;">
 
           <p class="panel-heading align-center is-capoo">
-            好友列表
+            {{ friend_list }}
           </p>
 
           <p class="control has-icons-left">
@@ -108,24 +107,28 @@
             style="display: block; position: absolute; top: 106.5px; bottom: 69px; left: 12px; right: 12px; overflow-y: scroll;">
             <aside class="menu">
               <p class="menu-label">
-                在线
+                {{ online }}
               </p>
               <ul class="menu-list friends">
+                {% raw %}
                 <li v-for="friend of online_friends"><a>{{ friend.name }}</a></li>
+                {% endraw %}
               </ul>
               <p class="menu-label">
-                离线
+                {{ offline }}
               </p>
               <ul class="menu-list friends">
+                {% raw %}
                 <li v-for="friend of offline_friends"><a>{{ friend.name }}</a></li>
+                {% endraw %}
               </ul>
             </aside>
           </div>
 
           <div class="panel-block normal-color"
             style="position: absolute; height: 58px; left: 12px; right: 12px; bottom: 12px;">
-            <a href="#" class="card-footer-item is-capoo-2">加入游戏</a>
-            <a href="#" class="card-footer-item is-capoo-2">删除好友</a>
+            <a href="#" class="card-footer-item is-capoo-2">{{ join_game }}</a>
+            <a href="#" class="card-footer-item is-capoo-2">{{ delete_friend }}</a>
           </div>
 
         </div>
@@ -133,6 +136,7 @@
       </div>
       <div class="column" style="position: relative; min-height: 40rem;">
         <div class="panel" style="height: 100%;">
+          {% raw %}
           <p class="panel-heading align-center is-capoo">{{ right_username }}</p>
 
           <ul class="panel-block normal-color"
@@ -156,10 +160,10 @@
             </div>
 
           </ul>
-
+          {% endraw %}
           <div class="panel-block normal-color" style="position: absolute; left: 12px; right: 12px; bottom: 12px;">
             <input class="input" type="text">
-            <a class="button is-capoo" style="margin-left: 10px;">发送</a>
+            <a class="button is-capoo" style="margin-left: 10px;">{{ send }}</a>
           </div>
 
         </div>
