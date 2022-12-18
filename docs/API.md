@@ -1,5 +1,7 @@
 # "你说我猜"接口文档
 
+版本：v0.1-alpha4
+
 [TOC]
 
 ## 游戏规则
@@ -25,23 +27,42 @@
 
 `/api/account`
 
+### 获取用户名
+
+`/api/account/username`
+
+获取当前用户名，用于 navigator 获取当前登录状态
+
+- 发送
+  - 不发送
+- 回执
+  - `code`: int
+  - `message`: string
+  - `username`: string
+
 ### 登录
 
 `/api/account/login`
 
 - 发送
-
   - `username`: string
-
   - `password`: string
 
 - 回执
-
   - `code`: int
-
   - `message`: str
 
-成功同时 Set-Cookie, SESSION 设为一个 UUID
+### 登出
+
+`/api/account/logout`
+
+登出后当前 SESSION 失效
+
+- 发送
+  - 不发送
+- 回执
+  - `code`: int
+  - `message`: str
 
 ### 注册
 
