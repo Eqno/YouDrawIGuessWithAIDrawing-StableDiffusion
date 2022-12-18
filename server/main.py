@@ -1,29 +1,13 @@
 # -*- coding: utf-8 -*-
 
 __import__('os').environ['FLASK_ENV'] = 'development'
-import flask
-from website import frontend, backend, utils
+import website
 
 
-def app_init():
-    app = flask.Flask(__name__,
-                      template_folder='../app/templates',
-                      static_folder='../app/static')
-
-    # set global templates
-    app.context_processor(lambda: utils.template_variables)
-
-    # add pages
-    for pages in (frontend.frontend_pages, backend.backend_pages):
-        for k, v in pages.items():
-            if isinstance(v, dict):
-                app.add_url_rule(k, **v)
-            else:
-                app.add_url_rule(k, view_func=v)
-
-    return app
+def main():
+    app = website.Server(name=__name__)
+    app.run()
 
 
 if __name__ == '__main__':
-    app = app_init()
-    app.run('127.0.0.1', port=80, debug=True)
+    main()

@@ -9,15 +9,45 @@ user_database = {
 }
 
 
+def session_get_username():
+    return flask.session.get('username', None)
+
+
+def session_set_username(username: str):
+    flask.session['username'] = username
+
+
+def session_del_username(username: str):
+    return flask.session.pop('username')
+
+
+def api_account_username():
+    username = session_get_username()
+    if username:
+        return generate_return_data(StatusCode.SUCCESS, {'username': username})
+    return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+
 def api_account_login():
     data = flask.request.get_json()
     username = data['username']
     password = data['password']
     if username in user_database:
         if user_database[username] == password:
+            session_set_username(username)
             return generate_return_data(StatusCode.SUCCESS)
     return generate_return_data(
         StatusCode.ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG)
+
+
+def api_account_logout():
+    username = session_get_username()
+    if username:
+        if session_del_username(username):
+            return generate_return_data(StatusCode.SUCCESS)
+        else:
+            return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
+    return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
 
 
 def api_game_core_image():
@@ -26,9 +56,11 @@ def api_game_core_image():
 
 
 backend_pages = {
+    '/api/account/username': api_account_username,
     '/api/account/login': {
         'view_func': api_account_login,
         'methods': ['POST']
     },
+    '/api/account/logout': api_account_logout,
     '/api/game/core/image': api_game_core_image,
 }
