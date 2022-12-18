@@ -17,7 +17,7 @@ def session_set_username(username: str):
     flask.session['username'] = username
 
 
-def session_del_username(username: str):
+def session_del_username():
     return flask.session.pop('username')
 
 
@@ -43,7 +43,7 @@ def api_account_login():
 def api_account_logout():
     username = session_get_username()
     if username:
-        if session_del_username(username):
+        if session_del_username():
             return generate_return_data(StatusCode.SUCCESS)
         else:
             return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
