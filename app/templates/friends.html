@@ -3,15 +3,93 @@
 
 <head>
   {% include 'header.html' %}
+  <style>
+    .friends {
+      margin-left: 0;
+      list-style: none;
+    }
+
+    .message-block {
+      display: flex;
+      align-items: top;
+      position: relative;
+      height: auto;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .message-block.left {
+      justify-content: left;
+
+    }
+
+    .message-block.right {
+      justify-content: right;
+    }
+
+    .message-avatar {
+      display: block;
+      width: 40px;
+      height: 40px;
+    }
+
+    .message-text {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .message-block.left .message-text {
+      text-align: left;
+      margin-right: 60px;
+    }
+
+    .message-block.right .message-text {
+      text-align: right;
+      margin-left: 60px;
+    }
+
+    .message-block.left .message-text::before {
+      width: 5px;
+      height: 5px;
+      border-top: 15px solid #5ac9e8;
+      border-left: 15px solid transparent;
+      margin-top: 10px;
+      margin-left: 5px;
+      content: " ";
+    }
+
+    .message-block.message-block.right .message-text::after {
+      width: 5px;
+      height: 5px;
+      border-top: 15px solid #5ac9e8;
+      border-right: 15px solid transparent;
+      margin-top: 10px;
+      margin-right: 5px;
+      content: " ";
+    }
+
+    .message-span {
+      display: inline-block;
+      background-color: #5ac9e8;
+      border-radius: 10px;
+      padding: 10px;
+      color: #ffffff;
+    }
+
+    a.button:hover {
+      color: #ffffff;
+    }
+  </style>
 </head>
 
 <body>
   {% include 'nav.html' %}
 
-  {% raw %}
   <section class="section">
 
-    <div class="columns">
+    {% raw %}
+    <div id="app" class="columns">
       <div class="column is-one-quarter" style="position: relative; min-height: 30rem;">
         <div class="panel" style="height: 100%;">
 
@@ -32,26 +110,14 @@
               <p class="menu-label">
                 在线
               </p>
-              <ul class="menu-list" style="margin-left: 0; list-style: none;">
-                <li><a>小明</a></li>
+              <ul class="menu-list friends">
+                <li v-for="friend of online_friends"><a>{{ friend.name }}</a></li>
               </ul>
               <p class="menu-label">
                 离线
               </p>
-              <ul class="menu-list" style="margin-left: 0; list-style: none;">
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
-                <li><a>小红</a></li>
+              <ul class="menu-list friends">
+                <li v-for="friend of offline_friends"><a>{{ friend.name }}</a></li>
               </ul>
             </aside>
           </div>
@@ -67,67 +133,27 @@
       </div>
       <div class="column" style="position: relative; min-height: 40rem;">
         <div class="panel" style="height: 100%;">
-          <p class="panel-heading align-center is-capoo">
-            Friend Name
-          </p>
+          <p class="panel-heading align-center is-capoo">{{ right_username }}</p>
 
           <ul class="panel-block normal-color"
             style="display: block; position: absolute; top: 66px; bottom: 69px; left: 12px; right: 12px; overflow-y: scroll;">
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-other">
-              <p class="message-text-other">
-                <span class="message-span">aaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaa aaaaaaaaaaaaaaa
-                  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
-            <li class="message-block">
-              <img src="/static/avatar.png" class="message-head-mine">
-              <p class="message-text-mine">
-                <span class="message-span">aaa</span>
-              </p>
-            </li>
+            <div v-for="msg of messages">
+
+              <li v-if="msg.mine" class="message-block right">
+                <p class="message-text">
+                  <span class="message-span">{{ msg.content }}</span>
+                </p>
+                <img :src="right_avatar" class="message-avatar">
+              </li>
+
+              <li v-else class="message-block left">
+                <img :src="left_avatar" class="message-avatar">
+                <p class="message-text">
+                  <span class="message-span">{{ msg.content }}</span>
+                </p>
+              </li>
+
+            </div>
 
           </ul>
 
@@ -140,31 +166,90 @@
 
       </div>
     </div>
+    {% endraw %}
   </section>
   <script>
     new Vue({
       el: '#app',
       data: {
-        image_url: '/static/loading.png',
-        hint_prefix: '{{ hint_prefix }}',
-        hint: '？波',
-        description: '我是图片描述'
+        right_username: '先辈',
+        right_avatar: '/static/favicon.png',
+        left_avatar: '/static/avatar.png',
+        online_friends: [
+          { name: '小明' },
+        ],
+        offline_friends: [
+          { name: '小红' },
+          { name: '小绿' },
+          { name: '小蓝' },
+          { name: '小粉' },
+          { name: '大明' },
+          { name: '大红' },
+          { name: '大绿' },
+          { name: '大蓝' },
+          { name: '大粉' },
+          { name: '先辈' },
+          { name: '杰哥' },
+          { name: '阿伟' },
+          { name: '彬彬' },
+        ],
+        messages: [
+          {
+            mine: false,
+            content: '哼哼',
+          },
+          {
+            mine: false,
+            content: 'aaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaa aaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaa',
+          },
+          {
+            mine: true,
+            content: 'aaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaa aaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+          {
+            mine: true,
+            content: 'aaa',
+          },
+        ]
       },
-      mounted: function () {
-        this.$http.get('/api/game/core/image').then(function (res) {
-          console.log(res.body);
-          if (res.body.code == 0) {
-            this.image_url = res.body.url;
-          } else {
-            alert(res.body.message);
-          }
-        }, function (res) {
-          alert(res.status);
-        });
-      },
-    })
+    });
   </script>
-  {% endraw %}
 
   {% include 'footer.html' %}
 
