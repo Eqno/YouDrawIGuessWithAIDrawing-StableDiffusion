@@ -24,9 +24,9 @@
                     <header class="card-header-title">
                         <p class="card-header-title">{{ guess_the_image }}</p>
                     </header>
+                    {% raw %}
                     <div class="card-content">
                         <progress class="progress is-success" value="60" max="100">60%</progress>
-                        {% raw %}
                         <article class="message">
                             <div class="message-body">
                                 {{ description }}
@@ -36,176 +36,21 @@
                         <div class="content">
                             <div id="msgbox" class="card p-4" style="position: absolute; overflow-y: scroll;">
 
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
+                                <div v-for="msg of messages" class="field is-grouped is-grouped-multiline"
+                                    v-bind:class="{ 'icon-text': msg.is_alert, 'mb-2': !msg.players.length }">
+                                    <span v-if="msg.is_alert" class="icon has-text-info">
                                         <i class="fas fa-info-circle"></i>
                                     </span>
-                                    <span class="is-size-6">系统：</span>
-                                    <div class="control">
+                                    <span v-if="msg.is_alert" v-if="msg.alert_prefix" class="is-size-6">
+                                        {{ msg.alert_prefix }}:&nbsp;
+                                    </span>
+                                    <div v-for="player of msg.players" class="control">
                                         <div class="tags has-addons">
-                                            <span class="tag is-light">张三</span>
-                                            <span class="tag is-info is-light">1500</span>
+                                            <span class="tag is-light">{{ player.name }}</span>
+                                            <span class="tag is-info is-light">{{ player.ranking }}</span>
                                         </div>
                                     </div>
-                                    <div class="control">
-                                        <div class="tags has-addons">
-                                            <span class="tag is-light">李四</span>
-                                            <span class="tag is-info is-light">1000</span>
-                                        </div>
-                                    </div>
-                                    <span class="is-size-6">加入了房间</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline">
-                                    <div class="control">
-                                        <div class="tags has-addons">
-                                            <span class="tag is-light">张三</span>
-                                            <span class="tag is-info is-light">1500</span>
-                                        </div>
-                                    </div>
-                                    <span class="is-size-6">蓝色猫猫头</span>
-                                </div>
-
-                                <div class="icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span>{{ hint_prefix }}{{ hint }}</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline">
-                                    <div class="control">
-                                        <div class="tags has-addons">
-                                            <span class="tag is-light">张三</span>
-                                            <span class="tag is-info is-light">1500</span>
-                                        </div>
-                                    </div>
-                                    <span class="is-size-6">气功波</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline">
-                                    <div class="control">
-                                        <div class="tags has-addons">
-                                            <span class="tag is-light">李四</span>
-                                            <span class="tag is-info is-light">1000</span>
-                                        </div>
-                                    </div>
-                                    <span class="is-size-6">加波</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline">
-                                    <div class="control">
-                                        <div class="tags has-addons">
-                                            <span class="tag is-light">张三</span>
-                                            <span class="tag is-info is-light">1500</span>
-                                        </div>
-                                    </div>
-                                    <span class="is-size-6">咖波</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：</span>
-                                    <div class="control">
-                                        <div class="tags has-addons">
-                                            <span class="tag is-light">张三</span>
-                                            <span class="tag is-info is-light">1500</span>
-                                        </div>
-                                    </div>
-                                    <span class="is-size-6">回答正确</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
-                                </div>
-
-                                <div class="field is-grouped is-grouped-multiline icon-text my-2">
-                                    <span class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span class="is-size-6">系统：我要凑行数测试</span>
+                                    <span class="is-size-6">{{ msg.content }}</span>
                                 </div>
 
                             </div>
@@ -216,8 +61,8 @@
                                 <input ref="content" class="input" maxlength="16">
                             </div>
                         </div>
-                        {% endraw %}
                     </div>
+                    {% endraw %}
                     <footer id="submit" class="card-footer" style="position: absolute; left: 0; right: 0; bottom: 0;">
                         <a href="#" class="card-footer-item is-success">{{ submit }}</a>
                         <a href="#" class="card-footer-item is-danger">{{ abandon }}</a>
@@ -250,7 +95,122 @@
                 image_url: '/static/loading.png',
                 hint_prefix: '{{ hint_prefix }}',
                 hint: '？波',
-                description: '我是图片描述'
+                description: '我是图片描述',
+                messages: [
+                {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [
+                            {
+                                'name': '张三',
+                                'ranking': 1500,
+                            },
+                            {
+                                'name': '李四',
+                                'ranking': 1000,
+                            }
+                        ],
+                        'content': '加入了房间'
+                    },
+                    {
+                        'is_alert': false,
+                        'alert_prefix': '',
+                        'players': [
+                            {
+                                'name': '张三',
+                                'ranking': 1500,
+                            }
+                        ],
+                        'content': '蓝色猫猫头'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '提示',
+                        'players': [],
+                        'content': '？波'
+                    },
+                    {
+                        'is_alert': false,
+                        'alert_prefix': '',
+                        'players': [
+                            {
+                                'name': '张三',
+                                'ranking': 1500,
+                            }
+                        ],
+                        'content': '气功波'
+                    },
+                    {
+                        'is_alert': false,
+                        'alert_prefix': '',
+                        'players': [
+                            {
+                                'name': '李四',
+                                'ranking': 1000,
+                            }
+                        ],
+                        'content': '加波'
+                    },
+                    {
+                        'is_alert': false,
+                        'alert_prefix': '',
+                        'players': [
+                            {
+                                'name': '张三',
+                                'ranking': 1500,
+                            }
+                        ],
+                        'content': '咖波'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [
+                            {
+                                'name': '张三',
+                                'ranking': 1500,
+                            }
+                        ],
+                        'content': '回答正确'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [],
+                        'content': '凑行数测试'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [],
+                        'content': '凑行数测试'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [],
+                        'content': '凑行数测试'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [],
+                        'content': '凑行数测试'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [],
+                        'content': '凑行数测试'
+                    },
+                    {
+                        'is_alert': true,
+                        'alert_prefix': '系统',
+                        'players': [],
+                        'content': '凑行数测试'
+                    },
+                    
+                ]
             },
             mounted: function () {
                 this.$http.get('/api/game/core/image').then(function (res) {
