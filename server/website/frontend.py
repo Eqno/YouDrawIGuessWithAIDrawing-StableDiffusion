@@ -14,6 +14,11 @@ def login():
                                  title='登录',
                                  base_url=flask.request.base_url)
 
+def signup():
+    return flask.render_template('signup.html',
+                                title='注册',
+                                base_url=flask.request.base_url)
+
 
 def game():
     return flask.render_template('game.html',
@@ -35,6 +40,7 @@ frontend_pages = {
     '/': index,
     '/login': login,
     '/game': game,
+    '/signup': signup,
     '/friends': friends,
     '/image/<filename>': get_image,
 }

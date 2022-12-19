@@ -10,7 +10,7 @@
 
     <section class="section">
         <div id="app" class="container is-max-widescreen">
-            <form class="box" v-on:submit.prevent="login">
+            <form class="box" v-on:submit.prevent="signup">
                 <div class="field">
                     <label class="label">{{ username }}</label>
                     <div class="control">
@@ -24,13 +24,19 @@
                         <input ref="password" class="input" v-model="password" type="password" maxlength="16">
                     </div>
                 </div>
+                <div class="field">
+                    <label class="label">{{ password_again }}</label>
+                    <div class="control">
+                        <input ref="password_again" class="input" v-model="password_again" type="password" maxlength="16">
+                    </div>
+                </div>
                 {% raw %}
                 <p class="notification is-danger is-light" v-bind:class="{ 'is-hidden': !error_exist }">{{ message }}
                 </p>
                 {% endraw %}
                 <button class="button is-capoo"
-                    v-bind:class="{ 'is-capoo': login_enabled, 'is-light': !login_enabled, 'is-capoo': loading }">
-                    {{ login }}
+                    v-bind:class="{ 'is-capoo': signup_enabled, 'is-light': !signup_enabled, 'is-capoo': loading }">
+                    {{ signup }}
                 </button>
             </form>
         </div>
@@ -42,9 +48,10 @@
             data: {
                 username: '',
                 password: '',
+                password_again: '',
                 username_done: false,
                 password_done: false,
-                login_enabled: false,
+                signup_enabled: false,
                 loading: false,
                 error_exist: false,
                 message: ''
@@ -55,13 +62,19 @@
                         this.$refs.password.focus();
                     }
                 },
-                login: function (event) {
-                    if (!this.login_enabled) {
+                signup: function (event) {
+                    if (!this.signup_enabled) {
+                        return;
+                    }
+                    if (this.password != this.password_again)
+                    {  
+                        this.message = '两次密码不一致';
+                        this.error_exist = true;
                         return;
                     }
                     this.loading = true;
                     this.error_exist = false;
-                    this.$http.post('/api/account/login', { username: this.username, password: hex_md5(this.password) }, { emulateJSON: false }).then(function (res) {
+                    this.$http.post('/api/account/signup', { username: this.username, password: hex_md5(this.password) }, { emulateJSON: false }).then(function (res) {
                         console.log(res.body);
                         if (res.body.code == 0) {
                             this.error_exist = false;
@@ -83,11 +96,11 @@
             watch: {
                 username: function (val) {
                     this.username_done = (val.length >= 4 && val.length <= 16);
-                    this.login_enabled = (this.username_done && this.password_done);
+                    this.signup_enabled = (this.username_done && this.password_done);
                 },
                 password: function (val) {
                     this.password_done = (val.length >= 8 && val.length <= 16);
-                    this.login_enabled = (this.username_done && this.password_done);
+                    this.signup_enabled = (this.username_done && this.password_done);
                 }
             }
         });

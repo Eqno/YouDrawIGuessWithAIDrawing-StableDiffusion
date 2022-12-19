@@ -17,12 +17,13 @@ template_variables = {
     'custom_mode': '自定义模式',
     'ranking': '排行榜',
     'login': '登录',
-    'register': '注册',
+    'signup': '注册',
     'user_info': '用户信息',
     'logout': '注销',
     # login
     'username': '账号',
     'password': '密码',
+    'password_again': '再次输入密码',
     'please_input_username': '请输入账号',
     # game
     'guess_the_image': '快来猜图片！',

@@ -68,8 +68,8 @@
       <div v-if="!logined" class="navbar-item">
         <div class="buttons">
 
-          <a class="button is-capoo">
-            <strong>{{ register }}</strong>
+          <a class="button is-capoo" href="{{ url_for('signup') }}?src={{ base_url }}">
+            <strong>{{ signup }}</strong>
           </a>
 
           <a class="button is-light" href="{{ url_for('login') }}?src={{ base_url }}">
