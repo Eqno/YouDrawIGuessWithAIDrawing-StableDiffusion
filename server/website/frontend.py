@@ -31,10 +31,13 @@ def friends():
                                  title='好友',
                                  base_url=flask.request.base_url)
 
+def userinfo():
+    return flask.render_template('userinfo.html',
+                                 title='用户信息',
+                                 base_url=flask.request.base_url)
 
 def get_image(filename):
     return flask.send_file('static/' + filename, mimetype='image/png')
-
 
 frontend_pages = {
     '/': index,
@@ -42,5 +45,6 @@ frontend_pages = {
     '/game': game,
     '/signup': signup,
     '/friends': friends,
+    '/userinfo': userinfo,
     '/image/<filename>': get_image,
 }

@@ -84,6 +84,21 @@ def api_account_logout():
         else: ret_code = StatusCode.ERR_SERVER_UNKNOWN
     return generate_return_data(ret_code)
 
+def api_account_userinfo():
+    ret_code, ret_msg = StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED, None
+    find_or_create_data_dir(user_data_path)
+
+    data = flask.request.get_json()
+    username = data['username']
+
+    try:
+        with open(user_data_path + username + '.json', 'r') as f:
+            ret_msg = json.load(f)
+            ret_code = StatusCode.SUCCESS
+
+            f.close()
+    except: pass
+    return generate_return_data(ret_code, ret_msg)
 
 def api_game_core_image():
     result = {'url': '/static/capoo.png'}
@@ -91,6 +106,10 @@ def api_game_core_image():
 
 backend_pages = {
     '/api/account/username': api_account_username,
+    '/api/account/userinfo': {
+        'view_func': api_account_userinfo,
+        'methods': ['POST']
+    },
     '/api/account/login': {
         'view_func': api_account_login,
         'methods': ['POST']

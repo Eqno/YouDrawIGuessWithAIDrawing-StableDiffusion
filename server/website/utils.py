@@ -43,7 +43,7 @@ class StatusCode(IntEnum):
     ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG = 200
     ERR_ACCOUNT_USERNAME_EXISTED = 201
     ERR_ACCOUNT_NOT_LOGINED = 202
-
+    ERR_ACCOUNT_USERNAME_NOT_EXISTED = 203
 
 error_msg = {
     StatusCode.SUCCESS: '',
@@ -51,15 +51,16 @@ error_msg = {
     StatusCode.ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG: '用户名或密码错误',
     StatusCode.ERR_ACCOUNT_USERNAME_EXISTED: '用户名已存在',
     StatusCode.ERR_ACCOUNT_NOT_LOGINED: '用户未登录',
+    StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED: '用户名不存在',
 }
 
 default_errno = StatusCode.ERR_SERVER_UNKNOWN
 
 
-def generate_return_data(errno: StatusCode, res=None) -> str:
+def generate_return_data(errno: StatusCode, msg=None) -> str:
     if errno not in error_msg:
         errno = default_errno
     ret = {'code': int(errno), 'message': error_msg[errno]}
-    if isinstance(res, dict):
-        ret.update(res)
+    if isinstance(msg, dict):
+        ret.update(msg)
     return json.dumps(ret)

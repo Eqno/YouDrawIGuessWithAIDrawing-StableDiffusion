@@ -103,26 +103,41 @@
           console.log(res.body);
           if (res.body.code == 0) {
             this.username = res.body.username;
-            this.user_link = '/user/' + this.username;
+
+            this.user_link = '/userinfo';
+            this.userinfo(this.username)
+            
             this.logined = true;
           } else {
             console.log('There is not logined user.');
           }
-        }, function(res) {
-          console.log('Request fails, status:', res);
+        }, function(ret) {
+          console.log('Request fails, status:', ret);
         });
       },
       methods: {
         logout: function (event) {
           this.$http.get('/api/account/logout').then(function (res) {
-          console.log(res.body);
-          if (res.body.code == 0) {
-            location.reload();
-          } else {
-            console.log(res.body.message);
-          }
-        }, function(res) {
-          console.log('Request fails, status:', res);
+            console.log(res.body);
+            if (res.body.code == 0) {
+              location.reload();
+            } else {
+              console.log(res.body.message);
+            }
+          }, function(res) {
+            console.log('Request fails, status:', res);
+          });
+        },
+        userinfo: function (username) {
+          this.$http.post('/api/account/userinfo', { username: username }, {emulateJSON: false}).then(function (ret) {
+            console.log(ret.body);
+            if (ret.body.code == 0) {
+              this.message = ret.body.message;
+            } else {
+              this.message = ret.body.message;
+            }
+          }, function (ret) {
+            console.log(ret);
         });
         }
       }

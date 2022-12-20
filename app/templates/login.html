@@ -61,21 +61,19 @@
                     }
                     this.loading = true;
                     this.error_exist = false;
-                    this.$http.post('/api/account/login', { username: this.username, password: hex_md5(this.password) }, { emulateJSON: false }).then(function (res) {
-                        console.log(res.body);
-                        if (res.body.code == 0) {
+                    this.$http.post('/api/account/login', { username: this.username, password: hex_md5(this.password) }, { emulateJSON: false }).then(function (ret) {
+                        console.log(ret.body);
+                        if (ret.body.code == 0) {
                             this.error_exist = false;
                             var src = new URLSearchParams(window.location.search).get('src');
-                            if (!src) {
-                                src = '/';
-                            }
+                            if (!src) { src = '/'; }
                             window.location.href = src;
                         } else {
-                            this.message = res.body.message;
+                            this.message = ret.body.message;
                             this.error_exist = true;
                         }
-                    }, function (res) {
-                        alert(res.status);
+                    }, function (ret) {
+                        console.log(ret);
                     });
                     this.loading = false;
                 }
