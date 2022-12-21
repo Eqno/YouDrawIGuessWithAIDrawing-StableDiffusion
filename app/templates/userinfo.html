@@ -3,6 +3,12 @@
 
 <head>
     {% include 'header.html' %}
+    <style>
+        .is-32x32 {
+            height: 32px;
+            width: 32px;
+        }
+    </style>
 </head>
 
 <body>
@@ -10,218 +16,96 @@
 
     <section class="section">
         <div id="app" class="columns is-max-widescreen">
-            <div class="column is-two-thirds container">
+            <div class="column"></div>
+            <div class="column container is-half">
+                {% raw %}
                 <div class="card">
-                    <div class="card-image">
-                        <figure class="image is-4by3">
-                            <img ref="image" v-bind:src="image_url" alt="image">
-                        </figure>
-                    </div>
-                </div>
-            </div>
-            <div class="column container">
-                <div class="card" style="position: relative; height: 100%; min-height: 40rem;">
-                    <header class="card-header-title">
-                        <p class="card-header-title">{{ guess_the_image }}</p>
-                    </header>
-                    {% raw %}
-                    <div class="card-content">
-                        <progress class="progress is-success" value="60" max="100">60%</progress>
-                        <article class="message">
-                            <div class="message-body">
-                                {{ description }}
+                    <div v-if="userinfo.username" class="card-content">
+                        <div class="media">
+                            <div class="media-left">
+                                <figure class="image is-128x128">
+                                    <img :src="userinfo.avatar" alt="avatar">
+                                </figure>
                             </div>
-                        </article>
+                            <div class="media-content m-4">
+                                <p class="title is-2">{{ userinfo.username }}</p>
+                                <p v-if="userinfo.signature" class="subtitle is-4">个性签名</p>
+                                <p v-else class="subtitle is-4">
+                                    这个人很懒，什么都没写
+                                </p>
+                            </div>
+                        </div>
 
-                        <div class="content">
-                            <div id="msgbox" class="card p-4" style="position: absolute; overflow-y: scroll;">
+                        <div class="columns">
+                            <div class="column">
+                                <p class="is-size-4">胜场: 100/200</p>
+                            </div>
+                            <div class="column">
+                                <p class="is-size-4">胜率: 50.00%</p>
+                            </div>
+                        </div>
 
-                                <div v-for="msg of messages" class="field is-grouped is-grouped-multiline"
-                                    v-bind:class="{ 'icon-text': msg.is_alert, 'mb-2': !msg.players.length }">
-                                    <span v-if="msg.is_alert" class="icon has-text-info">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                    <span v-if="msg.is_alert" v-if="msg.alert_prefix" class="is-size-6">
-                                        {{ msg.alert_prefix }}:&nbsp;
-                                    </span>
-                                    <div v-for="player of msg.players" class="control">
-                                        <div class="tags has-addons">
-                                            <span class="tag is-light">{{ player.name }}</span>
-                                            <span class="tag is-info is-light">{{ player.ranking }}</span>
+                        <aside class="menu">
+                            <ul class="menu-list">
+                                <li><a class="is-active">游戏记录</a></li>
+
+                                <li>
+                                    <a class="columns m-4">
+                                        <p class="column is-one-quarter">匹配模式</p>
+                                        <div class="column">
+                                            <img src="/static/avatar.png" class="is-32x32">
+                                            <img src="/static/avatar.png" class="is-32x32">
+                                            <img src="/static/avatar.png" class="is-32x32">
+                                            <img src="/static/avatar.png" class="is-32x32">
                                         </div>
-                                    </div>
-                                    <span class="is-size-6">{{ msg.content }}</span>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <div id="inputbox" class="field" style="position: absolute;">
-                            <div class="control">
-                                <input ref="content" class="input" maxlength="16">
-                            </div>
-                        </div>
+                                        <p class="column is-one-fifth">+20</p>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="columns m-4">
+                                        <p class="column is-one-quarter">匹配模式</p>
+                                        <div class="column">
+                                            <img src="/static/avatar.png" class="is-32x32">
+                                            <img src="/static/avatar.png" class="is-32x32">
+                                            <img src="/static/avatar.png" class="is-32x32">
+                                            <img src="/static/avatar.png" class="is-32x32">
+                                        </div>
+                                        <p class="column is-one-fifth">+10</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </aside>
                     </div>
-                    {% endraw %}
-                    <footer id="submit" class="card-footer" style="position: absolute; left: 0; right: 0; bottom: 0;">
-                        <a href="#" class="card-footer-item is-success">{{ submit }}</a>
-                        <a href="#" class="card-footer-item is-danger">{{ abandon }}</a>
-                    </footer>
+                    <div v-else class="card-content">
+                        <p class="title is-2">{{ error_message }}</p>
+                    </div>
                 </div>
+                {% endraw %}
             </div>
+            <div class="column"></div>
         </div>
     </section>
-    <script>
-        var inputbox = $('#inputbox');
-        var msgbox = $("#msgbox");
-        var submit = $('#submit');
-
-        // padding = 1.5rem
-        const padding_val = msgbox.parent().parent().css('padding');
-        const padding = parseInt(padding_val.substr(0, padding_val.length));
-        inputbox.css('left', padding_val);
-        inputbox.css('right', padding_val);
-        inputbox.css('bottom', submit.height() + padding);
-        msgbox.css('top', msgbox.css('top'));
-        msgbox.css('left', padding_val);
-        msgbox.css('right', padding_val);
-        msgbox.css('bottom', submit.height() + inputbox.height() + 2 * padding);
-    </script>
 
     <script>
         new Vue({
             el: '#app',
             data: {
-                image_url: '/static/loading.png',
-                hint_prefix: '{{ hint_prefix }}',
-                hint: '？波',
-                description: '我是图片描述',
-                messages: [
-                {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [
-                            {
-                                'name': '张三',
-                                'ranking': 1500,
-                            },
-                            {
-                                'name': '李四',
-                                'ranking': 1000,
-                            }
-                        ],
-                        'content': '加入了房间'
-                    },
-                    {
-                        'is_alert': false,
-                        'alert_prefix': '',
-                        'players': [
-                            {
-                                'name': '张三',
-                                'ranking': 1500,
-                            }
-                        ],
-                        'content': '蓝色猫猫头'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '提示',
-                        'players': [],
-                        'content': '？波'
-                    },
-                    {
-                        'is_alert': false,
-                        'alert_prefix': '',
-                        'players': [
-                            {
-                                'name': '张三',
-                                'ranking': 1500,
-                            }
-                        ],
-                        'content': '气功波'
-                    },
-                    {
-                        'is_alert': false,
-                        'alert_prefix': '',
-                        'players': [
-                            {
-                                'name': '李四',
-                                'ranking': 1000,
-                            }
-                        ],
-                        'content': '加波'
-                    },
-                    {
-                        'is_alert': false,
-                        'alert_prefix': '',
-                        'players': [
-                            {
-                                'name': '张三',
-                                'ranking': 1500,
-                            }
-                        ],
-                        'content': '咖波'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [
-                            {
-                                'name': '张三',
-                                'ranking': 1500,
-                            }
-                        ],
-                        'content': '回答正确'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [],
-                        'content': '凑行数测试'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [],
-                        'content': '凑行数测试'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [],
-                        'content': '凑行数测试'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [],
-                        'content': '凑行数测试'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [],
-                        'content': '凑行数测试'
-                    },
-                    {
-                        'is_alert': true,
-                        'alert_prefix': '系统',
-                        'players': [],
-                        'content': '凑行数测试'
-                    },
-                    
-                ]
+                username: '{{ username }}',
+                error_message: '加载中',
+                userinfo: {}
             },
             mounted: function () {
-                this.$http.get('/api/game/core/image').then(function (res) {
+                this.$http.post('/api/account/userinfo', { username: this.username }, { emulateJSON: false }).then(function (res) {
                     console.log(res.body);
                     if (res.body.code == 0) {
-                        this.image_url = res.body.url;
+                        this.userinfo = res.body.userinfo;
                     } else {
-                        console.log('Getting image fails, message:', res.body.message);
+                        console.log('Getting user info fails, message:', res.body.message);
+                        this.error_message = res.body.message;
                     }
                 }, function (res) {
                     console.log('Request fails, status:', res);
+                    this.error_message = '服务器异常';
                 });
             },
         })
