@@ -50,8 +50,8 @@ generator = StableDiffusion(
 )
 
 img = generator.generate(
-    args.prompt,
-    negative_prompt=args.negative_prompt,
+    prompt=positive,
+    negative_prompt=negtive,
     num_steps=args.steps,
     unconditional_guidance_scale=7.5,
     temperature=1,
@@ -59,4 +59,4 @@ img = generator.generate(
     input_image=args.input,
     input_image_strength=0.8
 )
-Image.fromarray(img[0]).save(args.output)
+Image.fromarray(img[0]).save('server')
