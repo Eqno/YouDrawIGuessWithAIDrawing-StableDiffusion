@@ -37,8 +37,7 @@
         </div>
       </div>
 
-      <a v-if="logined" href="{{ url_for('friends') }}?src={{ base_url }}"
-        class="navbar-item is-light is-capoo-3">
+      <a v-if="logined" href="{{ url_for('friends') }}?src={{ base_url }}" class="navbar-item is-light is-capoo-3">
         {{ friends_page }}
       </a>
       <a v-if="!logined" href="{{ url_for('login') }}?src={{ url_for('friends') }}"
@@ -60,7 +59,7 @@
         </a>
         {% endraw %}
         <div class="navbar-dropdown">
-          <a href="{{ url_for('userinfo') }}?src={{ base_url }}" class="navbar-item">
+          <a :href="userinfo_prefix + username" class="navbar-item">
             {{ user_info }}
           </a>
           <hr class="navbar-divider">
@@ -70,7 +69,7 @@
         </div>
       </div>
 
-      <div v-if="!logined" class="navbar-item">
+      <div v-else class="navbar-item">
         <div class="buttons">
 
           <a class="button is-capoo" href="{{ url_for('signup') }}?src={{ base_url }}">
@@ -99,31 +98,25 @@
     app = new Vue({
       el: '#menu',
       data: {
+        userinfo_prefix: '{{ url_for("userinfo", username="") }}',
         username: '',
         logined: false,
       },
       mounted: function () {
-        ret = this.quary_logined();
-        console.log("123123123");
-        console.log(ret);
-        this.logined = ret[0];
-        this.username = ret[1];
+        this.$http.get('/api/account/username').then(function (res) {
+          console.log(res.body);
+          if (res.body.code == 0) {
+            this.username = res.body.username;
+            this.logined = true;
+          }
+          else {
+            console.log('There is no logined user.');
+          }
+        }, function (ret) {
+          console.log('Request fails, status:', ret);
+        });
       },
       methods: {
-        quary_logined: function () {
-          console.log("1");
-          this.$http.get('/api/account/username').then(function (res) {
-            console.log(res.body);
-            if (res.body.code == 0) {
-              console.log([true, res.body.username]);
-              return [true, res.body.username];
-            }
-            else console.log('There is not logined user.');
-          }, function (ret) {
-            console.log('Request fails, status:', ret);
-          });
-          return [false, ''];
-        },
         perform_logout: function (event) {
           this.$http.get('/api/account/logout').then(function (res) {
             console.log(res.body);
