@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <a v-if="logined" href="{{ url_for('friends') }}?src={{ base_url }}" class="navbar-item is-light is-capoo-3">
+      <a v-if="logined" href="{{ url_for('friends') }}" class="navbar-item is-light is-capoo-3">
         {{ friends_page }}
       </a>
       <a v-if="!logined" href="{{ url_for('login') }}?src={{ url_for('friends') }}"
@@ -58,7 +58,7 @@
           {{ username }}
         </a>
         {% endraw %}
-        <div class="navbar-dropdown">
+        <div class="navbar-dropdown is-right">
           <a :href="userinfo_prefix + username" class="navbar-item">
             {{ user_info }}
           </a>

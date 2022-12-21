@@ -92,22 +92,39 @@
           <p class="panel-heading align-center is-capoo">
             {{ friend_list }}
           </p>
-          <p class="control has-icons-left">
-            <input class="input" style="border-radius: 0; box-shadow: none;" type="text" placeholder="搜索用户">
+          <p class="control has-icons-left has-icons-right" style="margin-bottom: 1px;">
+            <input class="input" v-model="input_name" style="border-radius: 0; box-shadow: none;" type="text" placeholder="添加好友">
             <span class="icon is-left">
               <i class="fas fa-search" aria-hidden="true"></i>
             </span>
+            <span class="icon is-right" v-on:click="add_friend" style="pointer-events: auto;">
+              <i class="fas fa-arrow-right"></i>
+            </span>
           </p>
+          {% raw %}
+          <p class="notification is-light" v-bind:class="{'is-danger': message_is_error, 'is-success': !message_is_error}" style="padding: 0.5rem 1rem;">
+            {{ add_friend_message }}
+          </p>
+          {% endraw %}
 
           <div class="panel-block normal-color"
-            style="display: block; position: absolute; top: 106.5px; bottom: 69px; left: 12px; right: 12px; overflow-y: scroll;">
+            style="display: block; position: absolute; top: 106.5px; bottom: 69px; left: 12px; right: 12px; overflow-y: scroll;"
+            v-bind:style="{'margin-top': (add_friend_message.length ? '2.5rem' : '0')}">
             <aside class="menu">
               <p class="menu-label">
-                {{ online }}
+                {{ gaming }}
               </p>
               <ul class="menu-list friends">
                 {% raw %}
-                <li v-for="friend of online_friends"><a>{{ friend.name }}</a></li>
+                <li v-for="friend of gaming_friends"><a>{{ friend.name }}</a></li>
+                {% endraw %}
+              </ul>
+              <p class="menu-label">
+                {{ waiting }}
+              </p>
+              <ul class="menu-list friends">
+                {% raw %}
+                <li v-for="friend of waiting_friends"><a>{{ friend.name }}</a></li>
                 {% endraw %}
               </ul>
               <p class="menu-label">
@@ -130,7 +147,7 @@
         </div>
 
       </div>
-      <div class="column" style="position: relative; min-height: 40rem;">
+      <div class="column" style="position: relative; min-height: 60rem;">
         <div class="panel" style="height: 100%;">
           {% raw %}
           <p class="panel-heading align-center is-capoo">{{ left_username }}</p>
@@ -176,9 +193,15 @@
         right_username: 'capoo',
         right_avatar: '/static/favicon.png',
 
-        all_friends: [],
-        online_friends: [],
+        friends: [],
+        gaming_friends: [],
+        waiting_friends: [],
         offline_friends: [],
+
+        input_name: '',
+
+        add_friend_message: '',
+        message_is_error: false,
 
         messages: [
           {
@@ -236,15 +259,34 @@
         ]
       },
       mounted: function () {
-        
-        
+        this.update_friends_list();
       },
       methods: {
-        getUserName: function () {
-          this.$http.get('/api/account/username').then(function (ret) {
+        update_friends_list: function () {
+          this.$http.get('/api/account/get_friends').then(function (ret) {
             console.log(ret.body);
             if (ret.body.code == 0) {
-              this.right_username = ret.body.username;
+              console.log(ret.body.friends);
+              this.friends = ret.body.friends;
+              var gaming_friends = [];
+              var waiting_friends = [];
+              var offline_friends = [];
+              for (const i of this.friends) {
+                console.log(i);
+                console.log(i.name + ' ' + i.status);
+                if (i.status == 'gaming') {
+                  gaming_friends.push(i);
+                } else if (i.status == 'waiting') {
+                  waiting_friends.push(i);
+                } else if (i.status == 'offline') {
+                  offline_friends.push(i);
+                } else {
+                  console.log('Unknown status ' + i.status + ' of friend ' + i.name);
+                }
+              }
+              this.gaming_friends = gaming_friends;
+              this.waiting_friends = waiting_friends;
+              this.offline_friends = offline_friends;
             } else {
               console.log('There is not logined user.');
             }
@@ -252,19 +294,27 @@
             console.log('Request fails, status:', ret);
           });
         },
-        getFriendList: function () {
-          this.$http.post('/api/account/userinfo', { username: this.right_username }, { emulateJSON: false }).then(function (ret) {
+        add_friend: function () {
+          if (!this.input_name) {
+            this.message_is_error = true;
+            this.add_friend_message = '好友名字不能为空';
+            return;
+          }
+          this.$http.post('/api/account/add_friend', { username: this.input_name }, { emulateJSON: false }).then(function (ret) {
             console.log(ret.body);
             if (ret.body.code == 0) {
-              this.all_friends = ret.body.friend_list;
-              for (var i in this.all_friends) {
-                console.log(i['name']);
-              }
+              this.update_friends_list();
+              this.message_is_error = false;
+              this.add_friend_message = '添加好友成功';
             } else {
-              console.log('There is not logined user.');
+              console.log('Adding friend fails, message:', ret.body.message);
+              this.message_is_error = true;
+              this.add_friend_message = ret.body.message;
             }
           }, function (ret) {
             console.log('Request fails, status:', ret);
+            this.message_is_error = true;
+            this.add_friend_message = '添加好友失败，服务器异常';
           });
         },
       },

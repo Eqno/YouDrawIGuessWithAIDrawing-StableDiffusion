@@ -31,8 +31,9 @@ template_variables = {
     'submit': '提交',
     'abandon': '放弃',
     # friends
-    'online': '在线',
-    'offline': '离线',
+    'gaming': '游戏中',
+    'waiting': '等待中',
+    'offline': '休息中',
     'friend_list': '好友列表',
     'join_game': '加入游戏',
     'delete_friend': '删除好友',
@@ -46,6 +47,7 @@ class StatusCode(IntEnum):
     ERR_ACCOUNT_USERNAME_EXISTED = 201
     ERR_ACCOUNT_NOT_LOGINED = 202
     ERR_ACCOUNT_USERNAME_NOT_EXISTED = 203
+    ERR_ACCOUNT_DO_NOT_ADD_SELF_AS_FRIEND = 204
 
 
 error_msg = {
@@ -55,6 +57,7 @@ error_msg = {
     StatusCode.ERR_ACCOUNT_USERNAME_EXISTED: '用户名已存在',
     StatusCode.ERR_ACCOUNT_NOT_LOGINED: '用户未登录',
     StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED: '用户名不存在',
+    StatusCode.ERR_ACCOUNT_DO_NOT_ADD_SELF_AS_FRIEND: '不能添加自己为好友',
 }
 
 default_errno = StatusCode.ERR_SERVER_UNKNOWN
