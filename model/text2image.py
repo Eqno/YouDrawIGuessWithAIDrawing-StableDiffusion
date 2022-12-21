@@ -82,17 +82,48 @@ if args.mp:
     print("Using mixed precision.")
     keras.mixed_precision.set_global_policy("mixed_float16")
 
-generator = StableDiffusion(img_height=args.H, img_width=args.W, jit_compile=False, download_weights=False)
-img = generator.generate(
-    args.prompt,
-    negative_prompt=args.negative_prompt,
-    num_steps=args.steps,
-    unconditional_guidance_scale=args.scale,
-    temperature=1,
-    batch_size=1,
-    seed=args.seed,
+generator = StableDiffusion(
+    img_height=args.H, 
+    img_width=args.W, 
+    jit_compile=False,
+    download_weights=False
 )
-pnginfo = PngInfo()
-pnginfo.add_text('prompt', args.prompt)
-Image.fromarray(img[0]).save(args.output, pnginfo=pnginfo)
-print(f"saved at {args.output}")
+
+PLAYER_MAX_STORE_PIC_NUM = 1000
+IMAGE_SAVE_PATH = os.getcwd() + '/server/data/pic/'
+
+def generate_image(positive:str, negtive:str, name:str, rand_seed=int):
+
+    img = generator.generate(
+        prompt=positive,
+        negative_prompt=negtive,
+        num_steps=args.steps,
+        unconditional_guidance_scale=args.scale,
+        temperature=1,
+        batch_size=1,
+        seed=rand_seed,
+    )
+    
+    for i in range(0, PLAYER_MAX_STORE_PIC_NUM):
+        path = IMAGE_SAVE_PATH + name + '/' + i + '.png'
+        if not os.path.exists(path):
+            Image.fromarray(img[0]).save(path)
+            return path
+
+    print('player could not store any more pic')
+    return None
+
+# img = generator.generate(
+#     args.prompt,
+#     negative_prompt=args.negative_prompt,
+#     num_steps=args.steps,
+#     unconditional_guidance_scale=args.scale,
+#     temperature=1,
+#     batch_size=1,
+#     seed=args.seed,
+# )
+
+# pnginfo = PngInfo()
+# pnginfo.add_text('prompt', args.prompt)
+# Image.fromarray(img[0]).save(args.output, pnginfo=pnginfo)
+# print(f"saved at {args.output}")
