@@ -85,7 +85,6 @@
 
 <body>
   {% include 'nav.html' %}
-
   <section class="section">
     <div id="app" class="columns">
       <div class="column is-one-quarter" style="position: relative; min-height: 30rem;">
@@ -93,7 +92,6 @@
           <p class="panel-heading align-center is-capoo">
             {{ friend_list }}
           </p>
-
           <p class="control has-icons-left">
             <input class="input" style="border-radius: 0; box-shadow: none;" type="text" placeholder="搜索用户">
             <span class="icon is-left">
@@ -135,7 +133,7 @@
       <div class="column" style="position: relative; min-height: 40rem;">
         <div class="panel" style="height: 100%;">
           {% raw %}
-          <p class="panel-heading align-center is-capoo">{{ right_username }}</p>
+          <p class="panel-heading align-center is-capoo">{{ left_username }}</p>
 
           <ul class="panel-block normal-color"
             style="display: block; position: absolute; top: 66px; bottom: 69px; left: 12px; right: 12px; overflow-y: scroll;">
@@ -165,7 +163,6 @@
           </div>
 
         </div>
-
       </div>
     </div>
   </section>
@@ -173,27 +170,16 @@
     new Vue({
       el: '#app',
       data: {
-        right_username: '先辈',
-        right_avatar: '/static/favicon.png',
+        left_username: '先辈',
         left_avatar: '/static/avatar.png',
-        online_friends: [
-          { name: '小明' },
-        ],
-        offline_friends: [
-          { name: '小红' },
-          { name: '小绿' },
-          { name: '小蓝' },
-          { name: '小粉' },
-          { name: '大明' },
-          { name: '大红' },
-          { name: '大绿' },
-          { name: '大蓝' },
-          { name: '大粉' },
-          { name: '先辈' },
-          { name: '杰哥' },
-          { name: '阿伟' },
-          { name: '彬彬' },
-        ],
+
+        right_username: 'capoo',
+        right_avatar: '/static/favicon.png',
+
+        all_friends: [],
+        online_friends: [],
+        offline_friends: [],
+
         messages: [
           {
             mine: false,
@@ -248,6 +234,39 @@
             content: 'aaa',
           },
         ]
+      },
+      mounted: function () {
+        
+        
+      },
+      methods: {
+        getUserName: function () {
+          this.$http.get('/api/account/username').then(function (ret) {
+            console.log(ret.body);
+            if (ret.body.code == 0) {
+              this.right_username = ret.body.username;
+            } else {
+              console.log('There is not logined user.');
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+        },
+        getFriendList: function () {
+          this.$http.post('/api/account/userinfo', { username: this.right_username }, { emulateJSON: false }).then(function (ret) {
+            console.log(ret.body);
+            if (ret.body.code == 0) {
+              this.all_friends = ret.body.friend_list;
+              for (var i in this.all_friends) {
+                console.log(i['name']);
+              }
+            } else {
+              console.log('There is not logined user.');
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+        },
       },
     });
   </script>

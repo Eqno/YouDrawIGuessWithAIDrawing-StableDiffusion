@@ -12,7 +12,7 @@
     </a>
   </div>
 
-  <div class="navbar-menu">
+  <div id="menu" class="navbar-menu">
     <div class="navbar-start">
 
       <div class="navbar-item has-dropdown is-hoverable">
@@ -37,7 +37,12 @@
         </div>
       </div>
 
-      <a class="navbar-item is-light is-capoo-3" href="{{ url_for('friends') }}">
+      <a v-if="logined" href="{{ url_for('friends') }}?src={{ base_url }}"
+        class="navbar-item is-light is-capoo-3">
+        {{ friends_page }}
+      </a>
+      <a v-if="!logined" href="{{ url_for('login') }}?src={{ url_for('friends') }}"
+        class="navbar-item is-light is-capoo-3">
         {{ friends_page }}
       </a>
 
@@ -46,7 +51,7 @@
       </a>
 
     </div>
-    <div id="nav" class="navbar-end">
+    <div class="navbar-end">
 
       <div v-if="logined" class="navbar-item has-dropdown is-hoverable mx-4">
         {% raw %}
@@ -55,11 +60,11 @@
         </a>
         {% endraw %}
         <div class="navbar-dropdown">
-          <a :href="user_link" class="navbar-item">
+          <a href="{{ url_for('userinfo') }}?src={{ base_url }}" class="navbar-item">
             {{ user_info }}
           </a>
           <hr class="navbar-divider">
-          <a href="#" v-on:click="logout" class="navbar-item">
+          <a href="#" v-on:click="perform_logout" class="navbar-item">
             {{ logout }}
           </a>
         </div>
@@ -91,45 +96,45 @@
   </script>
 
   <script>
-    new Vue({
-      el: '#nav',
+    app = new Vue({
+      el: '#menu',
       data: {
         username: '',
-        user_link: '',
         logined: false,
       },
       mounted: function () {
-        this.$http.get('/api/account/username').then(function (res) {
-          console.log(res.body);
-          if (res.body.code == 0) {
-            this.username = res.body.username;
-
-            this.user_link = '/userinfo';
-            this.userinfo(this.username)
-            
-            this.logined = true;
-          } else {
-            console.log('There is not logined user.');
-          }
-        }, function(ret) {
-          console.log('Request fails, status:', ret);
-        });
+        ret = this.quary_logined();
+        console.log("123123123");
+        console.log(ret);
+        this.logined = ret[0];
+        this.username = ret[1];
       },
       methods: {
-        logout: function (event) {
-          this.$http.get('/api/account/logout').then(function (res) {
+        quary_logined: function () {
+          console.log("1");
+          this.$http.get('/api/account/username').then(function (res) {
             console.log(res.body);
             if (res.body.code == 0) {
-              location.reload();
-            } else {
-              console.log(res.body.message);
+              console.log([true, res.body.username]);
+              return [true, res.body.username];
             }
-          }, function(res) {
+            else console.log('There is not logined user.');
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+          return [false, ''];
+        },
+        perform_logout: function (event) {
+          this.$http.get('/api/account/logout').then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) location.reload();
+            else console.log(res.body.message);
+          }, function (res) {
             console.log('Request fails, status:', res);
           });
         },
         userinfo: function (username) {
-          this.$http.post('/api/account/userinfo', { username: username }, {emulateJSON: false}).then(function (ret) {
+          this.$http.post('/api/account/userinfo', { username: username }, { emulateJSON: false }).then(function (ret) {
             console.log(ret.body);
             if (ret.body.code == 0) {
               this.message = ret.body.message;
@@ -138,7 +143,7 @@
             }
           }, function (ret) {
             console.log(ret);
-        });
+          });
         }
       }
     });

@@ -65,6 +65,7 @@ def api_account_signup():
 
             user_data['username'] = username
             user_data['password'] = password
+            user_data['firend_list'] = {}
             
             ret_code = StatusCode.SUCCESS
             session_set_username(username)
@@ -88,8 +89,8 @@ def api_account_userinfo():
     ret_code, ret_msg = StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED, None
     find_or_create_data_dir(user_data_path)
 
-    data = flask.request.get_json()
-    username = data['username']
+    http_data = flask.request.get_json()
+    username = http_data['username']
 
     try:
         with open(user_data_path + username + '.json', 'r') as f:

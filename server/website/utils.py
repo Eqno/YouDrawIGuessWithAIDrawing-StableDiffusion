@@ -31,6 +31,8 @@ template_variables = {
     'submit': '提交',
     'abandon': '放弃',
     # friends
+    'online': '在线',
+    'offline': '离线',
     'friend_list': '好友列表',
     'join_game': '加入游戏',
     'delete_friend': '删除好友',

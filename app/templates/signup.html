@@ -2,111 +2,112 @@
 <html>
 
 <head>
-    {% include 'header.html' %}
+  {% include 'header.html' %}
 </head>
 
 <body>
-    {% include 'nav.html' %}
+  {% include 'nav.html' %}
 
-    <section class="section">
-        <div id="app" class="container is-max-widescreen">
-            <form class="box" v-on:submit.prevent="signup">
-                <div class="field">
-                    <label class="label">{{ username }}</label>
-                    <div class="control">
-                        <input ref="username" class="input" v-model="username" v-on:keydown.enter="move_to_password"
-                            placeholder="{{ please_input_username }}" maxlength="16">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">{{ password }}</label>
-                    <div class="control">
-                        <input ref="password" class="input" v-model="password" type="password" maxlength="16">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">{{ password_again }}</label>
-                    <div class="control">
-                        <input ref="password_again" class="input" v-model="password_again" type="password" maxlength="16">
-                    </div>
-                </div>
-                {% raw %}
-                <p class="notification is-danger is-light" v-bind:class="{ 'is-hidden': !error_exist }">{{ message }}
-                </p>
-                {% endraw %}
-                <button class="button is-capoo"
-                    v-bind:class="{ 'is-capoo': signup_enabled, 'is-light': !signup_enabled, 'is-capoo': loading }">
-                    {{ signup }}
-                </button>
-            </form>
+  <section class="section">
+    <div id="app" class="container is-max-widescreen">
+      <form class="box" v-on:submit.prevent="signup">
+        <div class="field">
+          <label class="label">{{ username }}</label>
+          <div class="control">
+            <input ref="username" class="input" v-model="username" v-on:keydown.enter="move_to_password"
+              placeholder="{{ please_input_username }}" maxlength="16">
+          </div>
         </div>
-    </section>
+        <div class="field">
+          <label class="label">{{ password }}</label>
+          <div class="control">
+            <input ref="password" class="input" v-model="password" type="password" maxlength="16">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">{{ password_again }}</label>
+          <div class="control">
+            <input ref="password_again" class="input" v-model="password_again" type="password" maxlength="16">
+          </div>
+        </div>
+        {% raw %}
+        <p class="notification is-danger is-light" v-bind:class="{ 'is-hidden': !error_exist }">{{ message }}
+        </p>
+        {% endraw %}
+        <button class="button is-capoo"
+          v-bind:class="{ 'is-capoo': signup_enabled, 'is-light': !signup_enabled, 'is-capoo': loading }">
+          {{ signup }}
+        </button>
+      </form>
+    </div>
+  </section>
 
-    <script>
-        var app = new Vue({
-            el: '#app',
-            data: {
-                username: '',
-                password: '',
-                password_again: '',
-                username_done: false,
-                password_done: false,
-                signup_enabled: false,
-                loading: false,
-                error_exist: false,
-                message: ''
-            },
-            methods: {
-                move_to_password: function (event) {
-                    if (!this.password_done) {
-                        this.$refs.password.focus();
-                    }
-                },
-                signup: function (event) {
-                    if (!this.signup_enabled) {
-                        return;
-                    }
-                    if (this.password != this.password_again)
-                    {  
-                        this.message = '两次密码不一致';
-                        this.error_exist = true;
-                        return;
-                    }
-                    this.loading = true;
-                    this.error_exist = false;
-                    this.$http.post('/api/account/signup', { username: this.username, password: hex_md5(this.password) }, { emulateJSON: false }).then(function (res) {
-                        console.log(res.body);
-                        if (res.body.code == 0) {
-                            this.error_exist = false;
-                            var src = new URLSearchParams(window.location.search).get('src');
-                            if (!src) {
-                                src = '/';
-                            }
-                            window.location.href = src;
-                        } else {
-                            this.message = res.body.message;
-                            this.error_exist = true;
-                        }
-                    }, function (res) {
-                        alert(res.status);
-                    });
-                    this.loading = false;
-                }
-            },
-            watch: {
-                username: function (val) {
-                    this.username_done = (val.length >= 4 && val.length <= 16);
-                    this.signup_enabled = (this.username_done && this.password_done);
-                },
-                password: function (val) {
-                    this.password_done = (val.length >= 8 && val.length <= 16);
-                    this.signup_enabled = (this.username_done && this.password_done);
-                }
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        username: '',
+        password: '',
+        password_again: '',
+        username_done: false,
+        password_done: false,
+        signup_enabled: false,
+        loading: false,
+        error_exist: false,
+        message: ''
+      },
+      mounted: function () {
+        // ret = app.quary_logined();
+        // if (ret[0]) window.location.href = '/';
+      },
+      methods: {
+        move_to_password: function (event) {
+          if (!this.password_done) {
+            this.$refs.password.focus();
+          }
+        },
+        signup: function (event) {
+          if (!this.signup_enabled) {
+            return;
+          }
+          if (this.password != this.password_again) {
+            this.message = '两次密码不一致';
+            this.error_exist = true;
+            return;
+          }
+          this.loading = true;
+          this.error_exist = false;
+          this.$http.post('/api/account/signup', { username: this.username, password: hex_md5(this.password) }, { emulateJSON: false }).then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              this.error_exist = false;
+              var src = new URLSearchParams(window.location.search).get('src');
+              if (!src) { src = '/'; }
+              window.location.href = src;
+            } else {
+              this.message = res.body.message;
+              this.error_exist = true;
             }
-        });
-    </script>
+          }, function (res) {
+            alert(res.status);
+          });
+          this.loading = false;
+        }
+      },
+      watch: {
+        username: function (val) {
+          this.username_done = (val.length >= 4 && val.length <= 32);
+          this.signup_enabled = (this.username_done && this.password_done);
+        },
+        password: function (val) {
+          this.password_done = (val.length >= 8 && val.length <= 32);
+          this.signup_enabled = (this.username_done && this.password_done);
+        }
+      }
+    });
+  </script>
 
-    {% include 'footer.html' %}
+  {% include 'footer.html' %}
 
 </body>
 
