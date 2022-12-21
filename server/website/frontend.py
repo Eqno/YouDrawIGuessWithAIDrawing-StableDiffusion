@@ -3,6 +3,10 @@
 import flask
 
 
+def frontend_init():
+    pass
+
+
 def index():
     return flask.render_template('index.html',
                                  title='首页',
@@ -14,10 +18,11 @@ def login():
                                  title='登录',
                                  base_url=flask.request.base_url)
 
+
 def signup():
     return flask.render_template('signup.html',
-                                title='注册',
-                                base_url=flask.request.base_url)
+                                 title='注册',
+                                 base_url=flask.request.base_url)
 
 
 def game():
@@ -31,13 +36,17 @@ def friends():
                                  title='好友',
                                  base_url=flask.request.base_url)
 
-def userinfo():
+
+def userinfo(username):
     return flask.render_template('userinfo.html',
                                  title='用户信息',
+                                 username=username,
                                  base_url=flask.request.base_url)
+
 
 def get_image(filename):
     return flask.send_file('static/' + filename, mimetype='image/png')
+
 
 frontend_pages = {
     '/': index,
@@ -45,6 +54,6 @@ frontend_pages = {
     '/game': game,
     '/signup': signup,
     '/friends': friends,
-    '/userinfo': userinfo,
+    '/user/<username>': userinfo,
     '/image/<filename>': get_image,
 }

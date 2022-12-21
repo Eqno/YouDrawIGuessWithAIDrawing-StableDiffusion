@@ -47,6 +47,7 @@ class StatusCode(IntEnum):
     ERR_ACCOUNT_NOT_LOGINED = 202
     ERR_ACCOUNT_USERNAME_NOT_EXISTED = 203
 
+
 error_msg = {
     StatusCode.SUCCESS: '',
     StatusCode.ERR_SERVER_UNKNOWN: '服务器异常',

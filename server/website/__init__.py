@@ -24,6 +24,11 @@ class Server(object):
         self.port = port
         self.debug = os.environ['FLASK_ENV'] == 'development'
 
+        # init frontend and backend
+        frontend.frontend_init()
+        backend.backend_init()
+
+        # create flask instance
         app = flask.Flask(name,
                           template_folder=template_folder,
                           static_folder=static_folder)
@@ -39,6 +44,7 @@ class Server(object):
 
         app.context_processor(lambda: utils.template_variables)
         app.before_request(make_session_permanent)
+
         # add pages
         for pages in (frontend.frontend_pages, backend.backend_pages):
             for k, v in pages.items():
