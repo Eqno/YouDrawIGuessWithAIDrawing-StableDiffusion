@@ -66,5 +66,6 @@ class Server(object):
 
     def run(self):
         
+        threading.Thread(target=backend.check_online).start()
+
         self.app.run(host=self.hostname, port=self.port, debug=self.debug)
-        self.server.serve_forever()

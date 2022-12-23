@@ -352,6 +352,15 @@ backend_pages = {
     '/api/game/core/image': api_game_core_image,
 }
 
+def check_online():
+
+    while True:
+
+        print('before:', time.time())
+        time.sleep(3)
+        print('after:', time.time())
+
+
 def socket_online(websocket):
 
     try:
@@ -373,9 +382,10 @@ def socket_online(websocket):
                         if quaryinfo is not None:
 
                             if quaryinfo == 'firends':
-                                
                                 print(quaryinfo)
 
             time.sleep(SOCKET_ONLINE_TIME_INTERVAL)
+
     except simple_websocket.ConnectionClosed:
+
         print('break')
