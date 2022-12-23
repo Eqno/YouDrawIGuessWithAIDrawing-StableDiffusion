@@ -16,7 +16,7 @@
 # sys.path.append("..")
 
 # monkey.patch_all()
-
+# app = Flask(__name__)
 # sockets = Sockets(app)
 
 # now = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
@@ -31,10 +31,6 @@
 #             ws.send(str(json.dumps(message)))
 #         else: print(now, "no receive")
 
-# class Server:
-
-#     def run(self):
-        
-#         server = pywsgi.WSGIServer(('127.0.0.1', 5000), app, handler_class=WebSocketHandler)
-#         print('server start')
-#         server.serve_forever()
+# server = pywsgi.WSGIServer(('127.0.0.1', 5000), app, handler_class=WebSocketHandler)
+# print('server start')
+# server.serve_forever()

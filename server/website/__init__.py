@@ -88,13 +88,13 @@ class Server(object):
 
         # add socks
         for k, v in backend.backend_socks.items():
-            sockets.add_url_rule(k, _=None, f=v)
+            sockets.add_url_rule(k, _=None, f=v, websocket=True)
 
         self.heart_app = heart_app
 
     def run(self):
 
         Thread(target=lambda: self.game_app.run(self.hostname, port=self.game_port, debug=self.debug)).start()
-        server = pywsgi.WSGIServer((self.hostname, self.heart_port), self.game_app, handler_class=WebSocketHandler)
+        server = pywsgi.WSGIServer((self.hostname, self.heart_port), self.heart_app, handler_class=WebSocketHandler)
         server.serve_forever()
         

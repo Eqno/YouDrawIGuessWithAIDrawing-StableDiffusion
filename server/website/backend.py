@@ -353,7 +353,7 @@ backend_pages = {
 now = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
 
 def echo_socket(ws):
-
+    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     while not ws.closed:
         ws.send(str(111111111))
         message = ws.receive()
