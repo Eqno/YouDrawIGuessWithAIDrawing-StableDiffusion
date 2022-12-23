@@ -15,19 +15,24 @@ msg_data_path = data_base_path / 'msg'
 user_data_path = data_base_path / 'user'
 filename_suffix = '.json'
 
+
 def backend_init():
     for _dir in (data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
 
+
 def session_get_username():
     return flask.session.get('username', None)
+
 
 def session_set_username(username: str):
     flask.session['username'] = username
 
+
 def session_del_username():
     return flask.session.pop('username')
+
 
 def api_account_username():
     username = session_get_username()
@@ -35,6 +40,7 @@ def api_account_username():
     if username:
         return generate_return_data(StatusCode.SUCCESS, {'username': username})
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
 
 def api_account_login():
     data = flask.request.get_json()
@@ -53,6 +59,7 @@ def api_account_login():
 
     return generate_return_data(
         StatusCode.ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG)
+
 
 def api_account_signup():
     data = flask.request.get_json()
@@ -81,6 +88,7 @@ def api_account_signup():
 
     return generate_return_data(StatusCode.SUCCESS)
 
+
 def api_account_logout():
     username = session_get_username()
 
@@ -89,6 +97,7 @@ def api_account_logout():
             return generate_return_data(StatusCode.SUCCESS)
         return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
 
 def api_account_userinfo():
     data = flask.request.get_json()
@@ -106,6 +115,7 @@ def api_account_userinfo():
         userinfo['username'] = raw_user_info['username']
         userinfo['avatar'] = '/static/avatar.png'
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
+
 
 def api_account_add_friend():
     data = flask.request.get_json()
@@ -131,12 +141,12 @@ def api_account_add_friend():
         user_info = json.load(f)
 
         # This is slow but we do not care it currently
-        friends_set = set(user_info['friends'])
+        friends_set = set(user_info.get('friends', []))
         if target_username in friends_set:
             return generate_return_data(
                 StatusCode.ERR_ACCOUNT_USERNAME_ALREADY_IN_FRIEND_LIST)
 
-        send_apply_set = set(user_info['applications_sent'])
+        send_apply_set = set(user_info.get('applications_sent', []))
         send_apply_set.add(target_username)
         user_info['applications_sent'] = list(send_apply_set)
 
@@ -148,10 +158,10 @@ def api_account_add_friend():
         user_info = json.load(f)
 
         # This is slow but we do not care it currently
-        send_apply_set = set(user_info['applications_sent'])
+        send_apply_set = set(user_info.get('applications_sent', []))
         if current_username in send_apply_set:
 
-            friends_set = set(user_info['friends'])
+            friends_set = set(user_info.get('friends', []))
             friends_set.add(current_username)
             user_info['friends'] = list(friends_set)
 
@@ -161,7 +171,7 @@ def api_account_add_friend():
 
             return generate_return_data(StatusCode.SUCCESS)
 
-        receive_apply_set = set(user_info['applications_received'])
+        receive_apply_set = set(user_info.get('applications_received', []))
         if current_username in receive_apply_set:
             return generate_return_data(
                 StatusCode.ERR_ACCOUNT_APPLICATION_ALREADY_SENT)
@@ -174,6 +184,7 @@ def api_account_add_friend():
         f.truncate()
 
     return generate_return_data(StatusCode.SUCCESS)
+
 
 # TODO: get status from game
 def api_account_get_friends():
@@ -191,13 +202,14 @@ def api_account_get_friends():
         friends = list({
             'name': name,
             'status': 'offline'
-        } for name in user_info['friends'])
+        } for name in user_info.get('friends', []))
         return generate_return_data(
             StatusCode.SUCCESS, {
                 'friends': friends,
-                'applications_sent': user_info['applications_sent'],
-                'applications_received': user_info['applications_received'],
+                'applications_sent': user_info.get('applications_sent', []),
+                'applications_received': user_info.get('applications_received', []),
             })
+
 
 def api_account_approved_application():
     data = flask.request.get_json()
@@ -223,11 +235,11 @@ def api_account_approved_application():
         user_info = json.load(f)
 
         # This is slow but we do not care it currently
-        friends_set = set(user_info['friends'])
+        friends_set = set(user_info.get('friends', []))
         friends_set.add(target_username)
         user_info['friends'] = list(friends_set)
 
-        receive_apply_set = set(user_info['applications_received'])
+        receive_apply_set = set(user_info.get('applications_received', []))
         receive_apply_set.remove(target_username)
         user_info['applications_received'] = list(receive_apply_set)
 
@@ -239,11 +251,11 @@ def api_account_approved_application():
         user_info = json.load(f)
 
         # This is slow but we do not care it currently
-        friends_set = set(user_info['friends'])
+        friends_set = set(user_info.get('friends', []))
         friends_set.add(current_username)
         user_info['friends'] = list(friends_set)
 
-        send_apply_set = set(user_info['applications_sent'])
+        send_apply_set = set(user_info.get('applications_sent', []))
         send_apply_set.remove(current_username)
         user_info['applications_sent'] = list(send_apply_set)
 
@@ -311,10 +323,36 @@ def api_game_room_player_ready():
     return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED,
                                 message)
 
+
 def api_game_core_image():
 
     result = {'url': '/static/capoo.png'}
     return generate_return_data(0, result)
+
+
+def socket_online(websocket):
+    try:
+        while True:
+            message = websocket.receive()
+            websocket.send(message)
+
+            print(message)
+
+            if message is not None:
+                message = json.loads(message)
+                if isinstance(message, dict):
+                    username = message.get('username', None)
+                    if username is not None:
+                        quaryinfo = message.get('quaryinfo', None)
+                        if quaryinfo is not None:
+                            if quaryinfo == 'firends':
+                                print(quaryinfo)
+
+            time.sleep(SOCKET_ONLINE_TIME_INTERVAL)
+
+    except simple_websocket.ConnectionClosed:
+        print('break')
+
 
 backend_pages = {
     '/api/account/username': api_account_username,
@@ -352,40 +390,4 @@ backend_pages = {
     '/api/game/core/image': api_game_core_image,
 }
 
-def check_online():
-
-    while True:
-
-        print('before:', time.time())
-        time.sleep(3)
-        print('after:', time.time())
-
-
-def socket_online(websocket):
-
-    try:
-        while True:
-
-            message = websocket.receive()
-            websocket.send(message)
-
-            print(message)
-
-            if message is not None:
-                message = json.loads(message)
-                if isinstance(message, dict):
-
-                    username = message.get('username', None)
-                    if username is not None:
-
-                        quaryinfo = message.get('quaryinfo', None)
-                        if quaryinfo is not None:
-
-                            if quaryinfo == 'firends':
-                                print(quaryinfo)
-
-            time.sleep(SOCKET_ONLINE_TIME_INTERVAL)
-
-    except simple_websocket.ConnectionClosed:
-
-        print('break')
+backend_websocket = {'/socket/online': socket_online}

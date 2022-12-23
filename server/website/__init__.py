@@ -50,8 +50,8 @@ class Server(object):
         app.context_processor(lambda: utils.template_variables)
         app.before_request(make_session_permanent)
 
-        sock.route('/socket/online')(backend.socket_online)
-        # sock.add_url_rule('/test', None, backend.echo_socket)
+        for k, v in backend.backend_websocket.items():
+            sock.route(k)(v)
 
         # add pages
         for pages in (frontend.frontend_pages, backend.backend_pages):
@@ -65,7 +65,7 @@ class Server(object):
         self.sock = sock
 
     def run(self):
-        
-        threading.Thread(target=backend.check_online).start()
-
-        self.app.run(host=self.hostname, port=self.port, debug=self.debug)
+        self.app.run(host=self.hostname,
+                     port=self.port,
+                     debug=self.debug,
+                     use_reloader=False)
