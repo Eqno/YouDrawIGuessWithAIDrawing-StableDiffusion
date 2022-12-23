@@ -109,7 +109,9 @@ def player_set_ready(player_name:str, ready:bool):
     if not retcode: return retcode, player
 
     if ready is not True and ready is not False:
+        print(ready)
         return False, 'ready must be set true or false'
+    print(ready)
     return player.set_ready(ready)
 
 from .game import Game

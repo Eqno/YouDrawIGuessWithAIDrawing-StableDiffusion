@@ -66,7 +66,7 @@
           {% raw %}
           <div class="columns" style="margin-top: 10px;">
             <div v-for="guest of guests" class="column"
-              v-bind:class="{ 'player-ready': guest['ready'], 'is-one-fifth': guest_num[5], 'is-one-quarter': guest_num[4], 'is-one-third': guest_num[3], 'is-half': guest_num[2] }">
+              v-bind:class="{ 'player-ready': guest['ready'] || (guest['name']==username && self_ready==true), 'is-one-fifth': guest_num[5], 'is-one-quarter': guest_num[4], 'is-one-third': guest_num[3], 'is-half': guest_num[2] }">
               
               <div style="display: flex;">
                   <img :src="guest['avatar']" style="margin: auto;">
@@ -100,41 +100,70 @@
           5: false,
           6: false,
         },
-        username: '{{ username }}',
+        username: '',
+
         host: {},
-        guests: []
+        guests: [],
+        
+        timer: '',
+        self_ready: false,
       },
       mounted: function () {
-        this.$http.get('/api/game/room/get_players').then(function (ret) {
-          console.log(ret.body);
-          if (ret.body.code == 0) {
-            this.host = ret.body.host;
-            this.guests = ret.body.guests;
-          } else {
-            console.log('There is no logined user.');
-          }
-        }, function (ret) {
-          console.log('Request fails, status:', ret);
-        });
-        for (var i=0; i<=6; i++) {
-          this.guest_num[i] = false;
-        }
-        this.guest_num[this.guests.length] = true;
+        this.update_players();
+        this.timer = setInterval(this.heart_beat, 500);
       },
       methods: {
-        player_ready: function (event) {
-          this.$http.post('/api/game/room/player_ready', { ready: true }, { emulateJSON: false }).then(function (ret) {
-            console.log(ret.body);
+        update_players: function () {
+          this.$http.get('/api/game/room/get_players').then(function (ret) {
             if (ret.body.code == 0) {
+              
+              this.host = ret.body.host;
+              this.guests = ret.body.guests;
 
+              this.username = app.username;
+              for (const i of this.guests) {
+                if (i.name == this.username) {
+
+                  this.self_ready = i.ready;
+                  console.log(this.self_ready);
+
+                  return;
+                }
+              }
+            } else {
+              console.log('There is no logined user.');
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+          for (var i=0; i<=6; i++) {
+            this.guest_num[i] = false;
+          }
+          this.guest_num[this.guests.length] = true;
+        },
+        player_ready: function (event) {
+          this.$http.post('/api/game/room/player_ready', { ready: !this.self_ready }, { emulateJSON: false }).then(function (ret) {
+            if (ret.body.code == 0) {
+              console.log(ret.body);
+              if (ret.body.begin_game) {
+                window.location.href = '/game';
+              } else {
+                this.update_players();
+              }
             } else {
               console.log(ret.body.message);
             }
           }, function (ret) {
             console.log('Request fails, status:', ret);
           });
-        }
+        },
+        heart_beat: function () {
+          this.update_players();
+        },
       },
+      beforeDestroy() {
+        clearInterval(this.timer);
+      }
     })
   </script>
 

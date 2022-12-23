@@ -11,24 +11,19 @@ msg_data_path = data_base_path / 'msg'
 user_data_path = data_base_path / 'user'
 filename_suffix = '.json'
 
-
 def backend_init():
     for _dir in (data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
 
-
 def session_get_username():
     return flask.session.get('username', None)
-
 
 def session_set_username(username: str):
     flask.session['username'] = username
 
-
 def session_del_username():
     return flask.session.pop('username')
-
 
 def api_account_username():
     username = session_get_username()
@@ -36,7 +31,6 @@ def api_account_username():
     if username:
         return generate_return_data(StatusCode.SUCCESS, {'username': username})
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-
 
 def api_account_login():
     data = flask.request.get_json()
@@ -55,7 +49,6 @@ def api_account_login():
 
     return generate_return_data(
         StatusCode.ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG)
-
 
 def api_account_signup():
     data = flask.request.get_json()
@@ -81,7 +74,6 @@ def api_account_signup():
 
     return generate_return_data(StatusCode.SUCCESS)
 
-
 def api_account_logout():
     username = session_get_username()
 
@@ -90,7 +82,6 @@ def api_account_logout():
             return generate_return_data(StatusCode.SUCCESS)
         return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-
 
 def api_account_userinfo():
     data = flask.request.get_json()
@@ -108,7 +99,6 @@ def api_account_userinfo():
         userinfo['username'] = raw_user_info['username']
         userinfo['avatar'] = '/static/avatar.png'
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
-
 
 def api_account_add_friend():
     data = flask.request.get_json()
@@ -178,7 +168,6 @@ def api_account_add_friend():
 
     return generate_return_data(StatusCode.SUCCESS)
 
-
 # TODO: get status from game
 def api_account_get_friends():
     username = session_get_username()
@@ -202,7 +191,6 @@ def api_account_get_friends():
                 'applications_sent': user_info['applications_sent'],
                 'applications_received': user_info['applications_received'],
             })
-
 
 def api_account_approved_application():
     data = flask.request.get_json()
@@ -316,12 +304,10 @@ def api_game_room_player_ready():
     return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED,
                                 message)
 
-
 def api_game_core_image():
 
     result = {'url': '/static/capoo.png'}
     return generate_return_data(0, result)
-
 
 backend_pages = {
     '/api/account/username': api_account_username,
@@ -361,7 +347,6 @@ backend_pages = {
 
 now = time.strftime(r'%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
 
-
 def echo_socket(ws):
     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     while True:
@@ -373,7 +358,6 @@ def echo_socket(ws):
         else:
             print(now, "no receive")
         time.sleep(1)
-
 
 backend_socks = {
     '/test': echo_socket,

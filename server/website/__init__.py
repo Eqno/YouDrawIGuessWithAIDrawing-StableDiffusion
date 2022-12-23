@@ -3,8 +3,6 @@
 import os, flask, datetime
 from flask_sock import Sock
 from . import frontend, backend, utils
-from gevent import pywsgi
-from geventwebsocket.handler import WebSocketHandler
 
 __all__ = ['frontend', 'backend', 'Server']
 
@@ -53,7 +51,7 @@ class Server(object):
         app.before_request(make_session_permanent)
 
         sock.route('/test')(backend.echo_socket)
-        #sock.add_url_rule('/test', None, backend.echo_socket)
+        # sock.add_url_rule('/test', None, backend.echo_socket)
 
         # add pages
         for pages in (frontend.frontend_pages, backend.backend_pages):

@@ -66,8 +66,11 @@ class Player:
             return False, 'player could only ready when waiting'
 
         self.ready = ready
-        self.game.check_ready()
-        return True, 'player set ready succeed'
+        retcode, message = self.game.check_ready()
+
+        if retcode:
+            return retcode, { 'begin_game': True, 'other_info': message}
+        return True, { 'begin_game': False, 'other_info': 'player set ready succeed'}
 
     # guest 给出答案，host 设置答案
     def give_answer(self, ans=str):

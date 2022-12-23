@@ -162,7 +162,12 @@
           this.unspecified_selected = true;
         },
         start_match: function (event) {
-          this.$http.post('/api/game/room/join_game', { username: '' }, { emulateJSON: false }).then(function (ret) {
+          var role = 0
+          if (this.host_selected) role = 1;
+          if (this.guest_selected) role = 2
+          if (this.unspecified_selected) role = 3
+
+          this.$http.post('/api/game/room/join_game', { username: '', role: role }, { emulateJSON: false }).then(function (ret) {
             console.log(ret.body);
             if (ret.body.code == 0) {
               this.modal_exsits = false;

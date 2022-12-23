@@ -107,6 +107,10 @@ class Game:
                 self.round_num = round_num
                 self.goto_next_round()
 
+                return True, 'game begin while everyone is ready'
+            
+        return False, 'there is someone not ready yet'
+
     def collect_ans(self, player):
 
         if self.state == GameState.PLAYING and self.host is not None:
