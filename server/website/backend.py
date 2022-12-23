@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import os
-import json
-import flask
-import pathlib
+import os, json, flask, pathlib, sys, time
 from .utils import generate_return_data, StatusCode
+
+sys.path.append(os.getcwd().replace('\\', '/') + '/../')
+from logic import *
 
 data_base_path = pathlib.Path(os.getcwd()) / 'data'
 msg_data_path = data_base_path / 'msg'
 user_data_path = data_base_path / 'user'
 filename_suffix = '.json'
 
-
 def backend_init():
     for _dir in (data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
-
 
 def session_get_username():
     return flask.session.get('username', None)
@@ -68,11 +66,15 @@ def api_account_signup():
         return generate_return_data(StatusCode.ERR_ACCOUNT_USERNAME_EXISTED)
 
     with open(user_file_path, 'w') as f:
-        user_data = {}
-        user_data['username'] = username
-        user_data['password'] = password
-        user_data['friends'] = []
-        json.dump(user_data, fp=f)
+        user_info = {}
+        
+        user_info['username'] = username
+        user_info['password'] = password
+        user_info['friends'] = []
+        user_info['applications_sent'] = []
+        user_info['applications_received'] = []
+
+        json.dump(user_info, fp=f)
         session_set_username(username)
 
     return generate_return_data(StatusCode.SUCCESS)
@@ -128,19 +130,46 @@ def api_account_add_friend():
 
     with open(current_filepath, 'r+') as f:
         user_info = json.load(f)
+
         # This is slow but we do not care it currently
         friends_set = set(user_info['friends'])
-        friends_set.add(target_username)
-        user_info['friends'] = list(friends_set)
+        if target_username in friends_set:
+            return generate_return_data(
+                StatusCode.ERR_ACCOUNT_USERNAME_ALREADY_IN_FRIEND_LIST)
+
+        send_apply_set = set(user_info['applications_sent'])
+        send_apply_set.add(target_username)
+        user_info['applications_sent'] = list(send_apply_set)
+
         f.seek(0)
         json.dump(user_info, fp=f)
         f.truncate()
+
     with open(target_filepath, 'r+') as f:
         user_info = json.load(f)
+
         # This is slow but we do not care it currently
-        friends_set = set(user_info['friends'])
-        friends_set.add(current_username)
-        user_info['friends'] = list(friends_set)
+        send_apply_set = set(user_info['applications_sent'])
+        if current_username in send_apply_set:
+
+            friends_set = set(user_info['friends'])
+            friends_set.add(current_username)
+            user_info['friends'] = list(friends_set)
+
+            f.seek(0)
+            json.dump(user_info, fp=f)
+            f.truncate()
+
+            return generate_return_data(StatusCode.SUCCESS)
+
+        receive_apply_set = set(user_info['applications_received'])
+        if current_username in receive_apply_set:
+            return generate_return_data(
+                StatusCode.ERR_ACCOUNT_APPLICATION_ALREADY_SENT)
+
+        receive_apply_set.add(current_username)
+        user_info['applications_received'] = list(receive_apply_set)
+
         f.seek(0)
         json.dump(user_info, fp=f)
         f.truncate()
@@ -158,19 +187,132 @@ def api_account_get_friends():
     user_file_path = user_data_path / (username + filename_suffix)
     if not user_file_path.exists():
         return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
+
     with open(user_file_path, 'r') as f:
         user_info = json.load(f)
         friends = list({
             'name': name,
             'status': 'offline'
         } for name in user_info['friends'])
-        return generate_return_data(StatusCode.SUCCESS, {'friends': friends})
+        return generate_return_data(StatusCode.SUCCESS, {
+            'friends': friends,
+            'applications_sent': user_info['applications_sent'],
+            'applications_received': user_info['applications_received'],
+        })
 
+def api_account_approved_application():
+    data = flask.request.get_json()
+
+    current_username = session_get_username()
+    current_filepath = user_data_path / (current_username + filename_suffix)
+
+    if not current_filepath.exists():
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    target_username = data['username']
+    target_filepath = user_data_path / (target_username + filename_suffix)
+
+    if not target_filepath.exists():
+        return generate_return_data(
+            StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
+
+    if current_username == target_username:
+        return generate_return_data(
+            StatusCode.ERR_ACCOUNT_DO_NOT_ADD_SELF_AS_FRIEND)
+
+    with open(current_filepath, 'r+') as f:
+        user_info = json.load(f)
+
+        # This is slow but we do not care it currently
+        friends_set = set(user_info['friends'])
+        friends_set.add(target_username)
+        user_info['friends'] = list(friends_set)
+
+        receive_apply_set = set(user_info['applications_received'])
+        receive_apply_set.remove(target_username)
+        user_info['applications_received'] = list(receive_apply_set)
+
+        f.seek(0)
+        json.dump(user_info, fp=f)
+        f.truncate()
+
+    with open(target_filepath, 'r+') as f:
+        user_info = json.load(f)
+
+        # This is slow but we do not care it currently
+        friends_set = set(user_info['friends'])
+        friends_set.add(current_username)
+        user_info['friends'] = list(friends_set)
+
+        send_apply_set = set(user_info['applications_sent'])
+        send_apply_set.remove(current_username)
+        user_info['applications_sent'] = list(send_apply_set)
+
+        f.seek(0)
+        json.dump(user_info, fp=f)
+        f.truncate()
+
+    return generate_return_data(StatusCode.SUCCESS)
+
+def api_game_room_join_game():
+    data = flask.request.get_json()
+    
+    current_username = session_get_username()
+    target_username = data.get('username', None)
+    current_role = data.get('role', None)
+
+    retcode, message = create_player_instance(current_username)
+    if not retcode:
+        return generate_return_data(
+            StatusCode.ERR_GAME_PLAYER_NUM_EXCEED_MAX,
+            { 'error_message': message }
+        )
+
+    retcode, message = player_join_game(
+        current_name=current_username,
+        target_name=target_username,
+        current_role=current_role
+    )
+
+    if not retcode:
+        return generate_return_data(
+            StatusCode.ERR_GAME_PLAYER_JOIN_GAME_FAILED,
+            { 'error_message': message }
+        )
+    return generate_return_data(StatusCode.SUCCESS)
+
+def api_game_room_get_players():
+
+    current_username = session_get_username()
+    retcode, message = player_get_others(current_username)
+    if retcode:
+
+        host, guests = message
+    
+        if len(host) > 0:
+            host['avatar'] = '/static/favicon.png'
+
+        for guest in guests:
+            guest['avatar'] = '/static/favicon.png'
+
+        return generate_return_data(StatusCode.SUCCESS, { 'host': host, 'guests': guests })
+    return generate_return_data(StatusCode.ERR_GAME_PLAYER_GET_OTHER_IN_ROOM_FAILED, message)
+
+def api_game_room_player_ready():
+    data = flask.request.get_json()
+    ready = data.get('ready', None)
+
+    username = session_get_username()
+    retcode, message = player_set_ready(username, ready)
+
+    if retcode:
+        generate_return_data(StatusCode.SUCCESS, message)
+    return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED, message)
 
 def api_game_core_image():
+
     result = {'url': '/static/capoo.png'}
     return generate_return_data(0, result)
-
 
 backend_pages = {
     '/api/account/username': api_account_username,
@@ -192,5 +334,34 @@ backend_pages = {
         'methods': ['POST']
     },
     '/api/account/get_friends': api_account_get_friends,
+    '/api/account/approved_application':  {
+        'view_func': api_account_approved_application,
+        'methods': ['POST']
+    },
+    '/api/game/room/join_game': {
+        'view_func': api_game_room_join_game,
+        'methods': ['POST']
+    },
+    '/api/game/room/get_players': api_game_room_get_players,
+    '/api/game/room/player_ready': {
+        'view_func': api_game_room_player_ready,
+        'methods': ['POST']
+    },
     '/api/game/core/image': api_game_core_image,
+}
+
+now = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+
+def echo_socket(ws):
+
+    while not ws.closed:
+        ws.send(str(111111111))
+        message = ws.receive()
+        if message is not None:
+            print("%s receive msg==> " % now, str(json.dumps(message)))
+            ws.send(str(json.dumps(message)))
+        else: print(now, "no receive")
+
+backend_socks = {
+    '/test': echo_socket,
 }

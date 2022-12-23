@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import tqdm
-import math
+import math, os
 
 import tensorflow as tf
 from tensorflow import keras
@@ -266,10 +266,10 @@ def get_models(img_height, img_width, download_weights=True):
             file_hash="56a2578423c640746c5e90c0a789b9b11481f47497f817e65b44a1a5538af754",
         )
     else:
-        text_encoder_weights_fpath = './models/text_encoder.h5'
-        diffusion_model_weights_fpath = './models/diffusion_model.h5'
-        decoder_weights_fpath = './models/decoder.h5'
-        encoder_weights_fpath = './models/encoder_newW.h5'
+        text_encoder_weights_fpath = os.getcwd() + '/../model/models/text_encoder.h5'
+        diffusion_model_weights_fpath = os.getcwd() + '/../model/models/diffusion_model.h5'
+        decoder_weights_fpath = os.getcwd() + '/../model/models/decoder.h5'
+        encoder_weights_fpath = os.getcwd() + '/../model/models/encoder_newW.h5'
 
     text_encoder.load_weights(text_encoder_weights_fpath)
     diffusion_model.load_weights(diffusion_model_weights_fpath)

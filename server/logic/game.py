@@ -1,12 +1,10 @@
 import random
 
-from player import Player
-from player import PlayerRole
-
-from manager import Manager
+from . import PlayerRole
+from . import GameMode
+from . import GameState
 
 from time import time
-from enum import IntEnum
 
 LOOP_LAST_TIME = 10
 GAME_FAIL_TIME = 180
@@ -16,23 +14,10 @@ HALF_WIN_SCORE = 5
 
 GUEST_MAX_NUM = 5
 
-
-class GameMode(IntEnum):
-    MATCH = 1
-    CUSTOM = 2
-
-
-class GameState(IntEnum):
-    WAITING = 1
-    PLAYING = 2
-    HASENDED = 3
-
-
 class Game:
 
-    def __init__(self,
-                 manager: Manager = None,
-                 mode: GameMode = GameMode.MATCH):
+    def __init__(self, mode: GameMode = GameMode.MATCH):
+
         self.mode = mode
         self.state = GameState.WAITING
 
@@ -46,41 +31,57 @@ class Game:
         self.round_num = None
 
         self.create_time = time()
-        self.manager = manager
 
-    def add_player(self, player: Player = None):
+    def add_player(self, player):
+
+        if self.state != GameState.WAITING:
+            
+            return False, 'game has began or ended'
 
         if player is not None:
+
             if player.role == PlayerRole.UNSPECIFIED:
 
                 if random.randint(0, GUEST_MAX_NUM \
                     - len(self.guests)) == 0 and self.host is None:
+
                     self.host = player
                     player.game = self
                     player.role = PlayerRole.HOST
+
+                    return True, 'player random as host'
+
                 elif len(self.guests) < GUEST_MAX_NUM:
+
                     self.guests.append(player)
                     player.game = self
                     player.role = PlayerRole.GUEST
-                else:
-                    print('player num is full')
+
+                    return True, 'player random as guest'
+
+                return False, 'player num is full'
 
             elif player.role == PlayerRole.HOST:
 
                 if self.host is None:
+
                     self.host = player
                     player.game = self
-                else:
-                    print('host is already occupied')
+
+                    return True, 'player join as host'
+
+                return False, 'host is already occupied'
 
             elif len(self.guests) < GUEST_MAX_NUM:
 
                 self.guests.append(player)
+                player.game = self
 
-            else:
-                print('guest num is full')
-        else:
-            print('there is no player to add')
+                return True, 'player join as guest'
+
+            return False, 'guest num is full'
+
+        return False, 'there is no player to add'
 
     def get_wait_time(self):
 
@@ -89,19 +90,24 @@ class Game:
         else:
             return 0
 
-    def begin_game(self, round_num=5):
+    # 所有人都点了准备就自动开始
+    def check_ready(self, round_num=5):
 
-        if self.host is None:
-            print('require at least one host')
-        elif len(self.guests) == 0:
-            print('require at least one guest')
-        else:
-            self.state = GameState.PLAYING
-            self.round_num = round_num
-            self.goto_next_round()
-        return self.state == GameState.PLAYING
+        if self.host and self.host.ready:
+            
+            guest_ready = True
+            for guest in self.guests:
+                if not guest.ready:
+                    guest_ready = False
+                    break
+            
+            if len(self.guests) > 0 and guest_ready:
 
-    def collect_ans(self, player: Player):
+                self.state = GameState.PLAYING
+                self.round_num = round_num
+                self.goto_next_round()
+
+    def collect_ans(self, player):
 
         if self.state == GameState.PLAYING and self.host is not None:
 

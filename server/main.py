@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 __import__('os').environ['FLASK_ENV'] = 'development'
-import website
-
+from website import Server
 
 def main():
-    app = website.Server(name=__name__)
-    app.run()
 
+    game_app = Server(game_app_name=__name__)
+    game_app.run()
 
 if __name__ == '__main__':
     main()

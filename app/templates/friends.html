@@ -77,6 +77,42 @@
       color: #ffffff;
     }
 
+    .friend-item-father {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .friend-item-left {
+      display: inline-block;
+      margin-right: auto;
+
+      margin-top: 6px;
+      margin-bottom: 6px;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .friend-item-right {
+      display: inline-block;
+      min-width: 89px;
+
+      margin-left: auto;
+      padding-left: 6px;
+      border-left: 1px solid;
+      border-color: #dbdbdb;
+      
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    .friend-item-right:hover {
+      background-color: #5ac9e8 !important;
+      color: #ffffff !important;
+      border-radius: 4px;
+    }
+
     a.button:hover {
       color: #ffffff;
     }
@@ -93,12 +129,12 @@
             {{ friend_list }}
           </p>
           <p class="control has-icons-left has-icons-right" style="margin-bottom: 1px;">
-            <input class="input" v-model="input_name" style="border-radius: 0; box-shadow: none;" type="text" placeholder="添加好友">
+            <input class="input" ref="input_name" v-model="input_name" style="border-radius: 0; box-shadow: none;" type="text" placeholder="搜索好友">
             <span class="icon is-left">
               <i class="fas fa-search" aria-hidden="true"></i>
             </span>
-            <span class="icon is-right" v-on:click="add_friend" style="pointer-events: auto;">
-              <i class="fas fa-arrow-right"></i>
+            <span class="icon is-right" v-on:click="clear_find_condition" style="pointer-events: auto;">
+              <i class="fas delete"></i>
             </span>
           </p>
           {% raw %}
@@ -108,7 +144,7 @@
           {% endraw %}
 
           <div class="panel-block normal-color"
-            style="display: block; position: absolute; top: 106.5px; bottom: 69px; left: 12px; right: 12px; overflow-y: scroll;"
+            style="display: block; position: absolute; top: 106.5px; bottom: 68px; left: 12px; right: 12px; overflow-y: scroll;"
             v-bind:style="{'margin-top': (add_friend_message.length ? '2.5rem' : '0')}">
             <aside class="menu">
               <p class="menu-label">
@@ -116,15 +152,21 @@
               </p>
               <ul class="menu-list friends">
                 {% raw %}
-                <li v-for="friend of gaming_friends"><a>{{ friend.name }}</a></li>
+                <li v-for="friend of gaming_friends" class="friend-item-father">
+                  <a class="friend-item-left">{{ friend.name }}</a>
+                  <a href="#" v-on:click="join_game(friend.name)" class="friend-item-right">加入游戏</a>
+                </li>
                 {% endraw %}
               </ul>
               <p class="menu-label">
-                {{ waiting }}
+                {{ online }}
               </p>
               <ul class="menu-list friends">
                 {% raw %}
-                <li v-for="friend of waiting_friends"><a>{{ friend.name }}</a></li>
+                <li v-for="friend of online_friends" class="friend-item-father">
+                  <a class="friend-item-left">{{ friend.name }}</a>
+                  <a href="#" v-on:click="invite_game(friend.name)" class="friend-item-right">邀请进房</a>
+                </li>
                 {% endraw %}
               </ul>
               <p class="menu-label">
@@ -132,22 +174,46 @@
               </p>
               <ul class="menu-list friends">
                 {% raw %}
-                <li v-for="friend of offline_friends"><a>{{ friend.name }}</a></li>
+                <li v-for="friend of offline_friends" class="friend-item-father">
+                  <a class="friend-item-left">{{ friend.name }}</a>
+                  <a href="#" v-on:click="join_game(friend.name)" class="friend-item-right">加入游戏</a>
+                </li>
+                {% endraw %}
+              </ul>
+              <p class="menu-label">
+                {{ sent_app }}
+              </p>
+              <ul class="menu-list friends">
+                {% raw %}
+                <li v-for="app of sent_application" class="friend-item-father">
+                  <a class="friend-item-left">{{ app }}</a>
+                </li>
+                {% endraw %}
+              </ul>
+              <p class="menu-label">
+                {{ received_app }}
+              </p>
+              <ul class="menu-list friends">
+                {% raw %}
+                <li v-for="app of received_application" class="friend-item-father">
+                  <a class="friend-item-left">{{ app }}</a>
+                  <a href="#" v-on:click="approved_application(app)" class="friend-item-right">同意申请</a>
+                </li>
                 {% endraw %}
               </ul>
             </aside>
           </div>
 
           <div class="panel-block normal-color"
-            style="position: absolute; height: 58px; left: 12px; right: 12px; bottom: 12px;">
-            <a href="#" class="card-footer-item is-capoo-2">{{ join_game }}</a>
-            <a href="#" class="card-footer-item is-capoo-2">{{ delete_friend }}</a>
+            style="position: absolute; height: 57px; left: 12px; right: 12px; bottom: 12px;">
+            <a href="#" v-on:click="search_friend" class="card-footer-item is-capoo-2" style="padding: 0; font-size: 15.5px;">{{ add_friend }}</a>
+            <a href="#" class="card-footer-item is-capoo-2" style="padding: 0; font-size: 15.5px;">{{ delete_friend }}</a>
           </div>
 
         </div>
 
       </div>
-      <div class="column" style="position: relative; min-height: 60rem;">
+      <div class="column" style="position: relative; min-height: 50rem;">
         <div class="panel" style="height: 100%;">
           {% raw %}
           <p class="panel-heading align-center is-capoo">{{ left_username }}</p>
@@ -178,7 +244,6 @@
             <input class="input" type="text">
             <a class="button is-capoo" style="margin-left: 10px;">{{ send }}</a>
           </div>
-
         </div>
       </div>
     </div>
@@ -195,8 +260,10 @@
 
         friends: [],
         gaming_friends: [],
-        waiting_friends: [],
+        online_friends: [],
         offline_friends: [],
+        sent_application: [],
+        received_application: [],
 
         input_name: '',
 
@@ -266,27 +333,11 @@
           this.$http.get('/api/account/get_friends').then(function (ret) {
             console.log(ret.body);
             if (ret.body.code == 0) {
-              console.log(ret.body.friends);
               this.friends = ret.body.friends;
-              var gaming_friends = [];
-              var waiting_friends = [];
-              var offline_friends = [];
-              for (const i of this.friends) {
-                console.log(i);
-                console.log(i.name + ' ' + i.status);
-                if (i.status == 'gaming') {
-                  gaming_friends.push(i);
-                } else if (i.status == 'waiting') {
-                  waiting_friends.push(i);
-                } else if (i.status == 'offline') {
-                  offline_friends.push(i);
-                } else {
-                  console.log('Unknown status ' + i.status + ' of friend ' + i.name);
-                }
-              }
-              this.gaming_friends = gaming_friends;
-              this.waiting_friends = waiting_friends;
-              this.offline_friends = offline_friends;
+              this.classify_friend_list(this.friends);
+
+              this.sent_application = ret.body.applications_sent;
+              this.received_application = ret.body.applications_received;
             } else {
               console.log('There is not logined user.');
             }
@@ -294,7 +345,42 @@
             console.log('Request fails, status:', ret);
           });
         },
-        add_friend: function () {
+        find_friend_from_list: function (friends, name) {
+          var res = [];
+          var reg = new RegExp(name, 'i');
+          for (const i of friends) {
+            if (reg.test(i.name)) res.push(i);
+          }
+          return res;
+        },
+        classify_friend_list: function (friends) {
+          var gaming_friends = [];
+          var online_friends = [];
+          var offline_friends = [];
+          for (const i of friends) {
+            console.log(i);
+            console.log(i.name + ' ' + i.status);
+            if (i.status == 'gaming') {
+              gaming_friends.push(i);
+            } else if (i.status == 'online') {
+              online_friends.push(i);
+            } else if (i.status == 'offline') {
+              offline_friends.push(i);
+            } else {
+              console.log('Unknown status ' + i.status + ' of friend ' + i.name);
+            }
+          }
+          this.gaming_friends = gaming_friends;
+          this.online_friends = online_friends;
+          this.offline_friends = offline_friends;
+        },
+        clear_find_condition: function () {
+          this.input_name = '';
+          this.message_is_error = false;
+          this.add_friend_message = '';
+          this.classify_friend_list(this.friends);
+        },
+        search_friend: function () {
           if (!this.input_name) {
             this.message_is_error = true;
             this.add_friend_message = '好友名字不能为空';
@@ -305,7 +391,7 @@
             if (ret.body.code == 0) {
               this.update_friends_list();
               this.message_is_error = false;
-              this.add_friend_message = '添加好友成功';
+              this.add_friend_message = '好友申请已发送';
             } else {
               console.log('Adding friend fails, message:', ret.body.message);
               this.message_is_error = true;
@@ -317,6 +403,36 @@
             this.add_friend_message = '添加好友失败，服务器异常';
           });
         },
+        approved_application: function (name) {
+          this.$http.post('/api/account/approved_application', { username: name }, { emulateJSON: false }).then(function (ret) {
+            console.log(ret.body);
+            if (ret.body.code == 0) {
+              this.update_friends_list();
+              this.message_is_error = false;
+              this.add_friend_message = '好友申请已通过';
+            } else {
+              console.log('Adding friend fails, message:', ret.body.message);
+              this.message_is_error = true;
+              this.add_friend_message = ret.body.message;
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+            this.message_is_error = true;
+            this.add_friend_message = '添加好友失败，服务器异常';
+          });
+        },
+        join_game: function (name) {
+          
+        },
+        invite_game: function (name) {
+
+        },
+      },
+      watch: {
+        input_name: function(val) {
+          var found_friends = this.find_friend_from_list(this.friends, val);
+          this.classify_friend_list(found_friends);
+        }
       },
     });
   </script>

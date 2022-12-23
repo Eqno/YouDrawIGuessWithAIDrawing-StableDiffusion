@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  {% include 'header.html' %}
+  <style>
+    .select-title {
+      text-align: center;
+      margin-top: 100px;
+    }
+    .role-name {
+      text-align: center;
+      font-size: 26px;
+    }
+    .role-desc {
+      text-align: center;
+      margin-bottom: 20px;
+      margin-top: 20px;
+
+      font-size: 18px;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+    .match-button {
+      text-align: center;
+      margin: auto;
+      margin-top: 80px;
+
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .match-button:hover {
+      border: 1px solid;
+      border-color: #485fc7;
+    }
+    .role-type {
+      color: #000000;
+    }
+    .role-type:hover {
+      border: 2px solid;
+      border-color: #5ac9e8;
+      border-radius: 8px;
+    }
+    .role-selected {
+      color: #ffffff;
+      background-color: #5ac9e8;
+      border-radius: 8px;
+    }
+    .role-selected:hover {
+      color: #ffffff;
+      background-color: #5ac9e8;
+      border-radius: 8px;
+    }
+    .error-title {
+      background-color: #5ac9e8;
+      width: fit-content;
+      text-align: center;
+
+      margin: auto;
+      margin-bottom: 40px;
+
+      padding-top: 12px;
+      padding-bottom: 15px;
+      padding-left: 25px;
+      padding-right: 25px;
+
+      color: #ffffff;
+      border-radius: 8px;
+    }
+    .error-content {
+      width: fit-content;
+      color: #ffffff;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  {% include 'nav.html' %}
+  <section id="app" class="section">
+    <div class="column container">
+
+      <div class="card">
+        <div class="card-content" style="min-height: 47rem;">
+          <p class="title is-3 select-title">{{ select_role }}</p>
+
+          {% raw %}
+          <div class="columns" style="margin-top: 80px;">
+            <a class="column is-one-third role-type" v-on:click="select_host" v-bind:class="{ 'role-selected':host_selected }">
+              <p class="role-name">出题者</p>
+              <p class="role-desc">任务是给图片施法</p>
+            </a>
+            <a class="column is-one-third role-type" v-on:click="select_guest" v-bind:class="{ 'role-selected': guest_selected }">
+              <p class="role-name">猜谜者</p>
+              <p class="role-desc">任务是猜出图片的词根</p>
+            </a>
+            <a class="column is-one-third role-type" v-on:click="select_unspecified" v-bind:class="{ 'role-selected': unspecified_selected }">
+              <p class="role-name">随机身份</p>
+              <p class="role-desc">在出题者和猜谜者中随机选择</p>
+            </a>
+          </div>
+          {% endraw %}
+
+          <div style="display: flex;">
+            <a href="#" v-on:click="start_match" class="title is-3 match-button is-capoo">
+              {{ start_match }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div> 
+    {% raw %}
+    <div class="modal" v-bind:class="{ 'is-active': modal_exsits }">
+      <div class="modal-background" v-on:click="close_modal"></div>
+      <div class="modal-content" style="width: fit-content; max-width: 60%;">
+        <div style="display: flex;">
+          <p class="error-title title is-3">
+            错误提示
+          </p>
+        </div>
+        <div class="box" style="background-color: transparent;">
+          <p class="error-content title is-4">{{ modal_message }}</p>
+        </div>
+      </div>
+      <button class="modal-close is-large" v-on:click="close_modal" aria-label="close"></button>
+    </div>
+    {% endraw %}
+  </section>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        host_selected: false,
+        guest_selected: false,
+        unspecified_selected: false,
+
+        modal_exsits: false,
+        modal_message: '',
+      },
+      mounted: function () {
+        this.host_selected = false;
+        this.guest_selected = false;
+        this.unspecified_selected = true;
+      },
+      methods: {
+        select_host: function (event) {
+          this.host_selected = true;
+          this.guest_selected = false;
+          this.unspecified_selected = false;
+        },
+        select_guest: function (event) {
+          this.host_selected = false;
+          this.guest_selected = true;
+          this.unspecified_selected = false;
+        },
+        select_unspecified: function (event) { 
+          this.host_selected = false;
+          this.guest_selected = false;
+          this.unspecified_selected = true;
+        },
+        start_match: function (event) {
+          this.$http.post('/api/game/room/join_game', { username: '' }, { emulateJSON: false }).then(function (ret) {
+            console.log(ret.body);
+            if (ret.body.code == 0) {
+              this.modal_exsits = false;
+              this.modal_message = '';
+
+              console.log(ret.body);
+              window.location.href = '/match';
+            } else {
+              console.log("error: " + ret.body.message);
+              this.modal_exsits = true;
+              this.modal_message = ret.body.error_message;
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+        },
+        close_modal: function (event) {
+          this.modal_exsits = false;
+          this.modal_message = '';
+        }
+      }
+    })
+  </script>
+
+  {% include 'footer.html' %}
+
+</body>
+
+</html>

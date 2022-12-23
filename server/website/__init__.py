@@ -1,59 +1,100 @@
 # -*- coding: utf-8 -*-
 
-import os
-import flask
-import datetime
+import os, flask, datetime
+from threading import Thread
+from gevent import monkey, pywsgi
+from flask_sockets import Sockets
 from . import frontend, backend, utils
+from geventwebsocket.handler import WebSocketHandler
 
 __all__ = ['frontend', 'backend', 'Server']
 
-
 class Server(object):
-    app = None
+    game_app = None
+    heart_app = None
+
     hostname = ''
-    port = 0
+    game_port = 0
+    heart_port = 0
     debug = False
 
     def __init__(self,
-                 name,
+                 game_app_name,
+                 heart_app_name,
                  hostname='127.0.0.1',
-                 port=80,
+                 game_port=80,
+                 heart_port=81,
                  template_folder='../app/templates',
                  static_folder='../app/static'):
         self.hostname = hostname
-        self.port = port
+        self.game_port = game_port
+        self.heart_port = heart_port
         self.debug = os.environ['FLASK_ENV'] == 'development'
+
+        # init game app server
+        self.__init_game_app__(game_app_name,
+                               template_folder,
+                               static_folder)
+
+        # init hear app server
+        self.__init_heart_app__(heart_app_name)
+
+    def __init_game_app__(self,
+                          game_app_name,
+                          template_folder='../app/templates',
+                          static_folder='../app/static'):
 
         # init frontend and backend
         frontend.frontend_init()
         backend.backend_init()
 
         # create flask instance
-        app = flask.Flask(name,
-                          template_folder=template_folder,
-                          static_folder=static_folder)
+        game_app = flask.Flask(game_app_name,
+                               template_folder=template_folder,
+                               static_folder=static_folder)
 
         # init session
-        app.secret_key = 'session_key_0xdeadbeef'
-        app.config['SESSION_TYPE'] = 'filesystem'
+        game_app.secret_key = 'session_key_0xdeadbeef'
+        game_app.config['SESSION_TYPE'] = 'filesystem'
 
         # set global templates
         def make_session_permanent():
             flask.session.permanent = True
-            app.permanent_session_lifetime = datetime.timedelta(days=1)
+            game_app.permanent_session_lifetime = datetime.timedelta(days=1)
 
-        app.context_processor(lambda: utils.template_variables)
-        app.before_request(make_session_permanent)
+        game_app.context_processor(lambda: utils.template_variables)
+        game_app.before_request(make_session_permanent)
 
         # add pages
         for pages in (frontend.frontend_pages, backend.backend_pages):
             for k, v in pages.items():
                 if isinstance(v, dict):
-                    app.add_url_rule(k, **v)
+                    game_app.add_url_rule(k, **v)
                 else:
-                    app.add_url_rule(k, view_func=v)
+                    game_app.add_url_rule(k, view_func=v)
+        
+        self.game_app = game_app
+    
+    def __init_heart_app__(self, heart_app_name):
 
-        self.app = app
+        # init socket io
+        monkey.patch_all()
+
+        # create flask instance
+        heart_app = flask.Flask(heart_app_name)
+
+        # create sockets instance
+        sockets = Sockets(heart_app)
+
+        # add socks
+        for k, v in backend.backend_socks.items():
+            sockets.add_url_rule(k, _=None, f=v)
+
+        self.heart_app = heart_app
 
     def run(self):
-        self.app.run(self.hostname, port=self.port, debug=self.debug)
+
+        Thread(target=lambda: self.game_app.run(self.hostname, port=self.game_port, debug=self.debug)).start()
+        server = pywsgi.WSGIServer((self.hostname, self.heart_port), self.game_app, handler_class=WebSocketHandler)
+        server.serve_forever()
+        

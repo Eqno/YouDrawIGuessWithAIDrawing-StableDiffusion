@@ -24,10 +24,10 @@
             {{ test_page }}
           </a>
           <hr class="navbar-divider">
-          <a class="navbar-item">
+          <a href="#" v-on:click="match_game" class="navbar-item">
             {{ match_mode }}
           </a>
-          <a class="navbar-item">
+          <a href="{{ url_for('custom') }}" class="navbar-item">
             {{ custom_mode }}
           </a>
           <hr class="navbar-divider">
@@ -103,41 +103,47 @@
         logined: false,
       },
       mounted: function () {
-        this.$http.get('/api/account/username').then(function (res) {
-          console.log(res.body);
-          if (res.body.code == 0) {
-            this.username = res.body.username;
-            this.logined = true;
-          }
-          else {
-            console.log('There is no logined user.');
-          }
-        }, function (ret) {
-          console.log('Request fails, status:', ret);
-        });
+        this.quary_logined();
       },
       methods: {
+        quary_logined: function () {
+          this.$http.get('/api/account/username').then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              this.username = res.body.username;
+              this.logined = true;
+            }
+            else {
+              console.log('There is no logined user.');
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+        },
         perform_logout: function (event) {
           this.$http.get('/api/account/logout').then(function (res) {
             console.log(res.body);
-            if (res.body.code == 0) location.reload();
+            if (res.body.code == 0)
+            {
+              var path = window.location.pathname;
+              var panel = path.substring(0, path.lastIndexOf('/'));
+              if (path == '/friends' || panel == '/user') {
+                window.location.href = '/';
+              }
+              else location.reload();
+            }
             else console.log(res.body.message);
           }, function (res) {
             console.log('Request fails, status:', res);
           });
         },
-        userinfo: function (username) {
-          this.$http.post('/api/account/userinfo', { username: username }, { emulateJSON: false }).then(function (ret) {
-            console.log(ret.body);
-            if (ret.body.code == 0) {
-              this.message = ret.body.message;
-            } else {
-              this.message = ret.body.message;
-            }
-          }, function (ret) {
-            console.log(ret);
-          });
-        }
+        match_game: function (event) {
+          if (! this.logined) {
+            window.location.href = '/login';
+          } else {
+            window.location.href = '/selectrole';
+          }
+        },
       }
     });
   </script>

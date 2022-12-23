@@ -1,27 +1,19 @@
-from game import Game
-from game import GameMode
+from . import GameMode
+from . import GameState
+from . import PlayerRole
+from . import create_game_instance, get_all_game_list
 
-from manager import Manager
+import sys, os
 
-__import__('sys').path.append('../../model')
-from text2image import generate_image
+# sys.path.append(os.getcwd().replace('\\', '/') + '/../')
+# from model import text2image
 
-from enum import IntEnum
-
-
-class PlayerRole(IntEnum):
-    HOST = 1
-    GUEST = 2
-    UNSPECIFIED = 3
-
-
-def cmp(game: Game):
+def cmp(game):
     return game.get_wait_time()
-
 
 class Player:
 
-    def __init__(self, manager: Manager, name: str):
+    def __init__(self, name: str):
 
         self.name = name
         self.role = None
@@ -31,33 +23,51 @@ class Player:
         self.score = 0
 
         self.game = None
-        self.manager = manager
+        self.ready = False
 
     def join_game(self,
-                  game: Game = None,
+                  game = None,
                   role: PlayerRole = PlayerRole.UNSPECIFIED):
-
-        self.game = None
         self.role = role
 
+        self.win = False
         self.ans = ''
         self.score = 0
 
-        games = self.manager.get_game_list()
+        self.game = None
+        self.ready = False
+
+        games = get_all_game_list()
 
         if game is not None:
-            game.add_player(self)
-        elif len(games) > 0:
-            games.sort(key=cmp, reverse=True)
-            games[0].add_player(self)
-        else:
-            index = self.manager.create_game_instance(GameMode.MATCH)
-            games[index].add_player(self)
 
-        if self.game is None:
-            print('join game failed')
-            return False
-        return True
+            return game.add_player(self)
+
+        elif len(games) > 0:
+
+            match_games = []
+            for game in games:
+                if game.mode == GameMode.MATCH and game.state == GameState.WAITING:
+                    match_games.append(game)
+
+            if len(match_games) > 0:
+                match_games.sort(key=cmp, reverse=True)
+                return match_games[0].add_player(self)
+        
+        index, message = create_game_instance(GameMode.MATCH)
+
+        if index != -1:
+            return games[index].add_player(self)
+        return False, message
+
+    def set_ready(self, ready:bool):
+
+        if self.game.state != GameState.WAITING:
+            return False, 'player could only ready when waiting'
+
+        self.ready = ready
+        self.game.check_ready()
+        return True, 'player set ready succeed'
 
     # guest 给出答案，host 设置答案
     def give_answer(self, ans=str):
@@ -80,7 +90,7 @@ class Player:
                 print('the player has won')
             return None
         else:
-            return generate_image(describe, negtive, self.name, rand_seed)
+            return None # text2image.generate_image(describe, negtive, self.name, rand_seed)
 
     def get_score(self):
         return self.score

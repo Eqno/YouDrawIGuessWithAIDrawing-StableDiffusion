@@ -8,7 +8,7 @@
 <body>
   {% include 'nav.html' %}
 
-  <section class="section">
+  <section id="heart" class="section">
     <div id="app" class="container is-max-widescreen">
       <form class="box" v-on:submit.prevent="login">
         <div class="field">
@@ -65,9 +65,12 @@
             console.log(ret.body);
             if (ret.body.code == 0) {
               this.error_exist = false;
-              
+
+              var login_url = window.location.origin + '/login';
+              var signup_url = window.location.origin + '/signup';
               var src = new URLSearchParams(window.location.search).get('src');
-              if (!src) { src = '/'; }
+              if (!src || src == signup_url || src == login_url) { src = '/'; }
+
               window.location.href = src;
             } else {
               this.message = ret.body.message;

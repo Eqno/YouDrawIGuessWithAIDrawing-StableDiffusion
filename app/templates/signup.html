@@ -35,7 +35,7 @@
         </p>
         {% endraw %}
         <button class="button is-capoo"
-          v-bind:class="{ 'is-capoo': signup_enabled, 'is-light': !signup_enabled, 'is-capoo': loading }">
+          v-bind:class="{ 'is-capoo-2': signup_enabled, 'is-light': !signup_enabled, 'is-capoo': loading }">
           {{ signup }}
         </button>
       </form>
@@ -51,14 +51,11 @@
         password_again: '',
         username_done: false,
         password_done: false,
+        password_again_done: false,
         signup_enabled: false,
         loading: false,
         error_exist: false,
         message: ''
-      },
-      mounted: function () {
-        // ret = app.quary_logined();
-        // if (ret[0]) window.location.href = '/';
       },
       methods: {
         move_to_password: function (event) {
@@ -70,19 +67,18 @@
           if (!this.signup_enabled) {
             return;
           }
-          if (this.password != this.password_again) {
-            this.message = '两次密码不一致';
-            this.error_exist = true;
-            return;
-          }
           this.loading = true;
           this.error_exist = false;
           this.$http.post('/api/account/signup', { username: this.username, password: hex_md5(this.password) }, { emulateJSON: false }).then(function (res) {
             console.log(res.body);
             if (res.body.code == 0) {
               this.error_exist = false;
+
+              var login_url = window.location.origin + '/login';
+              var signup_url = window.location.origin + '/signup';
               var src = new URLSearchParams(window.location.search).get('src');
-              if (!src) { src = '/'; }
+              if (!src || src == signup_url || src == login_url) { src = '/'; }
+              
               window.location.href = src;
             } else {
               this.message = res.body.message;
@@ -96,12 +92,70 @@
       },
       watch: {
         username: function (val) {
-          this.username_done = (val.length >= 4 && val.length <= 32);
-          this.signup_enabled = (this.username_done && this.password_done);
+          if (val.indexOf('/') != -1 || val.indexOf('\\') != -1) {
+            this.username_done = false;
+            this.message = '用户名含有非法字符"/"或"\"';
+            this.error_exist = true;
+          } else if (val.length < 4) {
+            this.username_done = false;
+            this.message = '用户名未达到最小长度';
+            this.error_exist = true;
+          } else if (val.length > 32) {
+            this.username_done = false;
+            this.message = '用户名超出最大长度';
+            this.error_exist = true;
+          } else {
+            this.message = '';
+            this.error_exist = false;
+            this.username_done = true;
+          }
+          if (this.username_done && this.password_done && this.password_again_done) {
+            this.message = '';
+            this.error_exist = false;
+            this.signup_enabled = true;
+          }
         },
         password: function (val) {
-          this.password_done = (val.length >= 8 && val.length <= 32);
-          this.signup_enabled = (this.username_done && this.password_done);
+          if (! this.username_done) return;
+          if (val.indexOf('/') != -1 || val.indexOf('\\') != -1) {
+            this.password_done = false;
+            this.message = '密码含有非法字符"/"或"\"';
+            this.error_exist = true;
+          } else if (val.length < 8) {
+            this.password_done = false;
+            this.message = '密码未达到最小长度';
+            this.error_exist = true;
+          } else if (val.length > 32) {
+            this.password_done = false;
+            this.message = '密码超出最大长度';
+            this.error_exist = true;
+          } else {
+            this.message = '';
+            this.error_exist = false;
+            this.password_done = true;
+          }
+          if (this.username_done && this.password_done && this.password_again_done) {
+            this.message = '';
+            this.error_exist = false;
+            this.signup_enabled = true;
+          }
+        },
+        password_again: function (val) {
+          if (! this.username_done || !this.password_done) return;
+          if (val != this.password) {
+            this.password_again_done = false;
+            this.message = '两次输入的密码不一致';
+            this.error_exist = true;
+          } else {
+            this.message = '';
+            this.error_exist = false;
+            this.password_again_done = true;
+          }
+          if (this.username_done && this.password_done && this.password_again_done) {
+            this.message = '';
+            this.error_exist = false;
+            this.signup_enabled = true;
+          }
         }
       }
     });
