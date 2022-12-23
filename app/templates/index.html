@@ -22,6 +22,7 @@
       </p>
     </div>
   </section>
+  {% endraw %}
   <script>
     new Vue({
       el: '#app',
@@ -54,7 +55,7 @@
       methods: {
         initWebSocket() {
           // 初始化 websocket
-          const wsuri = "ws://127.0.0.1:81/test";
+          const wsuri = "{{ wsurl }}";
           this.websock = new WebSocket(wsuri);
           this.websock.onopen = this.websocketonopen;
           this.websock.onmessage = this.websocketonmessage;
@@ -144,7 +145,6 @@
       }
     });
   </script>
-  {% endraw %}
 
   {% include 'footer.html' %}
 

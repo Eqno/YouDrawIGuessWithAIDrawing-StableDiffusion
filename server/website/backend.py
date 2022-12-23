@@ -11,10 +11,12 @@ msg_data_path = data_base_path / 'msg'
 user_data_path = data_base_path / 'user'
 filename_suffix = '.json'
 
+
 def backend_init():
     for _dir in (data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
+
 
 def session_get_username():
     return flask.session.get('username', None)
@@ -67,7 +69,7 @@ def api_account_signup():
 
     with open(user_file_path, 'w') as f:
         user_info = {}
-        
+
         user_info['username'] = username
         user_info['password'] = password
         user_info['friends'] = []
@@ -194,11 +196,13 @@ def api_account_get_friends():
             'name': name,
             'status': 'offline'
         } for name in user_info['friends'])
-        return generate_return_data(StatusCode.SUCCESS, {
-            'friends': friends,
-            'applications_sent': user_info['applications_sent'],
-            'applications_received': user_info['applications_received'],
-        })
+        return generate_return_data(
+            StatusCode.SUCCESS, {
+                'friends': friends,
+                'applications_sent': user_info['applications_sent'],
+                'applications_received': user_info['applications_received'],
+            })
+
 
 def api_account_approved_application():
     data = flask.request.get_json()
@@ -254,32 +258,29 @@ def api_account_approved_application():
 
     return generate_return_data(StatusCode.SUCCESS)
 
+
 def api_game_room_join_game():
     data = flask.request.get_json()
-    
+
     current_username = session_get_username()
     target_username = data.get('username', None)
     current_role = data.get('role', None)
 
     retcode, message = create_player_instance(current_username)
     if not retcode:
-        return generate_return_data(
-            StatusCode.ERR_GAME_PLAYER_NUM_EXCEED_MAX,
-            { 'error_message': message }
-        )
+        return generate_return_data(StatusCode.ERR_GAME_PLAYER_NUM_EXCEED_MAX,
+                                    {'error_message': message})
 
-    retcode, message = player_join_game(
-        current_name=current_username,
-        target_name=target_username,
-        current_role=current_role
-    )
+    retcode, message = player_join_game(current_name=current_username,
+                                        target_name=target_username,
+                                        current_role=current_role)
 
     if not retcode:
         return generate_return_data(
             StatusCode.ERR_GAME_PLAYER_JOIN_GAME_FAILED,
-            { 'error_message': message }
-        )
+            {'error_message': message})
     return generate_return_data(StatusCode.SUCCESS)
+
 
 def api_game_room_get_players():
 
@@ -288,15 +289,20 @@ def api_game_room_get_players():
     if retcode:
 
         host, guests = message
-    
+
         if len(host) > 0:
             host['avatar'] = '/static/favicon.png'
 
         for guest in guests:
             guest['avatar'] = '/static/favicon.png'
 
-        return generate_return_data(StatusCode.SUCCESS, { 'host': host, 'guests': guests })
-    return generate_return_data(StatusCode.ERR_GAME_PLAYER_GET_OTHER_IN_ROOM_FAILED, message)
+        return generate_return_data(StatusCode.SUCCESS, {
+            'host': host,
+            'guests': guests
+        })
+    return generate_return_data(
+        StatusCode.ERR_GAME_PLAYER_GET_OTHER_IN_ROOM_FAILED, message)
+
 
 def api_game_room_player_ready():
     data = flask.request.get_json()
@@ -307,12 +313,15 @@ def api_game_room_player_ready():
 
     if retcode:
         generate_return_data(StatusCode.SUCCESS, message)
-    return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED, message)
+    return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED,
+                                message)
+
 
 def api_game_core_image():
 
     result = {'url': '/static/capoo.png'}
     return generate_return_data(0, result)
+
 
 backend_pages = {
     '/api/account/username': api_account_username,
@@ -334,7 +343,7 @@ backend_pages = {
         'methods': ['POST']
     },
     '/api/account/get_friends': api_account_get_friends,
-    '/api/account/approved_application':  {
+    '/api/account/approved_application': {
         'view_func': api_account_approved_application,
         'methods': ['POST']
     },
@@ -350,17 +359,21 @@ backend_pages = {
     '/api/game/core/image': api_game_core_image,
 }
 
-now = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+now = time.strftime(r'%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+
 
 def echo_socket(ws):
     print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-    while not ws.closed:
-        ws.send(str(111111111))
+    while True:
         message = ws.receive()
+        ws.send(str(111111111))
         if message is not None:
             print("%s receive msg==> " % now, str(json.dumps(message)))
             ws.send(str(json.dumps(message)))
-        else: print(now, "no receive")
+        else:
+            print(now, "no receive")
+        time.sleep(1)
+
 
 backend_socks = {
     '/test': echo_socket,

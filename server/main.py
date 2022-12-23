@@ -5,7 +5,7 @@ from website import Server
 
 def main():
 
-    server = Server(game_app_name=__name__, heart_app_name=__name__+'_heart')
+    server = Server(__name__)
     server.run()
 
 if __name__ == '__main__':
