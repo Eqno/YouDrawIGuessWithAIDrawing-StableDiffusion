@@ -2,6 +2,7 @@
 
 import os, json, flask, pathlib, sys, time, threading
 from .utils import generate_return_data, StatusCode
+import simple_websocket
 
 sys.path.append(os.getcwd().replace('\\', '/') + '/../')
 from logic import *
@@ -353,25 +354,28 @@ backend_pages = {
 
 def socket_online(websocket):
 
-    while True:
+    try:
+        while True:
 
-        message = websocket.receive()
-        websocket.send(message)
+            message = websocket.receive()
+            websocket.send(message)
 
-        print(message)
+            print(message)
 
-        if message is not None:
-            message = json.loads(message)
-            if isinstance(message, dict):
+            if message is not None:
+                message = json.loads(message)
+                if isinstance(message, dict):
 
-                username = message.get('username', None)
-                if username is not None:
+                    username = message.get('username', None)
+                    if username is not None:
 
-                    quaryinfo = message.get('quaryinfo', None)
-                    if quaryinfo is not None:
+                        quaryinfo = message.get('quaryinfo', None)
+                        if quaryinfo is not None:
 
-                        if quaryinfo == 'firends':
-                            
-                            print(quaryinfo)
+                            if quaryinfo == 'firends':
+                                
+                                print(quaryinfo)
 
-        time.sleep(SOCKET_ONLINE_TIME_INTERVAL)
+            time.sleep(SOCKET_ONLINE_TIME_INTERVAL)
+    except simple_websocket.ConnectionClosed:
+        print('break')
