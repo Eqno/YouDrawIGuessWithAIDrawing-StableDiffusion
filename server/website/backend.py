@@ -205,9 +205,12 @@ def api_account_get_friends():
         } for name in user_info.get('friends', []))
         return generate_return_data(
             StatusCode.SUCCESS, {
-                'friends': friends,
-                'applications_sent': user_info.get('applications_sent', []),
-                'applications_received': user_info.get('applications_received', []),
+                'friends':
+                friends,
+                'applications_sent':
+                user_info.get('applications_sent', []),
+                'applications_received':
+                user_info.get('applications_received', []),
             })
 
 
@@ -319,7 +322,7 @@ def api_game_room_player_ready():
     retcode, message = player_set_ready(username, ready)
 
     if retcode:
-        generate_return_data(StatusCode.SUCCESS, message)
+        return generate_return_data(StatusCode.SUCCESS, message)
     return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED,
                                 message)
 
