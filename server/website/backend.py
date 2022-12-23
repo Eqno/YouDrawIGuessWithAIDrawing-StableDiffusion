@@ -307,7 +307,7 @@ def api_game_room_player_ready():
     retcode, message = player_set_ready(username, ready)
 
     if retcode:
-        generate_return_data(StatusCode.SUCCESS, message)
+        return generate_return_data(StatusCode.SUCCESS, message)
     return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED,
                                 message)
 
@@ -351,15 +351,6 @@ backend_pages = {
     },
     '/api/game/core/image': api_game_core_image,
 }
-
-def check_online():
-
-    while True:
-
-        print('before:', time.time())
-        time.sleep(3)
-        print('after:', time.time())
-
 
 def socket_online(websocket):
 

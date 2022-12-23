@@ -104,13 +104,10 @@
 
         host: {},
         guests: [],
-        
-        timer: '',
         self_ready: false,
       },
       mounted: function () {
         this.update_players();
-        this.timer = setInterval(this.heart_beat, 500);
       },
       methods: {
         update_players: function () {
@@ -143,8 +140,8 @@
         },
         player_ready: function (event) {
           this.$http.post('/api/game/room/player_ready', { ready: !this.self_ready }, { emulateJSON: false }).then(function (ret) {
+            console.log(ret.body);
             if (ret.body.code == 0) {
-              console.log(ret.body);
               if (ret.body.begin_game) {
                 window.location.href = '/game';
               } else {
@@ -161,13 +158,8 @@
           this.update_players();
         },
       },
-      beforeDestroy() {
-        clearInterval(this.timer);
-      }
     })
   </script>
-
-  {% include '../socket/index.html' %}
 
   {% include 'footer.html' %}
 
