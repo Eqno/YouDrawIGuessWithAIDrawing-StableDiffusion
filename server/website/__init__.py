@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, flask, datetime
+import os, flask, datetime, threading
 from flask_sock import Sock
 from . import frontend, backend, utils
 
@@ -50,7 +50,7 @@ class Server(object):
         app.context_processor(lambda: utils.template_variables)
         app.before_request(make_session_permanent)
 
-        sock.route('/test')(backend.echo_socket)
+        sock.route('/socket/online')(backend.socket_online)
         # sock.add_url_rule('/test', None, backend.echo_socket)
 
         # add pages
@@ -65,5 +65,6 @@ class Server(object):
         self.sock = sock
 
     def run(self):
+        
         self.app.run(host=self.hostname, port=self.port, debug=self.debug)
         self.server.serve_forever()

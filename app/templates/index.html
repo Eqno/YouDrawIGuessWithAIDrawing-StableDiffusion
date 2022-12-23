@@ -13,7 +13,6 @@
     <div class="container">
       <h1 class="title">
         <span id="app">{{ message }}</span>
-        <div id="heart"></div>
       </h1>
       <p class="subtitle">
         My first website with
@@ -23,6 +22,7 @@
     </div>
   </section>
   {% endraw %}
+
   <script>
     new Vue({
       el: '#app',
@@ -31,7 +31,6 @@
       }
     })
   </script>
-  {% endraw %}
 
   {% include 'footer.html' %}
 

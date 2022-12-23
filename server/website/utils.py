@@ -44,7 +44,7 @@ template_variables = {
     'delete_friend': '删除好友',
 
     # others
-    'wsurl': "ws://127.0.0.1:80/test",
+    'wsurl': "ws://127.0.0.1:80/socket/online",
 }
 
 class StatusCode(IntEnum):

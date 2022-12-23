@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import os, json, flask, pathlib, sys, time
+import os, json, flask, pathlib, sys, time, threading
 from .utils import generate_return_data, StatusCode
 
 sys.path.append(os.getcwd().replace('\\', '/') + '/../')
 from logic import *
+
+SOCKET_ONLINE_TIME_INTERVAL = 0.1
+CHECL_ONLINE_TIME_INTERVAL = 5
 
 data_base_path = pathlib.Path(os.getcwd()) / 'data'
 msg_data_path = data_base_path / 'msg'
@@ -65,6 +68,9 @@ def api_account_signup():
 
         user_info['username'] = username
         user_info['password'] = password
+
+        user_info['state'] = 'offline'
+
         user_info['friends'] = []
         user_info['applications_sent'] = []
         user_info['applications_received'] = []
@@ -345,20 +351,27 @@ backend_pages = {
     '/api/game/core/image': api_game_core_image,
 }
 
-now = time.strftime(r'%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+def socket_online(websocket):
 
-def echo_socket(ws):
-    print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     while True:
-        message = ws.receive()
-        ws.send(str(111111111))
-        if message is not None:
-            print("%s receive msg==> " % now, str(json.dumps(message)))
-            ws.send(str(json.dumps(message)))
-        else:
-            print(now, "no receive")
-        time.sleep(1)
 
-backend_socks = {
-    '/test': echo_socket,
-}
+        message = websocket.receive()
+        websocket.send(message)
+
+        print(message)
+
+        if message is not None:
+            message = json.loads(message)
+            if isinstance(message, dict):
+
+                username = message.get('username', None)
+                if username is not None:
+
+                    quaryinfo = message.get('quaryinfo', None)
+                    if quaryinfo is not None:
+
+                        if quaryinfo == 'firends':
+                            
+                            print(quaryinfo)
+
+        time.sleep(SOCKET_ONLINE_TIME_INTERVAL)

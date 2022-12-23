@@ -249,9 +249,11 @@
     </div>
   </section>
   <script>
-    new Vue({
+    page = new Vue({
       el: '#app',
       data: {
+        quary_info: 'firends',
+
         left_username: '先辈',
         left_avatar: '/static/avatar.png',
 
@@ -437,6 +439,7 @@
     });
   </script>
 
+  {% include 'heart.html' %}
   {% include 'footer.html' %}
 
 </body>
