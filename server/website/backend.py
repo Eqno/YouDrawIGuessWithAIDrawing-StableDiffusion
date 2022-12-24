@@ -414,7 +414,7 @@ def api_account_get_new_messages():
         return generate_return_data(
             StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
 
-    chat_filename = '.'.join(sorted([username, target_username]))
+    chat_filename = get_chat_filename([username, target_username])
     chat_path = msg_data_path / chat_filename
 
     if not chat_path.exists():
@@ -423,7 +423,7 @@ def api_account_get_new_messages():
     timestamp = int(data['timestamp'])
 
     with open(chat_path, 'r') as f:
-        json_data = json.load(chat_path)
+        json_data = json.load(f)
         messages = [
             msg for msg in json_data.get('messages', [])
             if msg['timestamp'] > timestamp
