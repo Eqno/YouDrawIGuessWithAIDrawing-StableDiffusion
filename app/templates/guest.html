@@ -185,8 +185,8 @@
         update_info: function () {
           this.$http.get('/api/game/core/get_info').then(function (res) {
             if (res.body.code == 0) {
-              this.message = res.body
-              console.log(res.body)
+              this.messages = res.body.message;
+              console.log(res.body.message);
             } else {
               console.log('Getting image fails, message:', res.body.message);
             }
