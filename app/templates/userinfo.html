@@ -67,23 +67,27 @@
                 <div v-if="userinfo.username" class="card-content" style="min-height: 47rem;">
                     <div class="columns">
                         <div class="column is-one-fifth">
-                            <figure class="image is-128x128" style="margin: auto;">
-                                <img :src="userinfo.avatar" alt="avatar">
+                            <figure class="image is-128x128 my-6" style="margin: auto;">
+                                <img :src="avatar" alt="avatar">
                             </figure>
+                            <button style="display: block; width: 8rem; margin: auto;"
+                                v-on:click="$refs.file.click()">修改头像</button>
+                            <input type="file" accept="image/png" ref="file" style="display: none"
+                                v-on:change="upload_avatar">
                         </div>
                         <div class="column" style="display: block; position: relative; min-height: 120px;">
-                            <div style="position: absolute; top: 43%; transform: translate(0, -50%);">
+                            <div style="position: absolute; top: 40%; left: 2rem; transform: translate(0, -50%);">
                                 <p class="title is-3" style="margin-bottom: 35px;">
                                     {{ userinfo.username }}
                                 </p>
                                 <p v-if="userinfo.signature" class="subtitle is-6">
                                     个性签名
                                 </p>
-                                <p v-else  class="subtitle is-6">
+                                <p v-else class="subtitle is-6">
                                     这个人很懒，什么都没写
                                 </p>
                             </div>
-                            
+
                         </div>
                     </div>
 
@@ -95,7 +99,9 @@
 
                     <aside class="menu">
                         <ul class="menu-list">
-                            <li><div class="is-capoo game-record">游戏记录</div></li>
+                            <li>
+                                <div class="is-capoo game-record">游戏记录</div>
+                            </li>
 
                             <li>
                                 <a class="columns m-4 one-record">
@@ -137,6 +143,7 @@
             el: '#app',
             data: {
                 username: '{{ username }}',
+                avatar: '',
                 error_message: '加载中',
                 userinfo: {}
             },
@@ -144,6 +151,7 @@
                 this.$http.post('/api/account/userinfo', { username: this.username }, { emulateJSON: false }).then(function (res) {
                     console.log(res.body);
                     if (res.body.code == 0) {
+                        this.avatar = '/avatar/' + this.username;
                         this.userinfo = res.body.userinfo;
                     } else {
                         console.log('Getting user info fails, message:', res.body.message);
@@ -154,6 +162,14 @@
                     this.error_message = '服务器异常';
                 });
             },
+            methods: {
+                upload_avatar: function (event) {
+                    const path = event.target.files[0];
+                    const data = new FormData();
+                    data.append("file", path);
+                    this.$http.post('/api/account/upload_avatar', data).then(function (res) {}, function (res) {});
+                }
+            }
         })
     </script>
 

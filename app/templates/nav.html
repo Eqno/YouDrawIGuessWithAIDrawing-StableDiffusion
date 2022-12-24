@@ -126,7 +126,12 @@
         },
         heartbeat: function () {
           this.$http.get('/api/heartbeat/imonline').then(
-            function (res) { },
+            function (res) {
+              if (res.body.code != 0) {
+                // session time out
+                window.reload();
+              }
+            },
             function (res) { clearInterval(this.heart); alert('服务器异常'); }
           );
         },

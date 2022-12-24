@@ -12,19 +12,19 @@ import threading
 
 import logic
 from .utils import generate_return_data, StatusCode
+from . import consts
 
 ############################### PARAMS ###############################
 
 HEARTBEAT_TIMEOUT = 10
 HEARTBEAT_INTERVAL = 5
 
-data_base_path = pathlib.Path(os.getcwd()) / 'data'
 
-msg_data_path = data_base_path / 'msg'
-user_data_path = data_base_path / 'user'
+
+msg_data_path = consts.data_base_path / 'msg'
+user_data_path = consts.data_base_path / 'user'
 
 info_file_name = 'info.json'
-avatar_file_name = 'avatar.png'
 
 
 ############################## HEARTBEAT ###############################
@@ -59,7 +59,7 @@ def online_users_update():
 
 
 def backend_init():
-    for _dir in (data_base_path, msg_data_path, user_data_path):
+    for _dir in (consts.data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
 
@@ -139,19 +139,16 @@ def api_account_signup():
 
     user_root_path = user_data_path / username
     user_info_path = user_root_path / info_file_name
-    user_avatar_path = user_root_path / avatar_file_name
 
     if user_root_path.exists():
         return generate_return_data(StatusCode.ERR_ACCOUNT_USERNAME_EXISTED)
+    os.mkdir(user_root_path)
 
     with open(user_info_path, 'w') as f:
         user_info = {}
 
         user_info['username'] = username
         user_info['password'] = password
-
-        user_info['avatar'] = user_avatar_path
-        user_info['state'] = 'offline'
 
         user_info['friends'] = []
         user_info['applications_sent'] = []
@@ -326,6 +323,20 @@ def api_account_approved_application():
     return generate_return_data(StatusCode.SUCCESS)
 
 
+def api_account_upload_avatar():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    data = flask.request.files.get('file', None)
+    if data is None:
+        return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
+
+    avatar = pathlib.Path(user_data_path / username / consts.avatar_file_name)
+    with open(avatar, 'wb') as f:
+        data.save(f)
+    return generate_return_data(StatusCode.SUCCESS)
+
 def api_game_room_join_game():
     data = flask.request.get_json()
 
@@ -411,6 +422,10 @@ backend_pages = {
     '/api/account/get_friends': api_account_get_friends,
     '/api/account/approved_application': {
         'view_func': api_account_approved_application,
+        'methods': ['POST']
+    },
+    '/api/account/upload_avatar': {
+        'view_func': api_account_upload_avatar,
         'methods': ['POST']
     },
     '/api/game/room/join_game': {
