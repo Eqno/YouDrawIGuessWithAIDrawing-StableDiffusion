@@ -81,7 +81,7 @@
       display: flex;
       justify-content: flex-end;
     }
-    
+
     .friend-item-left {
       display: inline-block;
       margin-right: auto;
@@ -102,7 +102,7 @@
       padding-left: 6px;
       border-left: 1px solid;
       border-color: #dbdbdb;
-      
+
       margin-top: 6px;
       margin-bottom: 6px;
     }
@@ -129,7 +129,8 @@
             {{ friend_list }}
           </p>
           <p class="control has-icons-left has-icons-right" style="margin-bottom: 1px;">
-            <input class="input" ref="input_name" v-model="input_name" style="border-radius: 0; box-shadow: none;" type="text" placeholder="搜索好友">
+            <input class="input" ref="input_name" v-model="input_name" style="border-radius: 0; box-shadow: none;"
+              type="text" placeholder="搜索好友">
             <span class="icon is-left">
               <i class="fas fa-search" aria-hidden="true"></i>
             </span>
@@ -138,7 +139,9 @@
             </span>
           </p>
           {% raw %}
-          <p class="notification is-light" v-bind:class="{'is-danger': message_is_error, 'is-success': !message_is_error}" style="padding: 0.5rem 1rem;">
+          <p class="notification is-light"
+            v-bind:class="{'is-danger': message_is_error, 'is-success': !message_is_error}"
+            style="padding: 0.5rem 1rem;">
             {{ add_friend_message }}
           </p>
           {% endraw %}
@@ -153,8 +156,8 @@
               <ul class="menu-list friends">
                 {% raw %}
                 <li v-for="friend of gaming_friends" class="friend-item-father">
-                  <a class="friend-item-left">{{ friend.name }}</a>
-                  <a href="#" v-on:click="join_game(friend.name)" class="friend-item-right">加入游戏</a>
+                  <a v-on:click="chat_with(friend.name)" class="friend-item-left">{{ friend.name }}</a>
+                  <a v-on:click="join_game(friend.name)" class="friend-item-right">加入游戏</a>
                 </li>
                 {% endraw %}
               </ul>
@@ -164,8 +167,8 @@
               <ul class="menu-list friends">
                 {% raw %}
                 <li v-for="friend of online_friends" class="friend-item-father">
-                  <a class="friend-item-left">{{ friend.name }}</a>
-                  <a href="#" v-on:click="invite_game(friend.name)" class="friend-item-right">邀请进房</a>
+                  <a v-on:click="chat_with(friend.name)" class="friend-item-left">{{ friend.name }}</a>
+                  <a v-on:click="invite_game(friend.name)" class="friend-item-right">邀请进房</a>
                 </li>
                 {% endraw %}
               </ul>
@@ -175,8 +178,7 @@
               <ul class="menu-list friends">
                 {% raw %}
                 <li v-for="friend of offline_friends" class="friend-item-father">
-                  <a class="friend-item-left">{{ friend.name }}</a>
-                  <a href="#" v-on:click="join_game(friend.name)" class="friend-item-right">加入游戏</a>
+                  <a v-on:click="chat_with(friend.name)" class="friend-item-left">{{ friend.name }}</a>
                 </li>
                 {% endraw %}
               </ul>
@@ -197,7 +199,7 @@
                 {% raw %}
                 <li v-for="app of received_application" class="friend-item-father">
                   <a class="friend-item-left">{{ app }}</a>
-                  <a href="#" v-on:click="approved_application(app)" class="friend-item-right">同意申请</a>
+                  <a v-on:click="approved_application(app)" class="friend-item-right">同意申请</a>
                 </li>
                 {% endraw %}
               </ul>
@@ -206,8 +208,12 @@
 
           <div class="panel-block normal-color"
             style="position: absolute; height: 57px; left: 12px; right: 12px; bottom: 12px;">
-            <a href="#" v-on:click="search_friend" class="card-footer-item is-capoo-2" style="padding: 0; font-size: 15.5px;">{{ add_friend }}</a>
-            <a href="#" class="card-footer-item is-capoo-2" style="padding: 0; font-size: 15.5px;">{{ delete_friend }}</a>
+            <a v-on:click="search_friend" class="card-footer-item is-capoo-2" style="padding: 0; font-size: 15.5px;">
+              {{ add_friend }}
+            </a>
+            <a class="card-footer-item is-capoo-2" style="padding: 0; font-size: 15.5px;">
+              {{ delete_friend }}
+            </a>
           </div>
 
         </div>
@@ -241,8 +247,8 @@
           </ul>
           {% endraw %}
           <div class="panel-block normal-color" style="position: absolute; left: 12px; right: 12px; bottom: 12px;">
-            <input class="input" type="text">
-            <a class="button is-capoo" style="margin-left: 10px;">{{ send }}</a>
+            <input class="input" v-model="chatbox_message" type="text">
+            <a class="button is-capoo" v-on:click="send_to(left_username)" style="margin-left: 10px;">{{ send }}</a>
           </div>
         </div>
       </div>
@@ -252,14 +258,15 @@
     page = new Vue({
       el: '#app',
       data: {
-        query_info: 'friends',
+        left_username: '',
+        left_avatar: '',
+        left_userinfo: null,
 
-        left_username: '先辈',
-        left_avatar: '/static/avatar.png',
+        right_username: '',
+        right_avatar: '',
+        right_userinfo: null,
 
-        right_username: 'capoo',
-        right_avatar: '/static/favicon.png',
-
+        friends_updater: null,
         friends: [],
         gaming_friends: [],
         online_friends: [],
@@ -268,69 +275,47 @@
         received_application: [],
 
         input_name: '',
+        chatbox_message: '',
 
         add_friend_message: '',
         message_is_error: false,
 
-        messages: [
-          {
-            mine: false,
-            content: '哼哼',
-          },
-          {
-            mine: false,
-            content: 'aaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaa aaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaa',
-          },
-          {
-            mine: true,
-            content: 'aaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaa aaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-          {
-            mine: true,
-            content: 'aaa',
-          },
-        ]
+        messages: [],
+        last_msg_time: 0,
       },
       mounted: function () {
+        this.update_user_info();
         this.update_friends_list();
+        this.friends_updater = setInterval(this.update_friends_list, 5000);
       },
       methods: {
+        update_user_info: function () {
+          this.$http.get('/api/account/username').then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              this.right_username = res.body.username;
+              this.right_avatar = '/avatar/' + this.right_username;
+            }
+            else {
+              console.log('There is no logined user.');
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+          this.$http.post('/api/account/userinfo', { username: this.right_username }, { emulateJSON: false }).then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              const data = res.body.userinfo;
+              this.right_userinfo = res.body.userinfo;
+            } else {
+              console.log('Getting user info fails, message:', res.body.message);
+              this.error_message = res.body.message;
+            }
+          }, function (res) {
+            console.log('Request fails, status:', res);
+            this.error_message = '服务器异常';
+          });
+        },
         update_friends_list: function () {
           this.$http.get('/api/account/get_friends').then(function (ret) {
             console.log(ret.body);
@@ -345,6 +330,65 @@
             }
           }, function (ret) {
             console.log('Request fails, status:', ret);
+          });
+        },
+        chat_with: function (username) {
+          this.$http.post('/api/account/userinfo', { username: username }, { emulateJSON: false }).then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              const data = res.body.userinfo;
+              this.left_username = data.username;
+              this.left_avatar = '/avatar/' + this.left_username;
+              this.left_userinfo = res.body.userinfo;
+              this.last_msg_time = 0;
+              this.update_messages(username);
+            } else {
+              console.log('Getting user info fails, message:', res.body.message);
+              this.error_message = res.body.message;
+            }
+          }, function (res) {
+            console.log('Request fails, status:', res);
+            this.error_message = '服务器异常';
+          });
+        },
+        update_messages: function (username) {
+          this.$http.post('/api/account/get_messages', { username: username }, { emulateJSON: false }).then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              const data = res.body;
+              this.messages = [];
+              for (msg of data.messages) {
+                console.log('msg.username: ' + msg.username);
+                console.log('this.right_username: ' + this.right_username);
+                if (msg.username == this.right_username) {
+                  this.messages.push({ mine: true, content: msg.content });
+                } else {
+                  this.messages.push({ mine: false, content: msg.content });
+                }
+                this.last_msg_time = msg.timestamp;
+              }
+            } else {
+              console.log('Getting chat info fails, message:', res.body.message);
+              this.error_message = res.body.message;
+            }
+          }, function (res) {
+            console.log('Request fails, status:', res);
+            this.error_message = '服务器异常';
+          });
+        },
+        send_to: function (username) {
+          this.$http.post('/api/account/send_message', { username: username, content: this.chatbox_message }, { emulateJSON: false }).then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              this.update_messages(username);
+              this.chatbox_message = '';
+            } else {
+              console.log('Sending message fails, message:', res.body.message);
+              this.error_message = res.body.message;
+            }
+          }, function (res) {
+            console.log('Request fails, status:', res);
+            this.error_message = '服务器异常';
           });
         },
         find_friend_from_list: function (friends, name) {
@@ -424,14 +468,14 @@
           });
         },
         join_game: function (name) {
-          
+
         },
         invite_game: function (name) {
 
         },
       },
       watch: {
-        input_name: function(val) {
+        input_name: function (val) {
           var found_friends = this.find_friend_from_list(this.friends, val);
           this.classify_friend_list(found_friends);
         }

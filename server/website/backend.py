@@ -19,14 +19,12 @@ from . import consts
 HEARTBEAT_TIMEOUT = 10
 HEARTBEAT_INTERVAL = 5
 
-
 msg_data_path = consts.data_base_path / 'msg'
 user_data_path = consts.data_base_path / 'user'
 
 info_file_name = 'info.json'
 
 ############################## APIS FOR GAME ###############################
-
 
 ############################## HEARTBEAT ###############################
 
@@ -49,12 +47,12 @@ def online_users_update():
         now = time.time()
         result = {
             k: v
-            for k, v in online_users.items()
-            if now - v < HEARTBEAT_TIMEOUT
+            for k, v in online_users.items() if now - v < HEARTBEAT_TIMEOUT
         }
         online_users = result
         print('online users: {}'.format(list(online_users.keys())))
         time.sleep(HEARTBEAT_INTERVAL)
+
 
 ############################## INITIAL ###############################
 
@@ -94,6 +92,7 @@ def api_account_username():
         return generate_return_data(StatusCode.SUCCESS, {'username': username})
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
 
+
 def api_account_userinfo():
     data = flask.request.get_json()
     username = data['username']
@@ -109,10 +108,11 @@ def api_account_userinfo():
         userinfo = {}
         userinfo['username'] = raw_user_info['username']
         userinfo['signature'] = raw_user_info.get('signature', '')
-        userinfo['ranking'] = raw_user_info.get(
-            'ranking', consts.default_ranking)
+        userinfo['ranking'] = raw_user_info.get('ranking',
+                                                consts.default_ranking)
 
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
+
 
 def api_account_login():
     data = flask.request.get_json()
@@ -131,6 +131,7 @@ def api_account_login():
 
     return generate_return_data(
         StatusCode.ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG)
+
 
 def api_account_signup():
     data = flask.request.get_json()
@@ -161,6 +162,7 @@ def api_account_signup():
 
     return generate_return_data(StatusCode.SUCCESS)
 
+
 def api_account_logout():
     username = session_get_username()
 
@@ -169,6 +171,7 @@ def api_account_logout():
             return generate_return_data(StatusCode.SUCCESS)
         return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
 
 def api_account_upload_avatar():
     username = session_get_username()
@@ -202,7 +205,9 @@ def api_account_update_signature():
         f.truncate()
     return generate_return_data(StatusCode.SUCCESS)
 
+
 ############################ USER FRIEND ############################
+
 
 def api_account_add_friend():
     data = flask.request.get_json()
@@ -273,9 +278,16 @@ def api_account_add_friend():
     return generate_return_data(StatusCode.SUCCESS)
 
 
-# TODO: get status from game
+# TODO: supporting 'gaming'
+
+
+def __get_user_status(username: str):
+    if username in online_users:
+        return 'online'
+    return 'offline'
+
+
 def api_account_get_friends():
-    print(session_get_username())
     username = session_get_username()
 
     if not username:
@@ -289,7 +301,7 @@ def api_account_get_friends():
         user_info = json.load(f)
         friends = list({
             'name': name,
-            'status': 'offline'
+            'status': __get_user_status(name)
         } for name in user_info.get('friends', []))
         return generate_return_data(
             StatusCode.SUCCESS, {
@@ -356,7 +368,110 @@ def api_account_approved_application():
 
     return generate_return_data(StatusCode.SUCCESS)
 
+
+# msg: {'username': str, 'content': str, 'timestamp': int}
+
+
+def get_chat_filename(users) -> str:
+    return '.'.join(sorted(users)) + '.json'
+
+
+def api_account_get_messages():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    data = flask.request.get_json()
+    target_username = data['username']
+    target_user_path = user_data_path / target_username
+    if not target_user_path.exists():
+        return generate_return_data(
+            StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
+
+    chat_filename = get_chat_filename([username, target_username])
+    chat_path = msg_data_path / chat_filename
+
+    if not chat_path.exists():
+        with open(chat_path, 'w') as f:
+            json.dump({'messages': []}, fp=f)
+        return generate_return_data(StatusCode.SUCCESS, {'messages': []})
+
+    with open(chat_path, 'r') as f:
+        json_data = json.load(f)
+        messages = json_data.get('messages', [])
+        return generate_return_data(StatusCode.SUCCESS, {'messages': messages})
+
+
+def api_account_get_new_messages():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    data = flask.request.get_json()
+    target_username = data['username']
+    target_user_path = user_data_path / target_username
+    if not target_user_path.exists():
+        return generate_return_data(
+            StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
+
+    chat_filename = '.'.join(sorted([username, target_username]))
+    chat_path = msg_data_path / chat_filename
+
+    if not chat_path.exists():
+        return generate_return_data(StatusCode.SUCCESS, {'messages': []})
+
+    timestamp = int(data['timestamp'])
+
+    with open(chat_path, 'r') as f:
+        json_data = json.load(chat_path)
+        messages = [
+            msg for msg in json_data.get('messages', [])
+            if msg['timestamp'] > timestamp
+        ]
+        return generate_return_data(StatusCode.SUCCESS, {'messages': messages})
+
+
+def api_account_send_message():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    data = flask.request.get_json()
+    target_username = data['username']
+    target_user_path = user_data_path / target_username
+    if not target_user_path.exists():
+        return generate_return_data(
+            StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
+
+    chat_filename = get_chat_filename([username, target_username])
+    chat_path = msg_data_path / chat_filename
+
+    content = data['content']
+    timestamp = int(time.time())
+
+    with open(chat_path, 'r+') as f:
+        json_data = {}
+        try:
+            json_data = json.load(f)
+        except:
+            pass
+
+        messages = list(json_data.get('messages', []))
+        messages.append({
+            'username': username,
+            'content': content,
+            'timestamp': timestamp
+        })
+
+        f.seek(0)
+        json.dump({'messages': messages}, fp=f)
+        f.truncate()
+        
+        return generate_return_data(StatusCode.SUCCESS)
+
+
 ############################ GAME ROOM ############################
+
 
 def api_game_room_get_players():
 
@@ -368,8 +483,9 @@ def api_game_room_get_players():
     return generate_return_data(
         StatusCode.ERR_GAME_PLAYER_GET_OTHER_IN_ROOM_FAILED, message)
 
+
 def api_game_room_join_game():
-    
+
     data = flask.request.get_json()
 
     current_username = session_get_username()
@@ -391,6 +507,7 @@ def api_game_room_join_game():
             {'error_message': message})
     return generate_return_data(StatusCode.SUCCESS)
 
+
 def api_game_room_player_ready():
 
     data = flask.request.get_json()
@@ -404,7 +521,9 @@ def api_game_room_player_ready():
     return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED,
                                 message)
 
+
 ############################ GAME CORE ############################
+
 
 def api_game_core_image():
 
@@ -445,6 +564,18 @@ backend_pages = {
         'view_func': api_account_update_signature,
         'methods': ['POST']
     },
+    '/api/account/get_messages': {
+        'view_func': api_account_get_messages,
+        'methods': ['POST']
+    },
+    '/api/account/get_new_messages': {
+        'view_func': api_account_get_new_messages,
+        'methods': ['POST']
+    },
+    '/api/account/send_message': {
+        'view_func': api_account_send_message,
+        'methods': ['POST']
+    },
     '/api/game/room/join_game': {
         'view_func': api_game_room_join_game,
         'methods': ['POST']
@@ -454,6 +585,5 @@ backend_pages = {
         'view_func': api_game_room_player_ready,
         'methods': ['POST']
     },
-
     '/api/game/core/image': api_game_core_image,
 }

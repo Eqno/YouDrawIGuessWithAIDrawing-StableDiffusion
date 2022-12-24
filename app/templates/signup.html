@@ -88,13 +88,22 @@
             alert(res.status);
           });
           this.loading = false;
+        },
+        username_valid: function (val) {
+          const invalid_chars = ['.', '*', '?', '/', '\\'];
+          for (char of invalid_chars) {
+            if (val.indexOf(char) != -1) {
+              return false;
+            }
+          }
+          return true;
         }
       },
       watch: {
         username: function (val) {
-          if (val.indexOf('/') != -1 || val.indexOf('\\') != -1) {
+          if (this.username_valid(val)) {
             this.username_done = false;
-            this.message = '用户名含有非法字符"/"或"\"';
+            this.message = '用户名含有非法字符".", "*", "?", "/" 或 "\\"';
             this.error_exist = true;
           } else if (val.length < 4) {
             this.username_done = false;
