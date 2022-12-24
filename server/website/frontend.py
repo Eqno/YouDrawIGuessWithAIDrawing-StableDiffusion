@@ -12,18 +12,21 @@ def frontend_init():
 def index():
     return flask.render_template('index.html',
                                  title='首页',
+                                 need_login=False,
                                  base_url=flask.request.base_url)
 
 
 def login():
     return flask.render_template('login.html',
                                  title='登录',
+                                 need_login=False,
                                  base_url=flask.request.base_url)
 
 
 def signup():
     return flask.render_template('signup.html',
                                  title='注册',
+                                 need_login=False,
                                  base_url=flask.request.base_url)
 
 def host():

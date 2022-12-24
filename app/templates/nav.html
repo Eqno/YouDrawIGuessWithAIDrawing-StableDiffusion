@@ -25,7 +25,7 @@
             {{ test_page }}
           </a>
           <hr class="navbar-divider">
-          <a href="#" v-on:click="match_game" class="navbar-item">
+          <a href="{{ url_for('selectrole') }}" class="navbar-item">
             {{ match_mode }}
           </a>
           <a href="{{ url_for('custom') }}" class="navbar-item">
@@ -38,11 +38,7 @@
         </div>
       </div>
 
-      <a v-if="logined" href="{{ url_for('friends') }}" class="navbar-item is-light is-capoo-3">
-        {{ friends_page }}
-      </a>
-      <a v-if="!logined" href="{{ url_for('login') }}?src={{ url_for('friends') }}"
-        class="navbar-item is-light is-capoo-3">
+      <a href="{{ url_for('friends') }}" class="navbar-item is-light is-capoo-3">
         {{ friends_page }}
       </a>
 
@@ -103,9 +99,14 @@
         username: '',
         logined: false,
         heart: null,
+        need_login: '{{ need_login }}',
       },
       mounted: function () {
         this.query_logined();
+        console.log(this.need_login);
+        if (this.need_login != 'False') {
+          window.location.href = '/login?src=' + window.location.href;
+        }
       },
       methods: {
         query_logined: function () {
@@ -152,13 +153,6 @@
           }, function (res) {
             console.log('Request fails, status:', res);
           });
-        },
-        match_game: function (event) {
-          if (!this.logined) {
-            window.location.href = '/login';
-          } else {
-            window.location.href = '/selectrole';
-          }
         },
       },
     });
