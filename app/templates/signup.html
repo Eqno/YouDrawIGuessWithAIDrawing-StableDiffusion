@@ -89,19 +89,19 @@
           });
           this.loading = false;
         },
-        username_valid: function (val) {
+        username_invalid: function (val) {
           const invalid_chars = ['.', '*', '?', '/', '\\'];
           for (char of invalid_chars) {
             if (val.indexOf(char) != -1) {
-              return false;
+              return true;
             }
           }
-          return true;
+          return false;
         }
       },
       watch: {
         username: function (val) {
-          if (this.username_valid(val)) {
+          if (this.username_invalid(val)) {
             this.username_done = false;
             this.message = '用户名含有非法字符".", "*", "?", "/" 或 "\\"';
             this.error_exist = true;
