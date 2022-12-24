@@ -24,6 +24,7 @@ class Game:
         self.state = GameState.WAITING
 
         self.ans = None
+        self.start = False
 
         self.host = None
         self.guests = []
@@ -281,6 +282,34 @@ class Game:
 
         if self.round_num > 0:
             self.round_num -= 1
+
+            if self.start is False:
+
+                res = dict({
+                    'is_alert': True,
+                    'alert_prefix': '系统',
+                    'players': [],
+                    'content': '游戏共计 5 轮'
+                })
+                self.info_record.append(res)
+
+                res = dict({
+                    'is_alert': True,
+                    'alert_prefix': '系统',
+                    'players': [],
+                    'content': '开始第一轮'
+                })
+                self.info_record.append(res)
+            
+            else:
+                res = dict({
+                    'is_alert': True,
+                    'alert_prefix': '系统',
+                    'players': [],
+                    'content': '进入新一轮'
+                })
+                self.info_record.append(res)
+
             return True, 'next round'
         else:
             self.state = GameState.HASENDED
