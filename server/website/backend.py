@@ -20,11 +20,12 @@ HEARTBEAT_TIMEOUT = 10
 HEARTBEAT_INTERVAL = 5
 
 
-
 msg_data_path = consts.data_base_path / 'msg'
 user_data_path = consts.data_base_path / 'user'
 
 info_file_name = 'info.json'
+
+############################## APIS FOR GAME ###############################
 
 
 ############################## HEARTBEAT ###############################
@@ -109,6 +110,8 @@ def api_account_userinfo():
         userinfo = {}
         userinfo['username'] = raw_user_info['username']
         userinfo['signature'] = raw_user_info.get('signature', '')
+        userinfo['ranking'] = raw_user_info.get(
+            'ranking', consts.default_ranking)
 
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
 
@@ -149,6 +152,8 @@ def api_account_signup():
 
         user_info['username'] = username
         user_info['password'] = password
+
+        user_info['ranking'] = consts.default_ranking
 
         user_info['friends'] = []
         user_info['applications_sent'] = []
@@ -337,11 +342,12 @@ def api_account_upload_avatar():
         data.save(f)
     return generate_return_data(StatusCode.SUCCESS)
 
+
 def api_account_update_signature():
     username = session_get_username()
     if username is None:
         return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-    
+
     data = flask.request.get_json()
     signature = data['signature']
 

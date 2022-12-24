@@ -13,3 +13,4 @@ data_base_path = cwd / 'data'
 user_data_path = data_base_path / 'user'
 
 default_avatar_path = cwd / 'app' / 'static' / 'avatar.png'
+default_ranking = 1000
