@@ -70,22 +70,31 @@
                             <figure class="image is-128x128 my-6" style="margin: auto;">
                                 <img :src="avatar" alt="avatar">
                             </figure>
-                            <button style="display: block; width: 8rem; margin: auto;"
-                                v-on:click="$refs.file.click()">修改头像</button>
+                            <div v-if="is_self_info">
+                            <a style="text-align: center; display: block;"
+                                v-on:click="$refs.file.click()">修改头像</a>
                             <input type="file" accept="image/png" ref="file" style="display: none"
                                 v-on:change="upload_avatar">
+                            </div>
                         </div>
                         <div class="column" style="display: block; position: relative; min-height: 120px;">
-                            <div style="position: absolute; top: 40%; left: 2rem; transform: translate(0, -50%);">
+                            <div style="position: absolute; top: 20%; left: 2rem;">
                                 <p class="title is-3" style="margin-bottom: 35px;">
                                     {{ userinfo.username }}
                                 </p>
-                                <p v-if="userinfo.signature" class="subtitle is-6">
-                                    个性签名
-                                </p>
-                                <p v-else class="subtitle is-6">
-                                    这个人很懒，什么都没写
-                                </p>
+                                <div v-if="editing_signature">
+                                    <input type="text" maxlength="140" value="abc" class="is-size-6" style="display: block; width: 100%;">
+                                    <a>提交签名</a>
+                                </div>
+                                <div v-else>
+                                    <p v-if="userinfo.signature" class="subtitle is-6">
+                                        {{ userinfo.signature }}
+                                    </p>
+                                    <p v-else class="subtitle is-6">
+                                        这个人很懒，什么都没写
+                                    </p>
+                                    <a v-on:click="editing_signature = true">修改签名</a>
+                                </div>
                             </div>
 
                         </div>
@@ -143,9 +152,11 @@
             el: '#app',
             data: {
                 username: '{{ username }}',
+                is_self_info: false,
                 avatar: '',
                 error_message: '加载中',
-                userinfo: {}
+                userinfo: {},
+                editing_signature: false,
             },
             mounted: function () {
                 this.$http.post('/api/account/userinfo', { username: this.username }, { emulateJSON: false }).then(function (res) {
@@ -153,6 +164,9 @@
                     if (res.body.code == 0) {
                         this.avatar = '/avatar/' + this.username;
                         this.userinfo = res.body.userinfo;
+                        if (this.userinfo.username == nav_app.$data.username) {
+                            this.is_self_info = true;
+                        }
                     } else {
                         console.log('Getting user info fails, message:', res.body.message);
                         this.error_message = res.body.message;
@@ -168,7 +182,7 @@
                     const data = new FormData();
                     data.append("file", path);
                     this.$http.post('/api/account/upload_avatar', data).then(function (res) {}, function (res) {});
-                }
+                },
             }
         })
     </script>
