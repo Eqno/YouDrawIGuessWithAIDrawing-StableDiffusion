@@ -169,6 +169,7 @@
 
           this.$http.post('/api/game/room/join_game', { username: '', role: role }, { emulateJSON: false }).then(function (ret) {
             console.log(ret.body);
+            
             if (ret.body.code == 0) {
               this.modal_exsits = false;
               this.modal_message = '';

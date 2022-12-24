@@ -25,8 +25,7 @@ template_variables = {
     'password': '密码',
     'password_again': '再次输入密码',
     'please_input_username': '请输入账号',
-    # game
-    'guess_the_image': '快来猜图片！',
+    # game3
     'hint_prefix': '提示：',
     'submit': '提交',
     'select_role': '选择身份',
