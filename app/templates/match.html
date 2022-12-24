@@ -53,7 +53,7 @@
             <div class="colum" v-bind:class="{ 'player-ready': host['ready'] }">
 
               <div style="display: flex;">
-                <img :src="host['avatar']" style="margin: auto;">
+                <img :src="'/avatar/' + host['name']" style="margin: auto;">
               </div>
               <p class="subtitle is-5 role-item-name">{{ host['name'] }}</p>
             
@@ -69,7 +69,7 @@
               v-bind:class="{ 'player-ready': guest['ready'] || (guest['name']==username && self_ready==true), 'is-one-fifth': guest_num[5], 'is-one-quarter': guest_num[4], 'is-one-third': guest_num[3], 'is-half': guest_num[2] }">
               
               <div style="display: flex;">
-                  <img :src="guest['avatar']" style="margin: auto;">
+                  <img :src="'/avatar/' + guest['name']" style="margin: auto;">
               </div>
               <p class="subtitle is-5 role-item-name">{{ guest.name }}</p>
 
@@ -102,11 +102,11 @@
         },
         username: '',
 
+        role: '',
         host: {},
         guests: [],
-        all_ready: false,
+
         self_ready: false,
-      
         timer: '',
       },
       mounted: function () {
@@ -120,23 +120,36 @@
               
               this.host = ret.body.host;
               this.guests = ret.body.guests;
+              this.username = nav_app.username;
 
-              this.username = app.username;
-              this.all_ready = true;
+              if (this.host.name == this.username) {
+                
+                this.self_ready = this.host.ready;
+                console.log(this.self_ready);
+                this.role = 'host';
 
-              for (const i of this.guests) {
-                this.all_ready &&= i.ready;
-                if (i.name == this.username) {
+              } else {
+                for (const i of this.guests) {
+                  if (i.name == this.username) {
 
-                  this.self_ready = i.ready;
-                  console.log(this.self_ready);
+                    this.self_ready = i.ready;
+                    console.log(this.self_ready);
+                    this.role = 'guest';
 
-                  return;
+                    break;
+                  }
                 }
               }
-              // if (this.all_ready) {
-              //   window.location.href = '/game';
-              // }
+              if (ret.body.game_state == 'playing') {
+
+                if (this.role == 'host') {
+                  window.location.href = '/host';
+                } else if (this.role == 'guest') {
+                  window.location.href = '/guest';
+                } else {
+                  console.log('unknown role');
+                }
+              }
             } else {
               console.log('There is no logined user.');
             }
