@@ -104,7 +104,7 @@
       mounted: function () {
         this.query_logined();
         console.log(this.need_login);
-        if (this.need_login != 'False') {
+        if (this.logined == false && this.need_login != 'False') {
           window.location.href = '/login?src=' + window.location.href;
         }
       },
