@@ -42,6 +42,8 @@ template_variables = {
     'friend_list': '好友列表',
     'add_friend': '添加好友',
     'delete_friend': '删除好友',
+    # others
+    'page_timer_interval': '500',
 }
 
 class StatusCode(IntEnum):
