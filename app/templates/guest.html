@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  {% include 'header.html' %}
+  <style>
+    .submit-button {
+      font-size: 18px;
+      text-align: center;
+      line-height: 38px;
+      border-radius: 4px;
+      border: 1px solid #5ac9e8;
+      margin: 8px 8px 8px 0;
+      width: 80px; 
+    }
+    .submit-button:hover {
+      border-color: #485fc7;
+    }
+    .submit-input {
+      margin: 8px;
+      width: 100%;
+    } 
+    .card-body {
+      position: absolute;
+      padding-top: 20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      top: 50px;
+      bottom: 56px;
+      box-shadow: none;
+      overflow-y: scroll;
+      border-top: 1px solid #dbdbdb;
+    }
+    .loding-content {
+      margin: auto;
+      width: 90%;
+    }
+    .loding-text {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  {% include 'nav.html' %}
+
+  <section class="section">
+    <div id="app" class="columns is-max-widescreen">
+      <div class="column is-two-thirds container">
+        <div class="card" style="height: 100%; display: flex;">
+
+          <div class="card-image" v-if="load_finished" style="width: 100%; margin: auto;">
+            <figure class="image is-4by3">
+              <img ref="image" v-bind:src="image_url" alt="image">
+            </figure>
+          </div>
+          <div class="loding-content" v-if="!load_finished">
+            <p class="loding-text title is-5">AI 画图中，请稍等片刻...</p>
+            <progress class="progress is-success" value="60" max="100">60%</progress>
+          </div>
+        </div>
+      </div>
+      <div class="column container">
+        <div class="card" style="position: relative; height: 100%; min-height: 40rem;">
+          
+          <header class="card-header-title">
+            <p style="text-align: center; width: 100%;">快来猜猜图片的词根吧！</p>
+          </header>
+          
+          {% raw %}
+          <div class="card-body">
+            <div v-for="msg of messages" class="field is-grouped is-grouped-multiline"
+              v-bind:class="{ 'icon-text': msg.is_alert, 'mb-2': !msg.players.length }">
+              <span v-if="msg.is_alert" class="icon has-text-info">
+                <i class="fas fa-info-circle"></i>
+              </span>
+              <span v-if="msg.is_alert" v-if="msg.alert_prefix" class="is-size-6">
+                {{ msg.alert_prefix }}:&nbsp;
+              </span>
+              <div v-for="player of msg.players" class="control">
+                <div class="tags has-addons">
+                  <span class="tag is-light">{{ player.name }}</span>
+                  <span class="tag is-info is-light">{{ player.ranking }}</span>
+                </div>
+              </div>
+              <span class="is-size-6">{{ msg.content }}</span>
+            </div>
+          </div>
+          {% endraw %}
+
+          <footer class="card-footer" style="position: absolute; left: 0; right: 0; bottom: 0;">
+            
+            <input ref="input_ans" v-model="input_ans" class="input submit-input" type="text" maxlength="16">
+            <a href="#" v-on:click="submit_ans" class="submit-button is-capoo">{{ submit }}</a>
+              
+          </footer>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        image_url: '/static/loading.png',
+        
+        hint_prefix: '{{ hint_prefix }}',
+        hint: '？波',
+
+        input_ans: '',
+
+        load_finished: true,
+
+        messages: [
+          // {
+          //   'is_alert': true,
+          //   'alert_prefix': '系统',
+          //   'players': [
+          //     {
+          //       'name': '张三',
+          //       'ranking': 1500,
+          //     },
+          //     {
+          //       'name': '李四',
+          //       'ranking': 1000,
+          //     }
+          //   ],
+          //   'content': '加入了房间'
+          // },
+          // {
+          //   'is_alert': true,
+          //   'alert_prefix': '提示',
+          //   'players': [],
+          //   'content': '？波'
+          // },
+          // {
+          //   'is_alert': false,
+          //   'alert_prefix': '',
+          //   'players': [
+          //     {
+          //       'name': '张三',
+          //       'ranking': 1500,
+          //     }
+          //   ],
+          //   'content': '咖波'
+          // },
+          // {
+          //   'is_alert': true,
+          //   'alert_prefix': '系统',
+          //   'players': [
+          //     {
+          //       'name': '张三',
+          //       'ranking': 1500,
+          //     }
+          //   ],
+          //   'content': '回答正确'
+          // },
+          // {
+          //   'is_alert': true,
+          //   'alert_prefix': '系统',
+          //   'players': [],
+          //   'content': '凑行数测试'
+          // },
+        ]
+      },
+      mounted: function () {
+        this.$http.get('/api/game/core/image').then(function (res) {
+          console.log(res.body);
+          if (res.body.code == 0) {
+            this.image_url = res.body.url;
+          } else {
+            console.log('Getting image fails, message:', res.body.message);
+          }
+        }, function (res) {
+          console.log('Request fails, status:', res);
+        });
+      },
+      methods: {
+        submit_ans: function (event) {
+          console.log(this.input_ans);
+        },
+      },
+    })
+  </script>
+
+  {% include 'footer.html' %}
+
+</body>
+
+</html>

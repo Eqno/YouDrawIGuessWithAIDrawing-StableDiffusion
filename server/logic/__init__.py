@@ -100,6 +100,7 @@ def player_get_others(player_name:str):
             'name': guest.name,
             'avatar': None
         })
+    begin = False
     
     return True, (host, guests)
 

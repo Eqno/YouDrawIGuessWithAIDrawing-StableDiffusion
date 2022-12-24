@@ -26,9 +26,13 @@ def signup():
                                  title='注册',
                                  base_url=flask.request.base_url)
 
+def host():
+    return flask.render_template('host.html',
+                                 title='游戏',
+                                 base_url=flask.request.base_url)
 
-def game():
-    return flask.render_template('game.html',
+def guest():
+    return flask.render_template('guest.html',
                                  title='游戏',
                                  base_url=flask.request.base_url)
 
@@ -80,7 +84,8 @@ frontend_pages = {
     '/login': login,
     '/signup': signup,
 
-    '/game': game,
+    '/host': host,
+    '/guest': guest,
     '/match': match,
     '/custom': custom,
     '/selectrole': selectrole,
