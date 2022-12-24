@@ -42,9 +42,6 @@ template_variables = {
     'friend_list': '好友列表',
     'add_friend': '添加好友',
     'delete_friend': '删除好友',
-
-    # others
-    'wsurl': "ws://127.0.0.1:80/socket/online",
 }
 
 class StatusCode(IntEnum):

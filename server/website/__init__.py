@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os, flask, datetime
-from flask_sock import Sock
 from . import frontend, backend, utils
 
 __all__ = ['frontend', 'backend', 'Server']
@@ -25,8 +24,6 @@ class Server(object):
         self.port = port
         self.debug = os.environ['FLASK_ENV'] == 'development'
         self.app = None
-        self.sock = None
-        self.server = None
 
         # init frontend and backend
         frontend.frontend_init()
@@ -36,7 +33,6 @@ class Server(object):
         app = flask.Flask(name,
                           template_folder=template_folder,
                           static_folder=static_folder)
-        sock = Sock(app)
 
         # init session
         app.secret_key = 'session_key_0xdeadbeef'
@@ -50,9 +46,6 @@ class Server(object):
         app.context_processor(lambda: utils.template_variables)
         app.before_request(make_session_permanent)
 
-        for k, v in backend.backend_websocket.items():
-            sock.route(k)(v)
-
         # add pages
         for pages in (frontend.frontend_pages, backend.backend_pages):
             for k, v in pages.items():
@@ -62,7 +55,6 @@ class Server(object):
                     app.add_url_rule(k, view_func=v)
 
         self.app = app
-        self.sock = sock
 
     def run(self):
         self.app.run(host=self.hostname,

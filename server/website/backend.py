@@ -3,19 +3,20 @@
 ############################### IMPORT ###############################
 
 import os
+import sys
 import json
 import time
 import flask
 import pathlib
-import simple_websocket
+import threading
 
 import logic
 from .utils import generate_return_data, StatusCode
 
 ############################### PARAMS ###############################
 
-SOCKET_ONLINE_TIME_INTERVAL = 0.1
-CHECL_ONLINE_TIME_INTERVAL = 5
+HEARTBEAT_TIMEOUT = 10
+HEARTBEAT_INTERVAL = 5
 
 data_base_path = pathlib.Path(os.getcwd()) / 'data'
 
@@ -25,6 +26,35 @@ user_data_path = data_base_path / 'user'
 info_file_name = 'info.json'
 avatar_file_name = 'avatar.png'
 
+
+############################## HEARTBEAT ###############################
+
+# FIXME: using global variables is NOT elegant!
+online_users = {}
+
+
+def api_heartbeat_imonline():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+    update_time = time.time()
+    online_users[username] = update_time
+    return generate_return_data(StatusCode.SUCCESS)
+
+
+def online_users_update():
+    global online_users
+    while True:
+        now = time.time()
+        result = {
+            k: v
+            for k, v in online_users.items()
+            if now - v < HEARTBEAT_TIMEOUT
+        }
+        online_users = result
+        print('online users: {}'.format(list(online_users.keys())))
+        time.sleep(HEARTBEAT_INTERVAL)
+
 ############################## INITIAL ###############################
 
 
@@ -32,6 +62,10 @@ def backend_init():
     for _dir in (data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
+
+    heartbeat = threading.Thread(target=online_users_update)
+    heartbeat.daemon = True
+    heartbeat.start()
 
 
 ############################# GET SESSION #############################
@@ -210,6 +244,7 @@ def api_account_add_friend():
 
 # TODO: get status from game
 def api_account_get_friends():
+    print(session_get_username())
     username = session_get_username()
 
     if not username:
@@ -353,24 +388,8 @@ def api_game_core_image():
     return generate_return_data(StatusCode.SUCCESS, result)
 
 
-# FIXME: using global variables is NOT elegant!
-online_users = {}
-
-
-def socket_online(websocket):
-    try:
-        while True:
-            websocket.send('ping')
-            message = websocket.receive()
-            if message == 'pong':
-                pass
-            time.sleep(SOCKET_ONLINE_TIME_INTERVAL)
-
-    except simple_websocket.ConnectionClosed:
-        print('break')
-
-
 backend_pages = {
+    '/api/heartbeat/imonline': api_heartbeat_imonline,
     '/api/account/username': api_account_username,
     '/api/account/userinfo': {
         'view_func': api_account_userinfo,
@@ -405,5 +424,3 @@ backend_pages = {
     },
     '/api/game/core/image': api_game_core_image,
 }
-
-backend_websocket = {'/socket/online': socket_online}

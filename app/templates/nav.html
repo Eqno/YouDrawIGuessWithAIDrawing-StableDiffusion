@@ -100,20 +100,22 @@
       el: '#menu',
       data: {
         userinfo_prefix: '{{ url_for("userinfo", username="") }}',
-
         username: '',
         logined: false,
+        heart: null,
       },
       mounted: function () {
-        this.quary_logined();
+        this.query_logined();
       },
       methods: {
-        quary_logined: function () {
+        query_logined: function () {
           this.$http.get('/api/account/username').then(function (res) {
             console.log(res.body);
             if (res.body.code == 0) {
               this.username = res.body.username;
               this.logined = true;
+              // enable heart beat
+              this.heart = setInterval(this.heartbeat, 2000);
             }
             else {
               console.log('There is no logined user.');
@@ -122,11 +124,16 @@
             console.log('Request fails, status:', ret);
           });
         },
+        heartbeat: function () {
+          this.$http.get('/api/heartbeat/imonline').then(
+            function (res) { },
+            function (res) { clearInterval(this.heart); alert('服务器异常'); }
+          );
+        },
         perform_logout: function (event) {
           this.$http.get('/api/account/logout').then(function (res) {
             console.log(res.body);
-            if (res.body.code == 0)
-            {
+            if (res.body.code == 0) {
               var path = window.location.pathname;
               var panel = path.substring(0, path.lastIndexOf('/'));
               if (path == '/friends' || panel == '/user') {
@@ -140,7 +147,7 @@
           });
         },
         match_game: function (event) {
-          if (! this.logined) {
+          if (!this.logined) {
             window.location.href = '/login';
           } else {
             window.location.href = '/selectrole';
