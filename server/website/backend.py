@@ -108,7 +108,7 @@ def api_account_userinfo():
         raw_user_info = json.load(f)
         userinfo = {}
         userinfo['username'] = raw_user_info['username']
-        userinfo['avatar'] = '/static/avatar.png'
+        userinfo['signature'] = raw_user_info.get('signature', '')
 
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
 
@@ -337,6 +337,25 @@ def api_account_upload_avatar():
         data.save(f)
     return generate_return_data(StatusCode.SUCCESS)
 
+def api_account_update_signature():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+    
+    data = flask.request.get_json()
+    signature = data['signature']
+
+    user_filepath = user_data_path / username / info_file_name
+
+    with open(user_filepath, 'r+') as f:
+        user_info = json.load(f)
+        user_info['signature'] = signature
+        f.seek(0)
+        json.dump(user_info, fp=f)
+        f.truncate()
+    return generate_return_data(StatusCode.SUCCESS)
+
+
 def api_game_room_join_game():
     data = flask.request.get_json()
 
@@ -426,6 +445,10 @@ backend_pages = {
     },
     '/api/account/upload_avatar': {
         'view_func': api_account_upload_avatar,
+        'methods': ['POST']
+    },
+    '/api/account/update_signature': {
+        'view_func': api_account_update_signature,
         'methods': ['POST']
     },
     '/api/game/room/join_game': {

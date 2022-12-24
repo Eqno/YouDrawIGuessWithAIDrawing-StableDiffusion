@@ -129,7 +129,7 @@
             function (res) {
               if (res.body.code != 0) {
                 // session time out
-                window.reload();
+                location.reload();
               }
             },
             function (res) { clearInterval(this.heart); alert('服务器异常'); }
@@ -144,7 +144,9 @@
               if (path == '/friends' || panel == '/user') {
                 window.location.href = '/';
               }
-              else location.reload();
+              else {
+                location.reload();
+              }
             }
             else console.log(res.body.message);
           }, function (res) {

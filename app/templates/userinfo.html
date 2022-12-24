@@ -17,17 +17,19 @@
             line-height: 40px;
         }
 
+        .game-column {
+            position: relative;
+        }
+
         .game-data {
             display: inline-block;
-
-            min-width: 267px;
             color: black;
 
             border-bottom: 1px solid;
             border-color: #4a4a4a;
 
-            margin-left: 15px;
-            margin-right: 15px;
+            width: 80%;
+            margin: 0 10%;
 
             line-height: 35px;
             padding: 0;
@@ -78,13 +80,13 @@
                             </div>
                         </div>
                         <div class="column" style="display: block; position: relative; min-height: 120px;">
-                            <div style="position: absolute; top: 20%; left: 2rem;">
+                            <div style="margin-top: 3rem; margin-left: 2rem; margin-right: 2rem;">
                                 <p class="title is-3" style="margin-bottom: 35px;">
                                     {{ userinfo.username }}
                                 </p>
                                 <div v-if="editing_signature">
-                                    <input type="text" maxlength="140" value="abc" class="is-size-6" style="display: block; width: 100%;">
-                                    <a>提交签名</a>
+                                    <input type="text" maxlength="140" v-model="new_signature" :value="userinfo.signature" class="is-size-6" style="width: 100%; margin-bottom: 1rem;">
+                                    <a v-on:click="update_signature">提交签名</a>
                                 </div>
                                 <div v-else>
                                     <p v-if="userinfo.signature" class="subtitle is-6">
@@ -93,17 +95,16 @@
                                     <p v-else class="subtitle is-6">
                                         这个人很懒，什么都没写
                                     </p>
-                                    <a v-on:click="editing_signature = true">修改签名</a>
+                                    <a v-if="is_self_info" v-on:click="editing_signature = true">修改签名</a>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
                     <div class="columns" style="position: relative;">
-                        <p class="column game-data">积分 300</p>
-                        <p class="column game-data">胜场 100/200</p>
-                        <p class="column game-data">胜率 50.00%</p>
+                        <div class="column game-column"><p class="game-data">积分 300</p></div>
+                        <div class="column game-column"><p class="game-data">胜场 100/200</p></div>
+                        <div class="column game-column"><p class="game-data">胜率 50.00%</p></div>
                     </div>
 
                     <aside class="menu">
@@ -157,6 +158,7 @@
                 error_message: '加载中',
                 userinfo: {},
                 editing_signature: false,
+                new_signature: '',
             },
             mounted: function () {
                 this.$http.post('/api/account/userinfo', { username: this.username }, { emulateJSON: false }).then(function (res) {
@@ -181,8 +183,33 @@
                     const path = event.target.files[0];
                     const data = new FormData();
                     data.append("file", path);
-                    this.$http.post('/api/account/upload_avatar', data).then(function (res) {}, function (res) {});
+                    this.$http.post('/api/account/upload_avatar', data).then(
+                        function (res) {
+                            if (res.body.code == 0) {
+                                location.reload();
+                            } else {
+                                alert(res.body.message);
+                            }
+                        },
+                        function (res) {
+                            alert('上传头像失败');
+                        }
+                    );
                 },
+                update_signature: function (event) {
+                    this.$http.post('/api/account/update_signature', {signature: this.new_signature}, {emulateJSON: false}).then(
+                        function (res) {
+                            if (res.body.code == 0) {
+                                location.reload();
+                            } else {
+                                alert(res.body.message);
+                            }
+                        },
+                        function (res) {
+                            alert('修改签名失败');
+                        }
+                    );
+                }
             }
         })
     </script>
