@@ -1,4 +1,4 @@
-import random
+import random, re
 
 from . import PlayerRole
 from . import GameMode
@@ -14,6 +14,8 @@ HALF_WIN_SCORE = 5
 
 GUEST_MAX_NUM = 5
 
+task_queue = {}
+
 class Game:
 
     def __init__(self, mode: GameMode = GameMode.MATCH):
@@ -21,12 +23,14 @@ class Game:
         self.mode = mode
         self.state = GameState.WAITING
 
+        self.ans = '咖波'
+
         self.host = None
         self.guests = []
+        self.info_record = []
 
         self.end_time = None
         self.loop_time = None
-        self.into_loop = False
 
         self.round_num = None
 
@@ -107,27 +111,123 @@ class Game:
                 self.round_num = round_num
                 self.goto_next_round()
 
-    def collect_ans(self, player):
+    def collect_ans(self, player, info):
 
-        if self.state == GameState.PLAYING and self.host is not None:
+        if self.state == GameState.PLAYING \
+            and player is not None \
+            and self.host is not None:
 
-            if player.ans == self.host.ans:
+            if player.win is True:
+                return False, 'player has won'
 
-                if self.into_loop:
+            if re.search(self.ans, info, re.IGNORECASE) is not None:
+
+                if self.loop_time is not None:
+                    
                     player.win = True
                     player.score += HALF_WIN_SCORE
+
+                    self.info_record.append({
+                        'is_alert': True,
+                        'alert_prefix': '系统',
+                        'players': [{
+                            'name': player.name + ' (猜谜者)',
+                            'ranking': player.score,
+                        }],
+                        'content': '回答正确'
+                    })
+
+                    return True, 'ans is correct'
                 else:
-                    self.into_loop = True
+                    
                     player.win = True
+                    self.host.win = True
                     player.score += WHOLE_WIN_SCORE
                     self.loop_time = time() + LOOP_LAST_TIME
+
+                    self.info_record.append({
+                        'is_alert': True,
+                        'alert_prefix': '系统',
+                        'players': [{
+                            'name': player.name + ' (猜谜者)',
+                            'ranking': player.score,
+                        }],
+                        'content': '首次回答正确'
+                    })
+                    self.info_record.append({
+                        'is_alert': True,
+                        'alert_prefix': '提示',
+                        'players': [],
+                        'content': self.ans
+                    })
+                    self.info_record.append({
+                        'is_alert': True,
+                        'alert_prefix': '系统',
+                        'players': [],
+                        'content': '进入倒计时'
+                    })
+                    return True, 'ans is the first correct'
+                
+            else:
+
+                self.info_record.append({
+                    'is_alert': False,
+                    'alert_prefix': '',
+                    'players': [{
+                        'name': player.name + ' (猜谜者)',
+                        'ranking': player.score,
+                    }],
+                    'content': info
+                })
+                return True, 'ans is incorrect'
+
+        return False, 'collect ans failed'
+
+    def collect_img(self, info, negative, rand_seed):
+
+        if self.state == GameState.PLAYING \
+            and self.host is not None:
+
+                if self.host.won is True:
+
+                    for i in self.ans:
+                        if re.search(i, info, re.IGNORECASE) is not None:
+                            return False, 'could not contain keyword character'
+
+                    self.info_record.append({
+                        'is_alert': False,
+                        'alert_prefix': '',
+                        'players': [{
+                            'name': self.host.name + ' (出题者)',
+                            'ranking': self.host.score,
+                        }],
+                        'content': info
+                    })
+                    return True, 'host say something'
+
+                host_task = task_queue.get(self.host.name)
+                if host_task is not None:
+                    return False, 'already have task in queue'
+
+                task_queue[self.host.name] = {
+                    'positive': info,
+                    'negative': negative,
+                    'rand_seed': rand_seed
+                }
+                return True, 'add task to generate image'
+
+        return False, 'collect img failed'
 
     def get_loop_time(self):
 
         if self.loop_time is not None:
-            return self.loop_time - time()
-        else:
-            return None
+            
+            loop_time = self.loop_time - time()
+
+            print(loop_time)
+
+            if loop_time < 0:
+                self.goto_next_round()
 
     # 一直没人猜出来的时间
     def get_remain_time(self):
@@ -140,19 +240,23 @@ class Game:
     def goto_next_round(self):
 
         if self.round_num is None:
-            print('please begin game first')
-            return
+            return False, 'please begin game first'
+
+        self.loop_time = None
+        self.ans = '咖波2'
+
+        if self.host is None:
+            return False, 'host escaped'
+        self.host.win = False
+
+        if len(self.guests) == 0:
+            return False, 'guests escaped'
+        for guest in self.guests:
+            guest.win = False
 
         if self.round_num > 0:
             self.round_num -= 1
+            return True, 'next round'
         else:
             self.state = GameState.HASENDED
-            return
-
-        self.host.ans = None
-        for guest in self.guests:
-            guest.ans = None
-
-        self.end_time = time() + GAME_FAIL_TIME
-        self.loop_time = None
-        self.into_loop = False
+            return True, 'game end'

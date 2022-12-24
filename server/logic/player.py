@@ -3,11 +3,6 @@ from . import GameState
 from . import PlayerRole
 from . import create_game_instance, get_all_game_list
 
-import sys, os
-
-# sys.path.append(os.getcwd().replace('\\', '/') + '/../')
-# from model import text2image
-
 def cmp(game):
     return game.get_wait_time()
 
@@ -19,7 +14,6 @@ class Player:
         self.role = None
 
         self.win = False
-        self.ans = ''
         self.score = 0
 
         self.game = None
@@ -31,7 +25,6 @@ class Player:
         self.role = role
 
         self.win = False
-        self.ans = ''
         self.score = 0
 
         self.game = None
@@ -73,31 +66,11 @@ class Player:
         
         return True, 'player set ready succeed'
 
-    # guest 给出答案，host 设置答案
-    def give_answer(self, ans=str):
-
-        self.ans = ans
+    # guest 给出答案，host 给出咒语
+    def give_info(self, info: str, negtive: str = '', rand_seed=0):
 
         if self.role == PlayerRole.GUEST:
-            if not self.win:
-                self.game.collect_ans(self)
-            else:
-                print('the player has won')
-
-    # guest 给出讨论，host 给出咒语
-    def give_describe(self, describe: str, negtive: str = '', rand_seed=0):
-
-        if self.role == PlayerRole.GUEST:
-            if not self.win:
-                self.game.collect_desc(self.name, describe)
-            else:
-                print('the player has won')
-            return None
+            return self.game.collect_ans(self, info)
         else:
-            return None # text2image.generate_image(describe, negtive, self.name, rand_seed)
-
-    def get_score(self):
-        return self.score
-
-    def get_win(self):
-        return self.win
+            return self.game.collect_img(info, negtive, rand_seed)
+            # return None # text2image.generate_image(describe, negtive, self.name, rand_seed)
