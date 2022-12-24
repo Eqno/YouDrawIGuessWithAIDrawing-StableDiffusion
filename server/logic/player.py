@@ -52,7 +52,10 @@ class Player:
 
             if len(match_games) > 0:
                 match_games.sort(key=cmp, reverse=True)
-                return match_games[0].add_player(self)
+                retcode, message = match_games[0].add_player(self)
+                
+                if retcode:
+                    return True, message
         
         index, message = create_game_instance(GameMode.MATCH)
 

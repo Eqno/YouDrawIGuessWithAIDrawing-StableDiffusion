@@ -91,18 +91,15 @@ def player_get_others(player_name:str):
         host = {
             'ready': player.game.host.ready,
             'name': player.game.host.name,
-            'avatar': None
         }
     guests = []
     for guest in player.game.guests:
         guests.append({
             'ready': guest.ready,
             'name': guest.name,
-            'avatar': None
         })
-    begin = False
     
-    return True, (host, guests)
+    return True, { 'host': host, 'guests': guests }
 
 def player_set_ready(player_name:str, ready:bool):
 

@@ -169,6 +169,7 @@ def api_account_logout():
         return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
 
+############################ USER FRIEND ############################
 
 def api_account_add_friend():
     data = flask.request.get_json()
@@ -355,8 +356,20 @@ def api_account_update_signature():
         f.truncate()
     return generate_return_data(StatusCode.SUCCESS)
 
+############################ GAME ROOM ############################
+
+def api_game_room_get_players():
+
+    current_username = session_get_username()
+    retcode, message = logic.player_get_others(current_username)
+
+    if retcode:
+        return generate_return_data(StatusCode.SUCCESS, message)
+    return generate_return_data(
+        StatusCode.ERR_GAME_PLAYER_GET_OTHER_IN_ROOM_FAILED, message)
 
 def api_game_room_join_game():
+    
     data = flask.request.get_json()
 
     current_username = session_get_username()
@@ -378,29 +391,8 @@ def api_game_room_join_game():
             {'error_message': message})
     return generate_return_data(StatusCode.SUCCESS)
 
-
-def api_game_room_get_players():
-    current_username = session_get_username()
-    retcode, message = logic.player_get_others(current_username)
-    if retcode:
-
-        host, guests = message
-
-        if len(host) > 0:
-            host['avatar'] = '/static/favicon.png'
-
-        for guest in guests:
-            guest['avatar'] = '/static/favicon.png'
-
-        return generate_return_data(StatusCode.SUCCESS, {
-            'host': host,
-            'guests': guests
-        })
-    return generate_return_data(
-        StatusCode.ERR_GAME_PLAYER_GET_OTHER_IN_ROOM_FAILED, message)
-
-
 def api_game_room_player_ready():
+
     data = flask.request.get_json()
     ready = data.get('ready', None)
 
@@ -412,8 +404,11 @@ def api_game_room_player_ready():
     return generate_return_data(StatusCode.ERR_GAME_PLAYER_SET_READY_FAILED,
                                 message)
 
+############################ GAME CORE ############################
+
 
 def api_game_core_image():
+
     result = {'url': '/static/capoo.png'}
     return generate_return_data(StatusCode.SUCCESS, result)
 
