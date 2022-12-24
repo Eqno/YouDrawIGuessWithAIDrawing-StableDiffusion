@@ -466,7 +466,7 @@ def api_account_send_message():
         f.seek(0)
         json.dump({'messages': messages}, fp=f)
         f.truncate()
-        
+
         return generate_return_data(StatusCode.SUCCESS)
 
 
@@ -523,6 +523,27 @@ def api_game_room_player_ready():
 
 
 ############################ GAME CORE ############################
+
+
+def api_game_core_submit_info():
+
+    data = flask.request.get_json()
+    info = data.get('info', None)
+    negative = data.get('negative', None)
+    rand_seed = data.get('rand_seed', None)
+
+    if info is None:
+        return generate_return_data(
+            StatusCode.ERR_GAME_DID_NOT_COMMIT_ANITHING)
+
+    username = session_get_username()
+    retcode, message = logic.game_submit_desc(username, info, negative,
+                                              rand_seed)
+
+    if retcode:
+        return generate_return_data(StatusCode.SUCCESS)
+    return generate_return_data(StatusCode.ERR_GAME_COMMIT_INFO_FAILED,
+                                message)
 
 
 def api_game_core_image():
@@ -583,6 +604,10 @@ backend_pages = {
     '/api/game/room/get_players': api_game_room_get_players,
     '/api/game/room/player_ready': {
         'view_func': api_game_room_player_ready,
+        'methods': ['POST']
+    },
+    '/api/game/core/submit_desc': {
+        'view_func': api_game_core_submit_info,
         'methods': ['POST']
     },
     '/api/game/core/image': api_game_core_image,
