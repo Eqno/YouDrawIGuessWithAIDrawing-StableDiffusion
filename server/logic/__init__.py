@@ -86,6 +86,15 @@ def player_get_others(player_name:str):
     retcode, player = __get_player_in_game__(player_name)
     if not retcode: return retcode, player
 
+    game_state = 'unknown'
+
+    if player.game.state == GameState.WAITING:
+        game_state = 'waiting'
+    elif player.game.state == GameState.PLAYING:
+        game_state = 'playing'
+    elif player.game.state == GameState.HASENDED:
+        game_state = 'hasended'
+
     host = {}
     if player.game.host is not None:
         host = {
@@ -99,7 +108,7 @@ def player_get_others(player_name:str):
             'name': guest.name,
         })
     
-    return True, { 'host': host, 'guests': guests }
+    return True, { 'game_state': game_state, 'host': host, 'guests': guests }
 
 def player_set_ready(player_name:str, ready:bool):
 

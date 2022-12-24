@@ -102,6 +102,7 @@
         },
         username: '',
 
+        role: '',
         host: {},
         guests: [],
 
@@ -119,15 +120,34 @@
               
               this.host = ret.body.host;
               this.guests = ret.body.guests;
-
               this.username = nav_app.username;
-              for (const i of this.guests) {
-                if (i.name == this.username) {
 
-                  this.self_ready = i.ready;
-                  console.log(this.self_ready);
+              if (this.host.name == this.username) {
+                
+                this.self_ready = this.host.ready;
+                console.log(this.self_ready);
+                this.role = 'host';
 
-                  break;
+              } else {
+                for (const i of this.guests) {
+                  if (i.name == this.username) {
+
+                    this.self_ready = i.ready;
+                    console.log(this.self_ready);
+                    this.role = 'guest';
+
+                    break;
+                  }
+                }
+              }
+              if (ret.body.game_state == 'playing') {
+
+                if (this.role == 'host') {
+                  window.location.href = '/host';
+                } else if (this.role == 'guest') {
+                  window.location.href = '/guest';
+                } else {
+                  console.log('unknown role');
                 }
               }
             } else {

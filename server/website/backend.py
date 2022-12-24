@@ -345,7 +345,6 @@ def api_account_update_signature():
     
     data = flask.request.get_json()
     signature = data['signature']
-
     user_filepath = user_data_path / username / info_file_name
 
     with open(user_filepath, 'r+') as f:
@@ -406,7 +405,6 @@ def api_game_room_player_ready():
 
 ############################ GAME CORE ############################
 
-
 def api_game_core_image():
 
     result = {'url': '/static/capoo.png'}
@@ -455,5 +453,6 @@ backend_pages = {
         'view_func': api_game_room_player_ready,
         'methods': ['POST']
     },
+
     '/api/game/core/image': api_game_core_image,
 }
