@@ -94,7 +94,6 @@ def api_account_username():
         return generate_return_data(StatusCode.SUCCESS, {'username': username})
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
 
-
 def api_account_userinfo():
     data = flask.request.get_json()
     username = data['username']
@@ -115,7 +114,6 @@ def api_account_userinfo():
 
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
 
-
 def api_account_login():
     data = flask.request.get_json()
     username = data['username']
@@ -133,7 +131,6 @@ def api_account_login():
 
     return generate_return_data(
         StatusCode.ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG)
-
 
 def api_account_signup():
     data = flask.request.get_json()
@@ -164,7 +161,6 @@ def api_account_signup():
 
     return generate_return_data(StatusCode.SUCCESS)
 
-
 def api_account_logout():
     username = session_get_username()
 
@@ -173,6 +169,38 @@ def api_account_logout():
             return generate_return_data(StatusCode.SUCCESS)
         return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+def api_account_upload_avatar():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    data = flask.request.files.get('file', None)
+    if data is None:
+        return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
+
+    avatar = pathlib.Path(user_data_path / username / consts.avatar_file_name)
+    with open(avatar, 'wb') as f:
+        data.save(f)
+    return generate_return_data(StatusCode.SUCCESS)
+
+
+def api_account_update_signature():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    data = flask.request.get_json()
+    signature = data['signature']
+    user_filepath = user_data_path / username / info_file_name
+
+    with open(user_filepath, 'r+') as f:
+        user_info = json.load(f)
+        user_info['signature'] = signature
+        f.seek(0)
+        json.dump(user_info, fp=f)
+        f.truncate()
+    return generate_return_data(StatusCode.SUCCESS)
 
 ############################ USER FRIEND ############################
 
@@ -326,39 +354,6 @@ def api_account_approved_application():
         json.dump(user_info, fp=f)
         f.truncate()
 
-    return generate_return_data(StatusCode.SUCCESS)
-
-
-def api_account_upload_avatar():
-    username = session_get_username()
-    if username is None:
-        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-
-    data = flask.request.files.get('file', None)
-    if data is None:
-        return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
-
-    avatar = pathlib.Path(user_data_path / username / consts.avatar_file_name)
-    with open(avatar, 'wb') as f:
-        data.save(f)
-    return generate_return_data(StatusCode.SUCCESS)
-
-
-def api_account_update_signature():
-    username = session_get_username()
-    if username is None:
-        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-
-    data = flask.request.get_json()
-    signature = data['signature']
-    user_filepath = user_data_path / username / info_file_name
-
-    with open(user_filepath, 'r+') as f:
-        user_info = json.load(f)
-        user_info['signature'] = signature
-        f.seek(0)
-        json.dump(user_info, fp=f)
-        f.truncate()
     return generate_return_data(StatusCode.SUCCESS)
 
 ############################ GAME ROOM ############################
