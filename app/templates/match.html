@@ -104,10 +104,14 @@
 
         host: {},
         guests: [],
+        all_ready: false,
         self_ready: false,
+      
+        timer: '',
       },
       mounted: function () {
         this.update_players();
+        this.timer = setInterval(this.heart_beat, '{{ page_timer_interval }}');
       },
       methods: {
         update_players: function () {
@@ -118,7 +122,10 @@
               this.guests = ret.body.guests;
 
               this.username = app.username;
+              this.all_ready = true;
+
               for (const i of this.guests) {
+                this.all_ready &&= i.ready;
                 if (i.name == this.username) {
 
                   this.self_ready = i.ready;
@@ -126,6 +133,9 @@
 
                   return;
                 }
+              }
+              if (this.all_ready) {
+                window.location.href = '/game';
               }
             } else {
               console.log('There is no logined user.');
@@ -140,13 +150,8 @@
         },
         player_ready: function (event) {
           this.$http.post('/api/game/room/player_ready', { ready: !this.self_ready }, { emulateJSON: false }).then(function (ret) {
-            console.log(ret.body);
             if (ret.body.code == 0) {
-              if (ret.body.begin_game) {
-                window.location.href = '/game';
-              } else {
-                this.update_players();
-              }
+              this.update_players();
             } else {
               console.log(ret.body.message);
             }
@@ -157,6 +162,9 @@
         heart_beat: function () {
           this.update_players();
         },
+        beforeDestroy() {
+          clearInterval(this.timer);
+        }
       },
     })
   </script>
