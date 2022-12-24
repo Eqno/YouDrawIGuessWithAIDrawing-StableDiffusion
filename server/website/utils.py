@@ -44,6 +44,7 @@ template_variables = {
     'delete_friend': '删除好友',
 
     # others
+    'page_timer_interval': '500',
     'wsurl': "ws://127.0.0.1:80/socket/online",
 }
 
