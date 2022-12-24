@@ -103,10 +103,6 @@
       },
       mounted: function () {
         this.query_logined();
-        console.log(this.need_login);
-        if (this.logined == false && this.need_login != 'False') {
-          window.location.href = '/login?src=' + window.location.href;
-        }
       },
       methods: {
         query_logined: function () {
@@ -120,9 +116,15 @@
             }
             else {
               console.log('There is no logined user.');
+              if (this.need_login != 'False') {
+                window.location.href = '/login?src=' + window.location.href;
+              }
             }
           }, function (ret) {
             console.log('Request fails, status:', ret);
+            if (this.need_login != 'False') {
+              window.location.href = '/login?src=' + window.location.href;
+            }
           });
         },
         heartbeat: function () {
