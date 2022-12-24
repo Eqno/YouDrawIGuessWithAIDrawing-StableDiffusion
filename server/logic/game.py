@@ -300,6 +300,8 @@ class Game:
                     'content': '开始第一轮'
                 })
                 self.info_record.append(res)
+
+                self.start = True
             
             else:
                 res = dict({

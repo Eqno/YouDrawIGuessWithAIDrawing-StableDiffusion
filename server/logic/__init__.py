@@ -131,5 +131,10 @@ def game_get_info(player_name:str):
     if not retcode: return retcode, player
     return player.get_info()
 
+def __game_loop__():
+
+    for game in games:
+        game.get_loop_time()
+
 from .game import Game
 from .player import Player

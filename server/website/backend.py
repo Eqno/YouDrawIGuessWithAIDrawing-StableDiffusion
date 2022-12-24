@@ -3,7 +3,6 @@
 ############################### IMPORT ###############################
 
 import os
-import sys
 import json
 import time
 import flask
@@ -18,6 +17,7 @@ from . import consts
 
 HEARTBEAT_TIMEOUT = 10
 HEARTBEAT_INTERVAL = 5
+GAMELOOP_INTERVAL = 0.5
 
 msg_data_path = consts.data_base_path / 'msg'
 user_data_path = consts.data_base_path / 'user'
@@ -40,9 +40,14 @@ def api_heartbeat_imonline():
     online_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
 
+def main_game_loop():
+    while True:
+        logic.__game_loop__()
+        time.sleep(GAMELOOP_INTERVAL)
 
 def online_users_update():
     global online_users
+
     while True:
         now = time.time()
         result = {
@@ -53,9 +58,7 @@ def online_users_update():
         print('online users: {}'.format(list(online_users.keys())))
         time.sleep(HEARTBEAT_INTERVAL)
 
-
 ############################## INITIAL ###############################
-
 
 def backend_init():
     for _dir in (consts.data_base_path, msg_data_path, user_data_path):
@@ -66,6 +69,9 @@ def backend_init():
     heartbeat.daemon = True
     heartbeat.start()
 
+    gameloop = threading.Thread(target=main_game_loop)
+    gameloop.daemon = True
+    gameloop.start()
 
 ############################# GET SESSION #############################
 
