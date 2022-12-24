@@ -528,6 +528,7 @@ def api_game_room_player_ready():
 def api_game_core_submit_info():
 
     data = flask.request.get_json()
+
     info = data.get('info', None)
     negative = data.get('negative', None)
     rand_seed = data.get('rand_seed', None)
@@ -537,15 +538,22 @@ def api_game_core_submit_info():
             StatusCode.ERR_GAME_DID_NOT_COMMIT_ANITHING)
 
     username = session_get_username()
-    retcode, message = logic.game_submit_desc(username, info, negative,
+    retcode, message = logic.game_submit_info(username, info, negative,
                                               rand_seed)
-
     if retcode:
         return generate_return_data(StatusCode.SUCCESS)
     return generate_return_data(StatusCode.ERR_GAME_COMMIT_INFO_FAILED,
                                 message)
 
+def api_game_core_get_info():
 
+    username = session_get_username()
+    retcode, message = logic.game_get_info(username)
+
+    if retcode:
+        return generate_return_data(StatusCode.SUCCESS, message)
+    return generate_return_data(StatusCode.ERR_GAME_GET_INFO_FAILED, message)
+    
 def api_game_core_image():
 
     result = {'url': '/static/capoo.png'}
@@ -606,9 +614,10 @@ backend_pages = {
         'view_func': api_game_room_player_ready,
         'methods': ['POST']
     },
-    '/api/game/core/submit_desc': {
+    '/api/game/core/submit_info': {
         'view_func': api_game_core_submit_info,
         'methods': ['POST']
     },
+    '/api/game/core/get_info': api_game_core_get_info,
     '/api/game/core/image': api_game_core_image,
 }
