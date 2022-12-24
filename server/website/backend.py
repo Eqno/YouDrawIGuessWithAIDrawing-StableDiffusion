@@ -2,11 +2,14 @@
 
 ############################### IMPORT ###############################
 
-import os, json, flask, pathlib, sys, time, simple_websocket
+import os
+import json
+import time
+import flask
+import pathlib
+import simple_websocket
 from .utils import generate_return_data, StatusCode
-
-sys.path.append(os.getcwd().replace('\\', '/') + '/../')
-from logic import *
+from .. import logic
 
 ############################### PARAMS ###############################
 
@@ -23,13 +26,15 @@ avatar_file_name = 'avatar.png'
 
 ############################## INITIAL ###############################
 
-def backend_init():
 
+def backend_init():
     for _dir in (data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
 
+
 ############################# GET SESSION #############################
+
 
 def session_get_username():
     return flask.session.get('username', None)
@@ -42,7 +47,9 @@ def session_set_username(username: str):
 def session_del_username():
     return flask.session.pop('username')
 
+
 ############################ GET USER DATA ############################
+
 
 def api_account_username():
     username = session_get_username()
@@ -51,8 +58,8 @@ def api_account_username():
         return generate_return_data(StatusCode.SUCCESS, {'username': username})
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
 
-def api_account_userinfo():
 
+def api_account_userinfo():
     data = flask.request.get_json()
     username = data['username']
 
@@ -63,7 +70,6 @@ def api_account_userinfo():
             StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
 
     with open(user_file_path, 'r') as f:
-        
         raw_user_info = json.load(f)
         userinfo = {}
         userinfo['username'] = raw_user_info['username']
@@ -72,42 +78,26 @@ def api_account_userinfo():
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
 
 
-
-
-
-
-
-
-
 def api_account_login():
-
     data = flask.request.get_json()
     username = data['username']
     password = data['password']
 
-    user_root_path = user_data_path / username
-    user_info_path = user_root_path / info_file_name
-    user_avatar_path = user_root_path / avatar_file_name
+    user_info_path = user_data_path / username / info_file_name
 
     if user_info_path.exists():
-
         with open(user_info_path, 'r') as f:
-
             user_data = json.load(f)
-            if username == user_data['username'] and password == user_data['password']:
+            if username == user_data['username'] and password == user_data[
+                    'password']:
                 session_set_username(username)
-
-        if user_avatar_path.exists():
-            flask.send_file(user_avatar_path, mimetype='image/png')
-
-    return generate_return_data(StatusCode.SUCCESS)
+                return generate_return_data(StatusCode.SUCCESS)
 
     return generate_return_data(
         StatusCode.ERR_ACCOUNT_USERNAME_OR_PASSWORD_WRONG)
 
 
 def api_account_signup():
-
     data = flask.request.get_json()
     username = data['username']
     password = data['password']
@@ -146,8 +136,6 @@ def api_account_logout():
             return generate_return_data(StatusCode.SUCCESS)
         return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
     return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-
-
 
 
 def api_account_add_friend():
@@ -302,22 +290,6 @@ def api_account_approved_application():
     return generate_return_data(StatusCode.SUCCESS)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def api_game_room_join_game():
     data = flask.request.get_json()
 
@@ -325,14 +297,14 @@ def api_game_room_join_game():
     target_username = data.get('username', None)
     current_role = data.get('role', None)
 
-    retcode, message = create_player_instance(current_username)
+    retcode, message = logic.create_player_instance(current_username)
     if not retcode:
         return generate_return_data(StatusCode.ERR_GAME_PLAYER_NUM_EXCEED_MAX,
                                     {'error_message': message})
 
-    retcode, message = player_join_game(current_name=current_username,
-                                        target_name=target_username,
-                                        current_role=current_role)
+    retcode, message = logic.player_join_game(current_name=current_username,
+                                              target_name=target_username,
+                                              current_role=current_role)
 
     if not retcode:
         return generate_return_data(
@@ -340,10 +312,10 @@ def api_game_room_join_game():
             {'error_message': message})
     return generate_return_data(StatusCode.SUCCESS)
 
-def api_game_room_get_players():
 
+def api_game_room_get_players():
     current_username = session_get_username()
-    retcode, message = player_get_others(current_username)
+    retcode, message = logic.player_get_others(current_username)
     if retcode:
 
         host, guests = message
@@ -367,7 +339,7 @@ def api_game_room_player_ready():
     ready = data.get('ready', None)
 
     username = session_get_username()
-    retcode, message = player_set_ready(username, ready)
+    retcode, message = logic.player_set_ready(username, ready)
 
     if retcode:
         return generate_return_data(StatusCode.SUCCESS, message)
@@ -376,29 +348,20 @@ def api_game_room_player_ready():
 
 
 def api_game_core_image():
-
     result = {'url': '/static/capoo.png'}
     return generate_return_data(0, result)
 
 
+# FIXME: using global variables is NOT elegant!
+online_users = {}
+
 def socket_online(websocket):
     try:
         while True:
+            websocket.send('ping')
             message = websocket.receive()
-            websocket.send(message)
-
-            print(message)
-
-            if message is not None:
-                message = json.loads(message)
-                if isinstance(message, dict):
-                    username = message.get('username', None)
-                    if username is not None:
-                        quaryinfo = message.get('quaryinfo', None)
-                        if quaryinfo is not None:
-                            if quaryinfo == 'firends':
-                                print(quaryinfo)
-
+            if message == 'pong':
+                pass
             time.sleep(SOCKET_ONLINE_TIME_INTERVAL)
 
     except simple_websocket.ConnectionClosed:

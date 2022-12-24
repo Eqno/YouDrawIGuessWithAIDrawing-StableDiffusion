@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, flask, datetime, threading
+import os, flask, datetime
 from flask_sock import Sock
 from . import frontend, backend, utils
 
