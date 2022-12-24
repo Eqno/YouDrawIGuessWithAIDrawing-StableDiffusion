@@ -23,7 +23,7 @@ class Game:
         self.mode = mode
         self.state = GameState.WAITING
 
-        self.ans = '咖波'
+        self.ans = None
 
         self.host = None
         self.guests = []
@@ -134,7 +134,7 @@ class Game:
                     player.win = True
                     player.score += HALF_WIN_SCORE
 
-                    self.info_record.append({
+                    res = dict({
                         'is_alert': True,
                         'alert_prefix': '系统',
                         'players': [{
@@ -143,16 +143,19 @@ class Game:
                         }],
                         'content': '回答正确'
                     })
+                    self.info_record.append(res)
 
                     return True, 'ans is correct'
                 else:
                     
+                    print('correct!')
+
                     player.win = True
                     self.host.win = True
                     player.score += WHOLE_WIN_SCORE
                     self.loop_time = time() + LOOP_LAST_TIME
 
-                    self.info_record.append({
+                    res = dict({
                         'is_alert': True,
                         'alert_prefix': '系统',
                         'players': [{
@@ -161,23 +164,30 @@ class Game:
                         }],
                         'content': '首次回答正确'
                     })
-                    self.info_record.append({
+                    self.info_record.append(res)
+
+                    ret = dict({
                         'is_alert': True,
                         'alert_prefix': '提示',
                         'players': [],
                         'content': self.ans
                     })
-                    self.info_record.append({
+                    self.info_record.append(ret)
+
+                    res = dict({
                         'is_alert': True,
                         'alert_prefix': '系统',
                         'players': [],
                         'content': '进入倒计时'
                     })
+                    self.info_record.append(res)
                     return True, 'ans is the first correct'
                 
             else:
+                
+                print('in     correct!', info, 'ans: ', self.ans)
 
-                self.info_record.append({
+                res = dict({
                     'is_alert': False,
                     'alert_prefix': '',
                     'players': [{
@@ -186,6 +196,7 @@ class Game:
                     }],
                     'content': info
                 })
+                self.info_record.append(res)
                 return True, 'ans is incorrect'
 
         return False, 'collect ans failed'
@@ -201,7 +212,7 @@ class Game:
                         if re.search(i, info, re.IGNORECASE) is not None:
                             return False, 'could not contain keyword character'
 
-                    self.info_record.append({
+                    res = dict({
                         'is_alert': False,
                         'alert_prefix': '',
                         'players': [{
@@ -210,6 +221,7 @@ class Game:
                         }],
                         'content': info
                     })
+                    self.info_record.append(res)
                     return True, 'host say something'
 
                 host_task = task_queue.get(self.host.name)
@@ -229,7 +241,6 @@ class Game:
 
         if self.state != GameState.PLAYING:
             return False, 'player could get info when playing'
-        
         return True, self.info_record
 
     def get_loop_time(self):

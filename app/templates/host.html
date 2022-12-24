@@ -119,91 +119,7 @@
         load_finished: true,
         keyword: '咖波',
 
-        messages: [
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '系统',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     },
-          //     {
-          //       'name': '李四',
-          //       'ranking': 1000,
-          //     }
-          //   ],
-          //   'content': '加入了房间'
-          // },
-          // {
-          //   'is_alert': false,
-          //   'alert_prefix': '',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     }
-          //   ],
-          //   'content': '蓝色猫猫头'
-          // },
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '提示',
-          //   'players': [],
-          //   'content': '？波'
-          // },
-          // {
-          //   'is_alert': false,
-          //   'alert_prefix': '',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     }
-          //   ],
-          //   'content': '气功波'
-          // },
-          // {
-          //   'is_alert': false,
-          //   'alert_prefix': '',
-          //   'players': [
-          //     {
-          //       'name': '李四',
-          //       'ranking': 1000,
-          //     }
-          //   ],
-          //   'content': '加波'
-          // },
-          // {
-          //   'is_alert': false,
-          //   'alert_prefix': '',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     }
-          //   ],
-          //   'content': '咖波'
-          // },
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '系统',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     }
-          //   ],
-          //   'content': '回答正确'
-          // },
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '系统',
-          //   'players': [],
-          //   'content': '凑行数测试'
-          // },
-
-        ]
+        messages: []
       },
       mounted: function () {
         this.$http.get('/api/game/core/image').then(function (res) {
@@ -224,8 +140,8 @@
         update_info: function () {
           this.$http.get('/api/game/core/get_info').then(function (res) {
             if (res.body.code == 0) {
-              this.message = res.body
-              console.log(res.body)
+              this.messages = res.body.message;
+              console.log(res.body.message);
             } else {
               console.log('Getting image fails, message:', res.body.message);
             }
@@ -233,7 +149,7 @@
             console.log('Request fails, status:', res);
           });
         },
-        submit_ans: function (event) {
+        submit_desc: function (event) {
           console.log(this.input_ans);
 
           this.$http.post('/api/game/core/submit_info', { info: this.input_ans }, { emulateJSON: false }).then(function (res) {
