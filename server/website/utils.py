@@ -66,6 +66,7 @@ class StatusCode(IntEnum):
     ERR_GAME_GET_STATE_FAILED = 211
     ERR_GAME_DID_NOT_COMMIT_ANITHING = 212
     ERR_GAME_COMMIT_INFO_FAILED = 213
+    ERR_GAME_GET_INFO_FAILED = 214
 
 error_msg = {
     StatusCode.SUCCESS: '',
@@ -87,7 +88,8 @@ error_msg = {
 
     StatusCode.ERR_GAME_GET_STATE_FAILED: '获取游戏状态失败',
     StatusCode.ERR_GAME_DID_NOT_COMMIT_ANITHING: '未提交任何信息',
-    StatusCode.ERR_GAME_COMMIT_INFO_FAILED: '提交信息失败'
+    StatusCode.ERR_GAME_COMMIT_INFO_FAILED: '提交信息失败',
+    StatusCode.ERR_GAME_GET_INFO_FAILED: '获取信息失败'
 }
 
 default_errno = StatusCode.ERR_SERVER_UNKNOWN

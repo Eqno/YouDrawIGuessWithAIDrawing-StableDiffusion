@@ -207,24 +207,53 @@
       },
       mounted: function () {
         this.$http.get('/api/game/core/image').then(function (res) {
-
           console.log(res.body);
           if (res.body.code == 0) {
             this.image_url = res.body.url;
           } else {
             console.log('Getting image fails, message:', res.body.message);
           }
-
         }, function (res) {
           console.log('Request fails, status:', res);
         });
+
+        this.update_info();
+        this.timer = setInterval(this.heart_beat, '{{ page_timer_interval }}');
       },
       methods: {
-        submit_desc: function (event) {
-          console.log(this.content);
-          
+        update_info: function () {
+          this.$http.get('/api/game/core/get_info').then(function (res) {
+            if (res.body.code == 0) {
+              this.message = res.body
+              console.log(res.body)
+            } else {
+              console.log('Getting image fails, message:', res.body.message);
+            }
+          }, function (res) {
+            console.log('Request fails, status:', res);
+          });
+        },
+        submit_ans: function (event) {
+          console.log(this.input_ans);
+
+          this.$http.post('/api/game/core/submit_info', { info: this.input_ans }, { emulateJSON: false }).then(function (res) {
+            console.log(res.body);
+            if (res.body.code == 0) {
+              this.update_info();
+            } else {
+              console.log('Getting image fails, message:', res.body.message);
+            }
+          }, function (res) {
+            console.log('Request fails, status:', res);
+          });
+        },
+        heart_beat: function () {
+          this.update_info();
         },
       },
+      beforeDestroy() {
+        clearInterval(this.timer);
+      }
     })
   </script>
 

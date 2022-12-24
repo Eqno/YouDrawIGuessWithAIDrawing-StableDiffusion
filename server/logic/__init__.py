@@ -125,5 +125,11 @@ def game_submit_info(player_name:str, info:str, negative:str, rand_seed:int):
     if not retcode: return retcode, player
     return player.give_info(info, negative, rand_seed)
 
+def game_get_info(player_name:str):
+
+    retcode, player = __get_player_in_game__(player_name)
+    if not retcode: return retcode, player
+    return player.get_info()
+
 from .game import Game
 from .player import Player

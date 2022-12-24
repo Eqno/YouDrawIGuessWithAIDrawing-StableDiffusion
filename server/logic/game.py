@@ -95,7 +95,12 @@ class Game:
             return 0
 
     # 所有人都点了准备就自动开始
-    def check_ready(self, round_num=5):
+    def check_ready(self, player=None, ready:bool=False, round_num=5):
+
+        if self.state != GameState.WAITING:
+            return False, 'player could only ready when waiting'
+
+        player.ready = ready
 
         if self.host and self.host.ready:
             
@@ -110,6 +115,8 @@ class Game:
                 self.state = GameState.PLAYING
                 self.round_num = round_num
                 self.goto_next_round()
+        
+        return True, 'player set ready succeed'
 
     def collect_ans(self, player, info):
 
@@ -217,6 +224,13 @@ class Game:
                 return True, 'add task to generate image'
 
         return False, 'collect img failed'
+
+    def get_info(self):
+
+        if self.state != GameState.PLAYING:
+            return False, 'player could get info when playing'
+        
+        return True, self.info_record
 
     def get_loop_time(self):
 

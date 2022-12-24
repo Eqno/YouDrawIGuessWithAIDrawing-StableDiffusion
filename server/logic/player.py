@@ -58,13 +58,7 @@ class Player:
 
     def set_ready(self, ready:bool):
 
-        if self.game.state != GameState.WAITING:
-            return False, 'player could only ready when waiting'
-
-        self.ready = ready
-        self.game.check_ready()
-        
-        return True, 'player set ready succeed'
+        return self.game.check_ready(self, ready, 5)
 
     # guest 给出答案，host 给出咒语
     def give_info(self, info: str, negtive: str = '', rand_seed=0):
@@ -74,3 +68,7 @@ class Player:
         else:
             return self.game.collect_img(info, negtive, rand_seed)
             # return None # text2image.generate_image(describe, negtive, self.name, rand_seed)
+
+    def get_info(self):
+
+        return self.game.get_info()
