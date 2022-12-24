@@ -8,8 +8,9 @@ import time
 import flask
 import pathlib
 import simple_websocket
+
+import logic
 from .utils import generate_return_data, StatusCode
-from .. import logic
 
 ############################### PARAMS ###############################
 
@@ -349,11 +350,12 @@ def api_game_room_player_ready():
 
 def api_game_core_image():
     result = {'url': '/static/capoo.png'}
-    return generate_return_data(0, result)
+    return generate_return_data(StatusCode.SUCCESS, result)
 
 
 # FIXME: using global variables is NOT elegant!
 online_users = {}
+
 
 def socket_online(websocket):
     try:
