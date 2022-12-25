@@ -30,6 +30,7 @@ class Game:
         self.guests = []
         self.info_record = []
 
+        self.loop_flag = []
         self.end_time = None
         self.loop_time = None
 
@@ -250,7 +251,45 @@ class Game:
             
             loop_time = self.loop_time - time()
 
-            print(loop_time)
+            if loop_time < 5.5 and self.loop_flag[0] is False:
+                res = dict({
+                    'is_alert': True,
+                    'alert_prefix': '系统',
+                    'players': [],
+                    'content': '倒计时 5 秒'
+                })
+                self.info_record.append(res)
+                self.loop_flag[0] = True
+            
+            if loop_time < 3.5 and self.loop_flag[1] is False:
+                res = dict({
+                    'is_alert': True,
+                    'alert_prefix': '系统',
+                    'players': [],
+                    'content': '倒计时 3 秒'
+                })
+                self.info_record.append(res)
+                self.loop_flag[1] = True
+
+            if loop_time < 2.5 and self.loop_flag[2] is False:
+                res = dict({
+                    'is_alert': True,
+                    'alert_prefix': '系统',
+                    'players': [],
+                    'content': '倒计时 2 秒'
+                })
+                self.info_record.append(res)
+                self.loop_flag[2] = True
+
+            if loop_time < 1.5 and self.loop_flag[3] is False:
+                res = dict({
+                    'is_alert': True,
+                    'alert_prefix': '系统',
+                    'players': [],
+                    'content': '倒计时 1 秒'
+                })
+                self.info_record.append(res)
+                self.loop_flag[3] = True
 
             if loop_time < 0:
                 self.goto_next_round()
@@ -270,6 +309,7 @@ class Game:
 
         self.loop_time = None
         self.ans = '咖波2'
+        self.loop_flag = [False, False, False, False]
 
         if self.host is None:
             return False, 'host escaped'

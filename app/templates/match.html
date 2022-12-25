@@ -111,7 +111,7 @@
       },
       mounted: function () {
         this.update_players();
-        this.timer = setInterval(this.heart_beat, '{{ page_timer_interval }}');
+        this.timer = setInterval(this.heart_beat, 500);
       },
       methods: {
         update_players: function () {

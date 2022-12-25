@@ -134,7 +134,7 @@
         });
 
         this.update_info();
-        this.timer = setInterval(this.heart_beat, '{{ page_timer_interval }}');
+        this.timer = setInterval(this.heart_beat, 500);
       },
       methods: {
         update_info: function () {

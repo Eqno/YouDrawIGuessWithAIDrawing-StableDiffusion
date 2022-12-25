@@ -39,8 +39,6 @@ def model_init():
     global model_instance
     model_instance = stable_diffusion.Text2image(consts.generated_img_size,
                                                  consts.generated_img_size)
-
-
 def words_init():
     global words
     if not consts.words_path.exists():
@@ -52,12 +50,10 @@ def words_init():
             json_data = json.load(f)
             words = json_data['words']
 
-
 def prompt_str_to_list(prompts: str) -> list:
     splited_result = (p.strip() for p in prompts.split(','))
     non_empty_result = list(filter(lambda s: len(s) > 0, splited_result))
     return non_empty_result
-
 
 def api_core_generate_image():
     username = session_get_username()
@@ -84,7 +80,6 @@ def api_core_generate_image():
     return generate_return_data(StatusCode.ERR_MODEL_UNKNOWN_ERROR,
                                 {'message': msg})
 
-
 ############################## HEARTBEAT ###############################
 
 # FIXME: using global variables is NOT elegant!
@@ -97,7 +92,7 @@ def api_heartbeat_imonline():
     username = session_get_username()
     if username is None:
         return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-    update_time = time.time()
+    update_time = round(time.time() * 1000)
     online_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
 
@@ -107,7 +102,7 @@ def api_heartbeat_imgaming():
     username = session_get_username()
     if username is None:
         return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-    update_time = time.time()
+    update_time = round(time.time() * 1000)
     gaming_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
 
@@ -116,7 +111,7 @@ def user_status_update():
     global online_users
     global gaming_users
     while True:
-        now = time.time()
+        now = round(time.time() * 1000)
         online_result = {
             k: v
             for k, v in online_users.items() if now - v < HEARTBEAT_TIMEOUT
@@ -466,10 +461,48 @@ def api_account_approved_application():
 def get_chat_filename(users) -> str:
     return '.'.join(sorted(users)) + '.json'
 
+def api_account_get_unread_num():
+    username = session_get_username()
+    if not username:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    user_file_path = user_data_path / username / info_file_name
+    if not user_file_path.exists():
+        return generate_return_data(StatusCode.ERR_SERVER_UNKNOWN)
+
+    friends, unread_num = [], {}
+    with open(user_file_path, 'r') as f:
+        friends = json.load(f).get('friends', [])
+
+    for target_username in friends:
+        target_user_path = user_data_path / target_username
+
+        if not target_user_path.exists():
+            return generate_return_data(
+                StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
+
+        chat_filename = get_chat_filename([username, target_username])
+        chat_path = msg_data_path / chat_filename
+
+        if not chat_path.exists():
+            continue
+
+        with open(chat_path, 'r') as f:
+            json_data = json.load(f)
+            timestamp = json_data.get('timestamp', dict()).get(username, 0)
+
+            unread_num[target_username] = 0
+            for msg in json_data.get('messages', []):
+    
+                if msg['username'] == target_username and msg['timestamp'] > timestamp:
+                    unread_num[target_username] += 1
+
+    return generate_return_data(StatusCode.SUCCESS, { 'num': unread_num })
 
 def api_account_get_messages():
     # {'username': str, 'timestamp': int}
     # get messages that later than the `timestamp`
+
     username = session_get_username()
     if username is None:
         return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
@@ -477,6 +510,7 @@ def api_account_get_messages():
     data = flask.request.get_json()
     target_username = data['username']
     target_user_path = user_data_path / target_username
+
     if not target_user_path.exists():
         return generate_return_data(
             StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
@@ -485,21 +519,38 @@ def api_account_get_messages():
     chat_path = msg_data_path / chat_filename
 
     if not chat_path.exists():
-        return generate_return_data(StatusCode.SUCCESS, {'messages': []})
+        return generate_return_data(StatusCode.SUCCESS, { 'messages': [] })
 
     timestamp = int(data.get('timestamp', 0))
 
-    with open(chat_path, 'r') as f:
-        json_data = json.load(f)
-        messages = json_data.get('messages', [])
-        if timestamp > 0:
-            messages = [
-                msg for msg in messages if msg['timestamp'] > timestamp
-            ]
-        return generate_return_data(StatusCode.SUCCESS, {'messages': messages})
+    with open(chat_path, 'r+') as f:
+        json_data = {}
+        try:
+            json_data = json.load(f)
+        except:
+            pass
+        
+        all_messages = json_data.get('messages', [])
+        all_timestamp = json_data.get('timestamp', dict())
+        all_timestamp[username] = int(round(time.time() * 1000))
 
+        res = dict({
+            'timestamp': all_timestamp,
+            'messages': all_messages
+        })
+        f.seek(0)
+        json.dump(res, fp=f)
+        f.truncate()
+
+        if timestamp > 0:
+            all_messages = [
+                msg for msg in all_messages
+                if msg['timestamp'] > timestamp
+            ]
+        return generate_return_data(StatusCode.SUCCESS, { 'messages': all_messages })
 
 def api_account_send_message():
+
     username = session_get_username()
     if username is None:
         return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
@@ -507,6 +558,7 @@ def api_account_send_message():
     data = flask.request.get_json()
     target_username = data['username']
     target_user_path = user_data_path / target_username
+
     if not target_user_path.exists():
         return generate_return_data(
             StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
@@ -515,7 +567,7 @@ def api_account_send_message():
     chat_path = msg_data_path / chat_filename
 
     content = data['content']
-    timestamp = int(time.time())
+    this_timestamp = int(round(time.time() * 1000))
 
     with open(chat_path, 'r+') as f:
         json_data = {}
@@ -524,15 +576,22 @@ def api_account_send_message():
         except:
             pass
 
+        get_timestamp = json_data.get('timestamp', dict())
+        get_timestamp[username] = this_timestamp
+
         messages = list(json_data.get('messages', []))
         messages.append({
             'username': username,
             'content': content,
-            'timestamp': timestamp
+            'timestamp': this_timestamp
         })
 
         f.seek(0)
-        json.dump({'messages': messages}, fp=f)
+        res = dict({
+            'timestamp': get_timestamp,
+            'messages': messages
+        })
+        json.dump(res, fp=f)
         f.truncate()
 
         return generate_return_data(StatusCode.SUCCESS)
@@ -664,6 +723,10 @@ backend_pages = {
         'view_func': api_account_update_signature,
         'methods': ['POST']
     },
+
+########################### MESSAGES ###########################
+
+    '/api/account/get_unread_num': api_account_get_unread_num,
     '/api/account/get_messages': {
         'view_func': api_account_get_messages,
         'methods': ['POST']
@@ -672,6 +735,9 @@ backend_pages = {
         'view_func': api_account_send_message,
         'methods': ['POST']
     },
+
+########################### GAME ROOM ###########################
+
     '/api/game/room/join_game': {
         'view_func': api_game_room_join_game,
         'methods': ['POST']
@@ -681,6 +747,9 @@ backend_pages = {
         'view_func': api_game_room_player_ready,
         'methods': ['POST']
     },
+
+########################### GAME CORE ###########################
+
     '/api/game/core/submit_info': {
         'view_func': api_game_core_submit_info,
         'methods': ['POST']

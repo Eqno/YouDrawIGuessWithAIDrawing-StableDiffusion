@@ -7,6 +7,8 @@
     .friends {
       margin-left: 0;
       list-style: none;
+      height: fit-content;
+      line-height: unset !important;
     }
 
     .message-block {
@@ -80,31 +82,45 @@
     .friend-item-father {
       display: flex;
       justify-content: flex-end;
+
+      height: fit-content;
     }
 
     .friend-item-left {
       display: inline-block;
-      margin-right: auto;
+      
+      line-height: 32px;
 
-      margin-top: 6px;
-      margin-bottom: 6px;
+      margin-top: 0;
+      margin-bottom: 0;
+      margin-left: 0;
+      margin-right: auto;
 
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap
+      white-space: nowrap;
+
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
     }
 
     .friend-item-right {
       display: inline-block;
       min-width: 89px;
+      margin-top: 0;
+      margin-left: 0;
+      margin-right: 0;
+      margin-bottom: 0;
 
-      margin-left: auto;
+      line-height: 32px;
+
       padding-left: 6px;
+      
       border-left: 1px solid;
       border-color: #dbdbdb;
-
-      margin-top: 6px;
-      margin-bottom: 6px;
+      
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
     }
 
     .friend-item-right:hover {
@@ -115,6 +131,39 @@
 
     a.button:hover {
       color: #ffffff;
+    }
+
+    .new-message {
+      margin-top: 0;
+      margin-bottom: 0 !important;
+      margin-left: auto;
+      margin-right: 0;
+    }
+    .new-message-tag {
+      height: fit-content;
+      margin-top: 4px;
+      margin-bottom: auto !important;
+      margin-right: 6px;
+      background-color: #5ac9e8 !important;
+    }
+
+    .chat-name {
+      display: block;
+
+      color: #ffffff;
+      padding-left: 10px;
+      padding-right: 10px;
+      margin: auto;
+
+      width: fit-content;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    a.chat-name:hover {
+      color: #485fc7;
     }
   </style>
 </head>
@@ -157,6 +206,7 @@
                 {% raw %}
                 <li v-for="friend of gaming_friends" class="friend-item-father">
                   <a v-on:click="chat_with(friend.name)" class="friend-item-left">{{ friend.name }}</a>
+                  <div v-if="new_message_num[friend.name] != null && new_message_num[friend.name] > 0" class="tags new-message"><span class="tag is-info new-message-tag">{{ new_message_num[friend.name] }}</span></div>
                   <a v-on:click="join_game(friend.name)" class="friend-item-right">加入游戏</a>
                 </li>
                 {% endraw %}
@@ -168,6 +218,7 @@
                 {% raw %}
                 <li v-for="friend of online_friends" class="friend-item-father">
                   <a v-on:click="chat_with(friend.name)" class="friend-item-left">{{ friend.name }}</a>
+                  <div v-if="new_message_num[friend.name] != null && new_message_num[friend.name] > 0" class="tags new-message"><span class="tag is-info new-message-tag">{{ new_message_num[friend.name] }}</span></div>
                   <a v-on:click="invite_game(friend.name)" class="friend-item-right">邀请进房</a>
                 </li>
                 {% endraw %}
@@ -179,6 +230,7 @@
                 {% raw %}
                 <li v-for="friend of offline_friends" class="friend-item-father">
                   <a v-on:click="chat_with(friend.name)" class="friend-item-left">{{ friend.name }}</a>
+                  <div v-if="new_message_num[friend.name] != null && new_message_num[friend.name] > 0" class="tags new-message"><span class="tag is-info new-message-tag">{{ new_message_num[friend.name] }}</span></div>
                 </li>
                 {% endraw %}
               </ul>
@@ -222,8 +274,11 @@
       <div class="column" style="position: relative; min-height: 50rem;">
         <div class="panel" style="height: 100%;">
           {% raw %}
-          <p v-if="left_username" class="panel-heading align-center is-capoo">{{ left_username }}</p>
-          <p v-else class="panel-heading align-center is-capoo">聊天</p>
+          <div class="panel-heading align-center is-capoo">
+            <a v-if="left_username" :href="userinfo_prefix + left_username" class="chat-name">{{ left_username }}</a>
+            <p v-else class="chat-name">聊天</p>
+          </div>
+          
 
           <ul ref="msgbox" class="panel-block normal-color"
             style="display: block; position: absolute; top: 66px; bottom: 69px; left: 12px; right: 12px; overflow-y: scroll;">
@@ -259,15 +314,16 @@
     page = new Vue({
       el: '#app',
       data: {
+        new_message_num: {},
+        userinfo_prefix: '{{ url_for("userinfo", username="") }}',
+
         left_username: '',
         left_avatar: '',
         left_userinfo: null,
 
         right_username: '',
         right_avatar: '',
-        right_userinfo: null,
 
-        friends_updater: null,
         friends: [],
         gaming_friends: [],
         online_friends: [],
@@ -284,43 +340,18 @@
         messages: [],
         last_msg_time: 0,
         msg_updater: null,
+        unread_updater: null,
+        friends_updater: null,
       },
       mounted: function () {
-        this.update_user_info();
         this.update_friends_list();
-        this.friends_updater = setInterval(this.update_friends_list, 5000);
+        
+        this.friends_updater = setInterval(this.update_friends_list, 1500);
+        this.unread_updater = setInterval(this.get_unread_num, 1000);
       },
       methods: {
-        update_user_info: function () {
-          this.$http.get('/api/account/username').then(function (res) {
-            console.log(res.body);
-            if (res.body.code == 0) {
-              this.right_username = res.body.username;
-              this.right_avatar = '/avatar/' + this.right_username;
-            }
-            else {
-              console.log('There is no logined user.');
-            }
-          }, function (ret) {
-            console.log('Request fails, status:', ret);
-          });
-          this.$http.post('/api/account/userinfo', { username: this.right_username }, { emulateJSON: false }).then(function (res) {
-            console.log(res.body);
-            if (res.body.code == 0) {
-              const data = res.body.userinfo;
-              this.right_userinfo = res.body.userinfo;
-            } else {
-              console.log('Getting user info fails, message:', res.body.message);
-              this.error_message = res.body.message;
-            }
-          }, function (res) {
-            console.log('Request fails, status:', res);
-            this.error_message = '服务器异常';
-          });
-        },
         update_friends_list: function () {
           this.$http.get('/api/account/get_friends').then(function (ret) {
-            console.log(ret.body);
             if (ret.body.code == 0) {
               this.friends = ret.body.friends;
               this.classify_friend_list(this.friends);
@@ -335,17 +366,24 @@
           });
         },
         chat_with: function (username) {
-          this.$http.post('/api/account/userinfo', { username: username }, { emulateJSON: false }).then(function (res) {
-            console.log(res.body);
+          this.left_username = username;
+          this.left_avatar = '/avatar/' + this.left_username;
+
+          this.right_username = app.username;
+          this.right_avatar = '/avatar/' + this.right_username;
+
+          this.last_msg_time = 0;
+          this.update_messages();
+          if (this.msg_updater == null) {
+            this.msg_updater = setInterval(this.update_new_messages, 500);
+          }
+        },
+        get_unread_num: function () {
+          this.$http.get('/api/account/get_unread_num').then(function (res) {
             if (res.body.code == 0) {
-              const data = res.body.userinfo;
-              this.left_username = data.username;
-              this.left_avatar = '/avatar/' + this.left_username;
-              this.left_userinfo = res.body.userinfo;
-              this.last_msg_time = 0;
-              this.update_messages();
-              if (this.msg_updater == null) {
-                this.msg_updater = setInterval(this.update_new_messages, 2000);
+              const data = res.body.num;
+              for (var key in data) {
+                this.new_message_num[key] = data[key];
               }
             } else {
               console.log('Getting user info fails, message:', res.body.message);
@@ -361,15 +399,14 @@
             timestamp = this.last_msg_time;
           }
           this.$http.post('/api/account/get_messages', { username: this.left_username, timestamp: timestamp }, { emulateJSON: false }).then(function (res) {
-            console.log(res.body);
             if (res.body.code == 0) {
               const data = res.body;
               if (clear_messages) {
                 this.messages = [];
+              } else {
+                this.get_unread_num();
               }
               for (msg of data.messages) {
-                console.log('msg.username: ' + msg.username);
-                console.log('this.right_username: ' + this.right_username);
                 if (msg.username == this.right_username) {
                   this.messages.push({ mine: true, content: msg.content });
                 } else {
@@ -398,9 +435,9 @@
             return;
           }
           this.$http.post('/api/account/send_message', { username: this.left_username, content: this.chatbox_message }, { emulateJSON: false }).then(function (res) {
-            console.log(res.body);
             if (res.body.code == 0) {
               this.chatbox_message = '';
+              this.update_new_messages();
             } else {
               console.log('Sending message fails, message:', res.body.message);
               this.error_message = res.body.message;
@@ -423,8 +460,6 @@
           var online_friends = [];
           var offline_friends = [];
           for (const i of friends) {
-            console.log(i);
-            console.log(i.name + ' ' + i.status);
             if (i.status == 'gaming') {
               gaming_friends.push(i);
             } else if (i.status == 'online') {
@@ -452,7 +487,6 @@
             return;
           }
           this.$http.post('/api/account/add_friend', { username: this.input_name }, { emulateJSON: false }).then(function (ret) {
-            console.log(ret.body);
             if (ret.body.code == 0) {
               this.update_friends_list();
               this.message_is_error = false;
@@ -470,7 +504,6 @@
         },
         approved_application: function (name) {
           this.$http.post('/api/account/approved_application', { username: name }, { emulateJSON: false }).then(function (ret) {
-            console.log(ret.body);
             if (ret.body.code == 0) {
               this.update_friends_list();
               this.message_is_error = false;
