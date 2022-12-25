@@ -289,7 +289,6 @@
         this.update_user_info();
         this.update_friends_list();
         this.friends_updater = setInterval(this.update_friends_list, 5000);
-        this.msg_updater = setInterval(this.update_new_messages, 2000);
       },
       methods: {
         update_user_info: function () {
@@ -345,6 +344,9 @@
               this.left_userinfo = res.body.userinfo;
               this.last_msg_time = 0;
               this.update_messages();
+              if (this.msg_updater == null) {
+                this.msg_updater = setInterval(this.update_new_messages, 2000);
+              }
             } else {
               console.log('Getting user info fails, message:', res.body.message);
               this.error_message = res.body.message;
@@ -354,12 +356,17 @@
             this.error_message = '服务器异常';
           });
         },
-        update_messages: function () {
-          this.$http.post('/api/account/get_messages', { username: this.left_username }, { emulateJSON: false }).then(function (res) {
+        __update_messages: function (timestamp, clear_messages) {
+          if (timestamp < 0) {
+            timestamp = this.last_msg_time;
+          }
+          this.$http.post('/api/account/get_messages', { username: this.left_username, timestamp: timestamp }, { emulateJSON: false }).then(function (res) {
             console.log(res.body);
             if (res.body.code == 0) {
               const data = res.body;
-              this.messages = [];
+              if (clear_messages) {
+                this.messages = [];
+              }
               for (msg of data.messages) {
                 console.log('msg.username: ' + msg.username);
                 console.log('this.right_username: ' + this.right_username);
@@ -380,28 +387,11 @@
             this.error_message = '服务器异常';
           });
         },
+        update_messages: function () {
+          this.__update_messages(0, true);
+        },
         update_new_messages: function () {
-          this.$http.post('/api/account/get_new_messages', { username: this.left_username, timestamp: this.last_msg_time }, { emulateJSON: false }).then(function (res) {
-            console.log(res.body);
-            if (res.body.code == 0) {
-              const data = res.body;
-              for (msg of data.messages) {
-                if (msg.username == this.right_username) {
-                  this.messages.push({ mine: true, content: msg.content });
-                } else {
-                  this.messages.push({ mine: false, content: msg.content });
-                }
-                this.last_msg_time = msg.timestamp;
-                this.$refs.msgbox.scrollTop = this.$refs.msgbox.lastElementChild.offsetTop;
-              }
-            } else {
-              console.log('Getting chat info fails, message:', res.body.message);
-              this.error_message = res.body.message;
-            }
-          }, function (res) {
-            console.log('Request fails, status:', res);
-            this.error_message = '服务器异常';
-          });
+          this.__update_messages(-1, false);
         },
         send_to: function () {
           if (this.left_username == '' || this.chatbox_message == '') {

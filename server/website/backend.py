@@ -100,7 +100,7 @@ def backend_init():
     gameloop.start()
 
 
-############################# GET SESSION #############################
+############################# SESSION #############################
 
 
 def session_get_username():
@@ -115,7 +115,7 @@ def session_del_username():
     return flask.session.pop('username')
 
 
-############################ GET USER DATA ############################
+############################ USER DATA ############################
 
 
 def api_account_username():
@@ -239,7 +239,7 @@ def api_account_update_signature():
     return generate_return_data(StatusCode.SUCCESS)
 
 
-############################ USER FRIEND ############################
+############################ FRIENDS ############################
 
 
 def api_account_add_friend():
@@ -309,9 +309,6 @@ def api_account_add_friend():
         f.truncate()
 
     return generate_return_data(StatusCode.SUCCESS)
-
-
-# TODO: supporting 'gaming'
 
 
 def __get_user_status(username: str):
@@ -412,6 +409,8 @@ def get_chat_filename(users) -> str:
 
 
 def api_account_get_messages():
+    # {'username': str, 'timestamp': int}
+    # get messages that later than the `timestamp`
     username = session_get_username()
     if username is None:
         return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
@@ -427,42 +426,18 @@ def api_account_get_messages():
     chat_path = msg_data_path / chat_filename
 
     if not chat_path.exists():
-        with open(chat_path, 'w') as f:
-            json.dump({'messages': []}, fp=f)
         return generate_return_data(StatusCode.SUCCESS, {'messages': []})
+
+    timestamp = int(data.get('timestamp', 0))
 
     with open(chat_path, 'r') as f:
         json_data = json.load(f)
         messages = json_data.get('messages', [])
-        return generate_return_data(StatusCode.SUCCESS, {'messages': messages})
-
-
-def api_account_get_new_messages():
-    username = session_get_username()
-    if username is None:
-        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-
-    data = flask.request.get_json()
-    target_username = data['username']
-    target_user_path = user_data_path / target_username
-    if not target_user_path.exists():
-        return generate_return_data(
-            StatusCode.ERR_ACCOUNT_USERNAME_NOT_EXISTED)
-
-    chat_filename = get_chat_filename([username, target_username])
-    chat_path = msg_data_path / chat_filename
-
-    if not chat_path.exists():
-        return generate_return_data(StatusCode.SUCCESS, {'messages': []})
-
-    timestamp = int(data['timestamp'])
-
-    with open(chat_path, 'r') as f:
-        json_data = json.load(f)
-        messages = [
-            msg for msg in json_data.get('messages', [])
-            if msg['timestamp'] > timestamp
-        ]
+        if timestamp > 0:
+            messages = [
+                msg for msg in messages
+                if msg['timestamp'] > timestamp
+            ]
         return generate_return_data(StatusCode.SUCCESS, {'messages': messages})
 
 
@@ -633,10 +608,6 @@ backend_pages = {
     },
     '/api/account/get_messages': {
         'view_func': api_account_get_messages,
-        'methods': ['POST']
-    },
-    '/api/account/get_new_messages': {
-        'view_func': api_account_get_new_messages,
         'methods': ['POST']
     },
     '/api/account/send_message': {

@@ -11,15 +11,18 @@
       border-radius: 4px;
       border: 1px solid #5ac9e8;
       margin: 8px 8px 8px 0;
-      width: 80px; 
+      width: 80px;
     }
+
     .submit-button:hover {
       border-color: #485fc7;
     }
+
     .submit-input {
       margin: 8px;
       width: 100%;
-    } 
+    }
+
     .card-body {
       position: absolute;
       padding-top: 20px;
@@ -31,10 +34,12 @@
       overflow-y: scroll;
       border-top: 1px solid #dbdbdb;
     }
+
     .loding-content {
       margin: auto;
       width: 90%;
     }
+
     .loding-text {
       text-align: center;
       margin-bottom: 20px;
@@ -63,11 +68,11 @@
       </div>
       <div class="column container">
         <div class="card" style="position: relative; height: 100%; min-height: 40rem;">
-          
+
           <header class="card-header-title">
             <p style="text-align: center; width: 100%;">快来猜猜图片的词根吧！</p>
           </header>
-          
+
           {% raw %}
           <div class="card-body">
             <div v-for="msg of messages" class="field is-grouped is-grouped-multiline"
@@ -90,10 +95,10 @@
           {% endraw %}
 
           <footer class="card-footer" style="position: absolute; left: 0; right: 0; bottom: 0;">
-            
+
             <input ref="input_ans" v-model="input_ans" class="input submit-input" type="text" maxlength="16">
-            <a href="#" v-on:click="submit_ans" class="submit-button is-capoo">{{ submit }}</a>
-              
+            <a v-on:click="submit_ans" class="submit-button is-capoo">{{ submit }}</a>
+
           </footer>
         </div>
       </div>
@@ -105,7 +110,7 @@
       el: '#app',
       data: {
         image_url: '/static/loading.png',
-        
+
         hint_prefix: '{{ hint_prefix }}',
         hint: '？波',
 
@@ -114,57 +119,7 @@
 
         load_finished: true,
 
-        messages: [
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '系统',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     },
-          //     {
-          //       'name': '李四',
-          //       'ranking': 1000,
-          //     }
-          //   ],
-          //   'content': '加入了房间'
-          // },
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '提示',
-          //   'players': [],
-          //   'content': '？波'
-          // },
-          // {
-          //   'is_alert': false,
-          //   'alert_prefix': '',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     }
-          //   ],
-          //   'content': '咖波'
-          // },
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '系统',
-          //   'players': [
-          //     {
-          //       'name': '张三',
-          //       'ranking': 1500,
-          //     }
-          //   ],
-          //   'content': '回答正确'
-          // },
-          // {
-          //   'is_alert': true,
-          //   'alert_prefix': '系统',
-          //   'players': [],
-          //   'content': '凑行数测试'
-          // },
-        ]
+        messages: []
       },
       mounted: function () {
         this.$http.get('/api/game/core/image').then(function (res) {
