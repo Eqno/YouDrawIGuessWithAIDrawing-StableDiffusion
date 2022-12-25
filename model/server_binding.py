@@ -10,7 +10,7 @@ from tensorflow import keras
 from stable_diffusion_tf.stable_diffusion import StableDiffusion
 
 CWD = Path(os.getcwd())
-if os.path.basename(CWD) == 'model':
+if os.path.basename(CWD) == 'model' or os.path.basename(CWD) == 'server':
     CWD = CWD.parent
 IMAGE_SAVE_PATH = CWD / 'data' / 'pic'
 
@@ -18,7 +18,7 @@ if not IMAGE_SAVE_PATH.exists():
     os.mkdir(IMAGE_SAVE_PATH)
 
 
-class Text2image:
+class Text2image(object):
 
     def __init__(self,
                  image_height: int = 64,

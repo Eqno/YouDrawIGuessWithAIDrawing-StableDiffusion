@@ -3,6 +3,7 @@
 ############################### IMPORT ###############################
 
 import os
+import sys
 import json
 import time
 import flask
@@ -12,6 +13,9 @@ import threading
 import logic
 from .utils import generate_return_data, StatusCode
 from . import consts
+
+sys.path.append(str(consts.cwd / 'model'))
+import server_binding as stable_diffusion
 
 ############################### PARAMS ###############################
 
@@ -25,6 +29,61 @@ user_data_path = consts.data_base_path / 'user'
 info_file_name = 'info.json'
 
 ############################## APIS FOR GAME ###############################
+
+# FIXME: using global variables is NOT elegant!
+model_instance = None
+words = []
+
+
+def model_init():
+    global model_instance
+    model_instance = stable_diffusion.Text2image(consts.generated_img_size,
+                                                 consts.generated_img_size)
+
+
+def words_init():
+    global words
+    if not consts.words_path.exists():
+        words = consts.default_words
+        with open(consts.words_path, 'w') as f:
+            json.dump({'words': words}, fp=f)
+    else:
+        with open(consts.words_path, 'r') as f:
+            json_data = json.load(f)
+            words = json_data['words']
+
+
+def prompt_str_to_list(prompts: str) -> list:
+    splited_result = (p.strip() for p in prompts.split(','))
+    non_empty_result = list(filter(lambda s: len(s) > 0, splited_result))
+    return non_empty_result
+
+
+def api_core_generate_image():
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+
+    # TODO: check whether the user is a host
+    #assert is_host(username)
+
+    data = flask.request.get_json()
+    positive_str = str(data['positive'])
+    negative_str = str(data['negative'])
+    positive = prompt_str_to_list(positive_str)
+    negative = prompt_str_to_list(negative_str)
+    positive.append(*consts.default_positive_prompt)
+    negative.append(*consts.default_negative_prompt)
+
+    # TODO: generate a random file name and save into game instance
+    filename = 'temp'
+    status, msg = model_instance.generate_image_with_func_params(
+        positive, negative, filename)
+    if status:
+        return generate_return_data(StatusCode.SUCCESS, {'path': 'TODO'})
+    return generate_return_data(StatusCode.ERR_MODEL_UNKNOWN_ERROR,
+                                {'message': msg})
+
 
 ############################## HEARTBEAT ###############################
 
@@ -435,8 +494,7 @@ def api_account_get_messages():
         messages = json_data.get('messages', [])
         if timestamp > 0:
             messages = [
-                msg for msg in messages
-                if msg['timestamp'] > timestamp
+                msg for msg in messages if msg['timestamp'] > timestamp
             ]
         return generate_return_data(StatusCode.SUCCESS, {'messages': messages})
 
