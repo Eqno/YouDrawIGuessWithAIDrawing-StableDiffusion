@@ -208,7 +208,7 @@ class Game:
         if self.state == GameState.PLAYING \
             and self.host is not None:
 
-                if self.host.won is True:
+                if self.host.win is True:
 
                     for i in self.ans:
                         if re.search(i, info, re.IGNORECASE) is not None:

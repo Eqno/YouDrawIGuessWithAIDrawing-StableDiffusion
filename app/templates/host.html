@@ -5,31 +5,53 @@
   {% include 'header.html' %}
   <style>
     .submit-button {
+      display: block;
+
       font-size: 18px;
       text-align: center;
       line-height: 38px;
       border-radius: 4px;
       border: 1px solid #5ac9e8;
-      margin: 8px 8px 8px 0;
-      width: 80px;
+      margin: 8px;
+     
+      width: 80px !important;
     }
 
     .submit-button:hover {
       border-color: #485fc7;
     }
 
-    .submit-input {
-      margin: 8px;
+    .positive-input {
       width: 100%;
+      margin-top: 8px;
+      margin-right: 0px;
+      margin-left: 0px;
+      margin-bottom: 8px;
+    }
+
+    .negative-input {
+      width: 100%;
+      margin-top: 8px;
+      margin-right: 0px;
+      margin-left: 0px;
+      margin-bottom: 0px;
+    }
+
+    .rand-seed-input {
+      margin-top: 8px;
+      margin-left: 0px;
+      margin-right: 8px;
+      margin-bottom: 0px;
     }
 
     .card-body {
+      width: 100%;
       position: absolute;
       padding-top: 20px;
       padding-left: 20px;
       padding-right: 20px;
       top: 50px;
-      bottom: 56px;
+      bottom: 105px;
       box-shadow: none;
       overflow-y: scroll;
       border-top: 1px solid #dbdbdb;
@@ -43,6 +65,45 @@
     .loding-text {
       text-align: center;
       margin-bottom: 20px;
+    }
+
+    .footer-item {
+      display: flex !important;
+    }
+
+    .item-tip {
+      padding-left: 4px;
+
+      display: block;
+      min-width: fit-content;
+
+      margin-left: 8px;
+      margin-top: 8px;
+      margin-bottom: 0px;
+      margin-right: 0px;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      line-height: 40px;
+    }
+
+    .item-tip-middle {
+      padding-left: 12px;
+      display: block;
+      min-width: fit-content;
+
+      margin-left: 0px;
+      margin-top: 8px;
+      margin-bottom: 0px;
+      margin-right: 0px;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      line-height: 40px;
     }
   </style>
 </head>
@@ -71,7 +132,7 @@
 
           {% raw %}
           <header class="card-header-title">
-            <p style="text-align: center; width: 100%;">用一句话描述关键词：{{ keyword }}</p>
+            <p style="text-align: center; width: 100%;">用两句话描述关键词：{{ keyword }}</p>
           </header>
           {% endraw %}
 
@@ -96,10 +157,19 @@
           </div>
           {% endraw %}
 
-          <footer class="card-footer" style="position: absolute; left: 0; right: 0; bottom: 0;">
+          <footer class="card-footer" style="display: block; position: absolute; left: 0; right: 0; bottom: 0;">
 
-            <input ref="content" class="input submit-input" type="text" maxlength="16">
-            <a class="submit-button is-capoo" v-on:click="submit_desc">{{ submit }}</a>
+            <div class="footer-item">
+              <div class="item-tip">消极描述：</div>
+              <input ref="negative" v-model="negative" class="input negative-input" type="text" maxlength="300" v-on:keyup.enter="focus_next('rand_seed')">
+              <div class="item-tip-middle">随机种子：</div>
+              <input ref="rand_seed" v-model="rand_seed" id="rand-seed-input-id" class="input rand-seed-input" type="number" maxlength="5" v-on:keyup.enter="focus_next('positive')">
+            </div>
+            <div class="footer-item">
+              <div class="item-tip">积极描述：</div>
+              <input ref="positive" v-model="positive" class="input positive-input" type="text" maxlength="300" v-on:keyup.enter="submit_desc">
+              <a class="submit-button is-capoo" id="submit-button-id" v-on:click="submit_desc">{{ submit }}</a>
+            </div>
 
           </footer>
         </div>
@@ -108,6 +178,18 @@
   </section>
 
   <script>
+    $(function () {
+      rand_seed_input_width();
+    });
+    function rand_seed_input_width () {
+      $('#rand-seed-input-id').css('width',
+        $("#submit-button-id").css('width'));
+    }
+    $(window).resize(function () {
+      rand_seed_input_width();
+    });
+  </script>
+  <script>
     new Vue({
       el: '#app',
       data: {
@@ -115,6 +197,9 @@
 
         hint_prefix: '{{ hint_prefix }}',
         hint: '？波',
+        positive: '',
+        negative: '',
+        rand_seed: '',
 
         load_finished: true,
         keyword: '咖波',
@@ -137,6 +222,9 @@
         this.timer = setInterval(this.heart_beat, 500);
       },
       methods: {
+        focus_next(next_ref) {
+          this.$refs[next_ref].focus()
+        },
         update_info: function () {
           this.$http.get('/api/game/core/get_info').then(function (res) {
             if (res.body.code == 0) {
@@ -150,12 +238,13 @@
           });
         },
         submit_desc: function (event) {
-          console.log(this.input_ans);
-
-          this.$http.post('/api/game/core/submit_info', { info: this.input_ans }, { emulateJSON: false }).then(function (res) {
+          this.$http.post('/api/game/core/submit_info', { info: this.positive, negative: this.negative, rand_seed: this.rand_seed }, { emulateJSON: false }).then(function (res) {
             console.log(res.body);
             if (res.body.code == 0) {
               this.update_info();
+              this.positive = '';
+              this.negative = '';
+              this.rand_seed = '';
             } else {
               console.log('Getting image fails, message:', res.body.message);
             }

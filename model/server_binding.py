@@ -105,10 +105,12 @@ def main():
     ]
     #param_def = ['serafuku', 'direct looking', 'eyeball', 'hair flower', 'close-up', 'gentle eyes', 'Hanfu pure wind', 'beauty', 'atmosphere light', 'shadow', 'detail', 'high quality', 'master works']
     param = param_capoo
+
     img_size = 256
     steps = 50
     scale = 7.5
     mixed_precision = False
+
     seed = int(time.time())
     filename = 'size_{size}-step_{step}-scale_{scale}-{time}'.format(
         size=img_size, step=steps, scale=scale, time=seed)

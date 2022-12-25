@@ -303,7 +303,7 @@
           </ul>
           {% endraw %}
           <div class="panel-block normal-color" style="position: absolute; left: 12px; right: 12px; bottom: 12px;">
-            <input class="input" v-model="chatbox_message" type="text" v-on:keyup.enter="send_to">
+            <input class="input" v-model="chatbox_message" type="text" v-on:keyup.enter="send_to" maxlength="2000">
             <a class="button is-capoo" v-on:click="send_to" style="margin-left: 10px;">{{ send }}</a>
           </div>
         </div>

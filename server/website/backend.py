@@ -670,7 +670,7 @@ def api_game_core_submit_info():
     if retcode:
         return generate_return_data(StatusCode.SUCCESS)
     return generate_return_data(StatusCode.ERR_GAME_COMMIT_INFO_FAILED,
-                                message)
+                                { 'logic_message': message })
 
 
 def api_game_core_get_info():
