@@ -99,9 +99,23 @@
         username: '',
         logined: false,
         heart: null,
+        heartbeat_url: '',
         need_login: '{{ need_login }}',
+        heartbeat_gaming: '{{ heartbeat_gaming }}',
       },
       mounted: function () {
+        if (this.need_login == 'False') {
+          this.need_login = false;
+        } else {
+          this.need_login = true;
+        }
+        if (this.heartbeat_gaming == 'True') {
+          this.heartbeat_gaming = true;
+          this.heartbeat_url = '/api/heartbeat/imgaming';
+        } else {
+          this.heartbeat_gaming = false;
+          this.heartbeat_url = '/api/heartbeat/imonline';
+        }
         this.query_logined();
       },
       methods: {
@@ -116,19 +130,19 @@
             }
             else {
               console.log('There is no logined user.');
-              if (this.need_login != 'False') {
+              if (this.need_login) {
                 window.location.href = '/login?src=' + window.location.href;
               }
             }
           }, function (ret) {
             console.log('Request fails, status:', ret);
-            if (this.need_login != 'False') {
+            if (this.need_login) {
               window.location.href = '/login?src=' + window.location.href;
             }
           });
         },
         heartbeat: function () {
-          this.$http.get('/api/heartbeat/imonline').then(
+          this.$http.get(this.heartbeat_url).then(
             function (res) {
               if (res.body.code != 0) {
                 // session time out

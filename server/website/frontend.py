@@ -29,14 +29,18 @@ def signup():
                                  need_login=False,
                                  base_url=flask.request.base_url)
 
+
 def host():
     return flask.render_template('host.html',
                                  title='游戏',
+                                 heartbeat_gaming=True,
                                  base_url=flask.request.base_url)
+
 
 def guest():
     return flask.render_template('guest.html',
                                  title='游戏',
+                                 heartbeat_gaming=True,
                                  base_url=flask.request.base_url)
 
 
@@ -55,6 +59,7 @@ def custom():
 def selectrole():
     return flask.render_template('selectrole.html',
                                  title='身份',
+                                 heartbeat_gaming=True,
                                  base_url=flask.request.base_url)
 
 
@@ -72,27 +77,25 @@ def userinfo(username):
 
 
 def user_avatar(username):
-    avatar = pathlib.Path(consts.user_data_path / username / consts.avatar_file_name)
+    avatar = consts.user_data_path / username / consts.avatar_file_name
     if avatar.exists():
         return flask.send_file(avatar, mimetype='image/png')
     return flask.send_file(consts.default_avatar_path, mimetype='image/png')
 
 
 def get_image(filename):
-    return flask.send_file('static/' + filename, mimetype='image/png')
+    return flask.send_file(consts.cwd / 'static' / filename, mimetype='image/png')
 
 
 frontend_pages = {
     '/': index,
     '/login': login,
     '/signup': signup,
-
     '/host': host,
     '/guest': guest,
     '/match': match,
     '/custom': custom,
     '/selectrole': selectrole,
-
     '/friends': friends,
     '/user/<username>': userinfo,
     '/avatar/<username>': user_avatar,

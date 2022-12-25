@@ -30,9 +30,11 @@ info_file_name = 'info.json'
 
 # FIXME: using global variables is NOT elegant!
 online_users = {}
+gaming_users = {}
 
 
 def api_heartbeat_imonline():
+    global online_users
     username = session_get_username()
     if username is None:
         return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
@@ -40,38 +42,63 @@ def api_heartbeat_imonline():
     online_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
 
+
+def api_heartbeat_imgaming():
+    global gaming_users
+    username = session_get_username()
+    if username is None:
+        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
+    update_time = time.time()
+    gaming_users[username] = update_time
+    return generate_return_data(StatusCode.SUCCESS)
+
+
+def user_status_update():
+    global online_users
+    global gaming_users
+    while True:
+        now = time.time()
+        online_result = {
+            k: v
+            for k, v in online_users.items() if now - v < HEARTBEAT_TIMEOUT
+        }
+        gaming_result = {}
+        escaped_users = []
+        for k, v in gaming_users.items():
+            if now - v < HEARTBEAT_TIMEOUT:
+                gaming_result[k] = v
+            else:
+                escaped_users.append(k)
+        online_users = online_result
+        gaming_users = gaming_result
+        print('online: {}'.format(online_users))
+        print('gaming: {}'.format(gaming_users))
+        print('escaped: {}'.format(escaped_users))
+        time.sleep(HEARTBEAT_INTERVAL)
+
+
 def main_game_loop():
     while True:
         logic.__game_loop__()
         time.sleep(GAMELOOP_INTERVAL)
 
-def online_users_update():
-    global online_users
-
-    while True:
-        now = time.time()
-        result = {
-            k: v
-            for k, v in online_users.items() if now - v < HEARTBEAT_TIMEOUT
-        }
-        online_users = result
-        print('online users: {}'.format(list(online_users.keys())))
-        time.sleep(HEARTBEAT_INTERVAL)
 
 ############################## INITIAL ###############################
+
 
 def backend_init():
     for _dir in (consts.data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
 
-    heartbeat = threading.Thread(target=online_users_update)
+    heartbeat = threading.Thread(target=user_status_update)
     heartbeat.daemon = True
     heartbeat.start()
 
     gameloop = threading.Thread(target=main_game_loop)
     gameloop.daemon = True
     gameloop.start()
+
 
 ############################# GET SESSION #############################
 
@@ -288,6 +315,8 @@ def api_account_add_friend():
 
 
 def __get_user_status(username: str):
+    if username in gaming_users:
+        return 'gaming'
     if username in online_users:
         return 'online'
     return 'offline'
@@ -551,15 +580,17 @@ def api_game_core_submit_info():
     return generate_return_data(StatusCode.ERR_GAME_COMMIT_INFO_FAILED,
                                 message)
 
+
 def api_game_core_get_info():
 
     username = session_get_username()
     retcode, message = logic.game_get_info(username)
 
     if retcode:
-        return generate_return_data(StatusCode.SUCCESS, { 'message': message })
+        return generate_return_data(StatusCode.SUCCESS, {'message': message})
     return generate_return_data(StatusCode.ERR_GAME_GET_INFO_FAILED, message)
-    
+
+
 def api_game_core_image():
 
     result = {'url': '/static/capoo.png'}
@@ -568,6 +599,7 @@ def api_game_core_image():
 
 backend_pages = {
     '/api/heartbeat/imonline': api_heartbeat_imonline,
+    '/api/heartbeat/imgaming': api_heartbeat_imgaming,
     '/api/account/username': api_account_username,
     '/api/account/userinfo': {
         'view_func': api_account_userinfo,
