@@ -3,6 +3,8 @@ import random, re
 from . import PlayerRole
 from . import GameMode
 from . import GameState
+from .kv_queue import KVqueue
+from .stable_diffusion_binding import stable_diffusion_init
 
 from time import time
 
@@ -14,7 +16,12 @@ HALF_WIN_SCORE = 5
 
 GUEST_MAX_NUM = 5
 
-task_queue = {}
+
+task_queue = KVqueue()
+img_queue = KVqueue()
+
+sd_thread = stable_diffusion_init(task_queue, img_queue)
+
 
 class Game:
 
@@ -37,6 +44,7 @@ class Game:
         self.round_num = None
 
         self.create_time = time()
+
 
     def add_player(self, player):
 
@@ -204,6 +212,7 @@ class Game:
         return False, 'collect ans failed'
 
     def collect_img(self, info, negative, rand_seed):
+        global task_queue
 
         if self.state == GameState.PLAYING \
             and self.host is not None:
@@ -226,18 +235,25 @@ class Game:
                     self.info_record.append(res)
                     return True, 'host say something'
 
-                host_task = task_queue.get(self.host.name)
-                if host_task is not None:
+                if task_queue.is_exist(self.host.name):
                     return False, 'already have task in queue'
 
-                task_queue[self.host.name] = {
+                task_queue.push(self.host.name, {
+                    'username': self.host.name,
                     'positive': info,
                     'negative': negative,
                     'rand_seed': rand_seed
-                }
+                })
                 return True, 'add task to generate image'
 
         return False, 'collect img failed'
+
+    def pop_img(self):
+        '''
+        return username and filename
+        '''
+        global img_queue
+        return img_queue.pop()
 
     def get_info(self):
 

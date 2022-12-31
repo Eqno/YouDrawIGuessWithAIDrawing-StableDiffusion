@@ -63,7 +63,7 @@ class Text2image(object):
 
         # negative prompt can be empty
         if isinstance(negative_list, list) and len(negative_list) > 0:
-            negative = ', '.join(negative)
+            negative = ', '.join(negative_list)
 
         # use current timestamp as random seed
         if rand_seed < 0:

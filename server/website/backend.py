@@ -14,9 +14,6 @@ import logic
 from .utils import generate_return_data, StatusCode
 from . import consts
 
-sys.path.append(str(consts.cwd / 'model'))
-import server_binding as stable_diffusion
-
 ############################### PARAMS ###############################
 
 HEARTBEAT_TIMEOUT = 10
@@ -31,14 +28,9 @@ info_file_name = 'info.json'
 ############################## APIS FOR GAME ###############################
 
 # FIXME: using global variables is NOT elegant!
-model_instance = None
 words = []
 
 
-def model_init():
-    global model_instance
-    model_instance = stable_diffusion.Text2image(consts.generated_img_size,
-                                                 consts.generated_img_size)
 def words_init():
     global words
     if not consts.words_path.exists():
@@ -50,35 +42,6 @@ def words_init():
             json_data = json.load(f)
             words = json_data['words']
 
-def prompt_str_to_list(prompts: str) -> list:
-    splited_result = (p.strip() for p in prompts.split(','))
-    non_empty_result = list(filter(lambda s: len(s) > 0, splited_result))
-    return non_empty_result
-
-def api_core_generate_image():
-    username = session_get_username()
-    if username is None:
-        return generate_return_data(StatusCode.ERR_ACCOUNT_NOT_LOGINED)
-
-    # TODO: check whether the user is a host
-    #assert is_host(username)
-
-    data = flask.request.get_json()
-    positive_str = str(data['positive'])
-    negative_str = str(data['negative'])
-    positive = prompt_str_to_list(positive_str)
-    negative = prompt_str_to_list(negative_str)
-    positive.append(*consts.default_positive_prompt)
-    negative.append(*consts.default_negative_prompt)
-
-    # TODO: generate a random file name and save into game instance
-    filename = 'temp'
-    status, msg = model_instance.generate_image_with_func_params(
-        positive, negative, filename)
-    if status:
-        return generate_return_data(StatusCode.SUCCESS, {'path': 'TODO'})
-    return generate_return_data(StatusCode.ERR_MODEL_UNKNOWN_ERROR,
-                                {'message': msg})
 
 ############################## HEARTBEAT ###############################
 
@@ -461,6 +424,7 @@ def api_account_approved_application():
 def get_chat_filename(users) -> str:
     return '.'.join(sorted(users)) + '.json'
 
+
 def api_account_get_unread_num():
     username = session_get_username()
     if not username:
@@ -493,11 +457,13 @@ def api_account_get_unread_num():
 
             unread_num[target_username] = 0
             for msg in json_data.get('messages', []):
-    
-                if msg['username'] == target_username and msg['timestamp'] > timestamp:
+
+                if msg['username'] == target_username and msg[
+                        'timestamp'] > timestamp:
                     unread_num[target_username] += 1
 
-    return generate_return_data(StatusCode.SUCCESS, { 'num': unread_num })
+    return generate_return_data(StatusCode.SUCCESS, {'num': unread_num})
+
 
 def api_account_get_messages():
     # {'username': str, 'timestamp': int}
@@ -519,7 +485,7 @@ def api_account_get_messages():
     chat_path = msg_data_path / chat_filename
 
     if not chat_path.exists():
-        return generate_return_data(StatusCode.SUCCESS, { 'messages': [] })
+        return generate_return_data(StatusCode.SUCCESS, {'messages': []})
 
     timestamp = int(data.get('timestamp', 0))
 
@@ -529,25 +495,23 @@ def api_account_get_messages():
             json_data = json.load(f)
         except:
             pass
-        
+
         all_messages = json_data.get('messages', [])
         all_timestamp = json_data.get('timestamp', dict())
         all_timestamp[username] = int(round(time.time() * 1000))
 
-        res = dict({
-            'timestamp': all_timestamp,
-            'messages': all_messages
-        })
+        res = dict({'timestamp': all_timestamp, 'messages': all_messages})
         f.seek(0)
         json.dump(res, fp=f)
         f.truncate()
 
         if timestamp > 0:
             all_messages = [
-                msg for msg in all_messages
-                if msg['timestamp'] > timestamp
+                msg for msg in all_messages if msg['timestamp'] > timestamp
             ]
-        return generate_return_data(StatusCode.SUCCESS, { 'messages': all_messages })
+        return generate_return_data(StatusCode.SUCCESS,
+                                    {'messages': all_messages})
+
 
 def api_account_send_message():
 
@@ -587,10 +551,7 @@ def api_account_send_message():
         })
 
         f.seek(0)
-        res = dict({
-            'timestamp': get_timestamp,
-            'messages': messages
-        })
+        res = dict({'timestamp': get_timestamp, 'messages': messages})
         json.dump(res, fp=f)
         f.truncate()
 
@@ -670,7 +631,7 @@ def api_game_core_submit_info():
     if retcode:
         return generate_return_data(StatusCode.SUCCESS)
     return generate_return_data(StatusCode.ERR_GAME_COMMIT_INFO_FAILED,
-                                { 'logic_message': message })
+                                {'logic_message': message})
 
 
 def api_game_core_get_info():
@@ -724,8 +685,7 @@ backend_pages = {
         'methods': ['POST']
     },
 
-########################### MESSAGES ###########################
-
+    ########################### MESSAGES ###########################
     '/api/account/get_unread_num': api_account_get_unread_num,
     '/api/account/get_messages': {
         'view_func': api_account_get_messages,
@@ -736,8 +696,7 @@ backend_pages = {
         'methods': ['POST']
     },
 
-########################### GAME ROOM ###########################
-
+    ########################### GAME ROOM ###########################
     '/api/game/room/join_game': {
         'view_func': api_game_room_join_game,
         'methods': ['POST']
@@ -748,8 +707,7 @@ backend_pages = {
         'methods': ['POST']
     },
 
-########################### GAME CORE ###########################
-
+    ########################### GAME CORE ###########################
     '/api/game/core/submit_info': {
         'view_func': api_game_core_submit_info,
         'methods': ['POST']
