@@ -8,10 +8,18 @@
       text-align: center;
       margin-top: 10px;
     }
+    .role-item-avatar {
+      width: 128px;
+      height: 128px;
+      border: 1px solid;
+      border-radius: 8px;
+      border-color: #dbdbdb;
+    }
     .role-item-name {
       text-align: center;
       margin-bottom: 20px;
       margin-top: 10px;
+      line-height: 30px;
 
       overflow: hidden;
       text-overflow: ellipsis;
@@ -31,8 +39,11 @@
       border-color: #485fc7;
     }
     .player-ready {
+      border-color: #5ac9e8 !important;
+    }
+    .player-not-ready {
       border: 2px solid;
-      border-color: #5ac9e8;
+      border-color: #ffffff;
       border-radius: 8px;
     }
   </style>
@@ -50,10 +61,10 @@
 
           {% raw %}
           <div class="colums" style="margin-bottom: 30px;">
-            <div class="colum" v-bind:class="{ 'player-ready': host['ready'] }">
+            <div v-if="host.name != null" class="colum player-not-ready" v-bind:class="{ 'player-ready': host['ready'] }">
 
-              <div style="display: flex;">
-                <img :src="'/avatar/' + host['name']" style="margin: auto;">
+              <div style="display: flex; margin-top: 20px;">
+                <img class="role-item-avatar" :src="'/avatar/' + host['name']" style="margin: auto;">
               </div>
               <p class="subtitle is-5 role-item-name">{{ host['name'] }}</p>
             
@@ -65,11 +76,11 @@
 
           {% raw %}
           <div class="columns" style="margin-top: 10px;">
-            <div v-for="guest of guests" class="column"
+            <div v-for="guest of guests" class="column player-not-ready"
               v-bind:class="{ 'player-ready': guest['ready'] || (guest['name']==username && self_ready==true), 'is-one-fifth': guest_num[5], 'is-one-quarter': guest_num[4], 'is-one-third': guest_num[3], 'is-half': guest_num[2] }">
               
-              <div style="display: flex;">
-                  <img :src="'/avatar/' + guest['name']" style="margin: auto;">
+              <div style="display: flex; margin-top: 20px;">
+                  <img class="role-item-avatar" :src="'/avatar/' + guest['name']" style="margin: auto;">
               </div>
               <p class="subtitle is-5 role-item-name">{{ guest.name }}</p>
 
