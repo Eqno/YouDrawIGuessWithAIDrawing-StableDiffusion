@@ -46,6 +46,7 @@ def guest():
 def match():
     return flask.render_template('match.html',
                                  title='匹配',
+                                 heartbeat_gaming=True,
                                  base_url=flask.request.base_url)
 
 

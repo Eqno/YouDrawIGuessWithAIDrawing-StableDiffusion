@@ -194,9 +194,6 @@ class Game:
                     return True, 'ans is the first correct'
                 
             else:
-                
-                print('in     correct!', info, 'ans: ', self.ans)
-
                 res = dict({
                     'is_alert': False,
                     'alert_prefix': '',
@@ -308,7 +305,8 @@ class Game:
                 self.loop_flag[3] = True
 
             if loop_time < 0:
-                self.goto_next_round()
+                return self.goto_next_round()
+        return True, self.loop_time
 
     # 一直没人猜出来的时间
     def get_remain_time(self):

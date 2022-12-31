@@ -1,4 +1,6 @@
 from enum import IntEnum
+from website import backend
+import time
 
 GAME_MAX_NUM = 20
 PLAYER_MAX_NUM = 100
@@ -108,6 +110,9 @@ def player_get_others(player_name:str):
             'name': guest.name,
         })
     
+    update_time = round(time.time() * 1000)
+    backend.gaming_users[player_name] = update_time
+
     return True, { 'game_state': game_state, 'host': host, 'guests': guests }
 
 def player_set_ready(player_name:str, ready:bool):
@@ -131,10 +136,35 @@ def game_get_info(player_name:str):
     if not retcode: return retcode, player
     return player.get_info()
 
+def check_escaped(escaped_users: list):
+
+    for user in escaped_users:
+        player = players[user]
+        if player is not None \
+            and player.game is not None:
+
+            if player.game.host is not None \
+                and player.game.host.name == user:
+                player.game.host = None
+
+            guests = []
+            if player.game.guests is not None:
+                for guest in player.game.guests:
+                    if guest.name != user:
+                        guests.append(guest)
+            player.game.guests = guests
+        players.pop(user)
+    
+    print('players: {}'.format(players))
+
 def __game_loop__():
 
     for game in games:
-        game.get_loop_time()
+
+        retcode, message = game.get_loop_time()
+        if not retcode:
+            print('===== GAME END =====\n' + message)
+            game.state = GameState.HASENDED
 
 from .game import Game
 from .player import Player

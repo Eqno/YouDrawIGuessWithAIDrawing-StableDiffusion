@@ -126,7 +126,11 @@
               this.username = res.body.username;
               this.logined = true;
               // enable heart beat
-              this.heart = setInterval(this.heartbeat, 2000);
+              if (this.heartbeat_gaming) {
+                this.heart = setInterval(this.heartbeat, 500);
+              } else {
+                this.heart = setInterval(this.heartbeat, 2000);
+              }
             }
             else {
               console.log('There is no logined user.');

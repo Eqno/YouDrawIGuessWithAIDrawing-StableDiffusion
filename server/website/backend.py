@@ -16,8 +16,12 @@ from . import consts
 
 ############################### PARAMS ###############################
 
-HEARTBEAT_TIMEOUT = 10
-HEARTBEAT_INTERVAL = 5
+ONLINE_HEARTBEAT_TIMEOUT = 10
+ONLINE_HEARTBEAT_INTERVAL = 5
+
+GAMING_HEARTBEAT_TIMEOUT = 2
+GAMING_HEARTBEAT_INTERVAL = 1
+
 GAMELOOP_INTERVAL = 0.5
 
 msg_data_path = consts.data_base_path / 'msg'
@@ -49,7 +53,6 @@ def words_init():
 online_users = {}
 gaming_users = {}
 
-
 def api_heartbeat_imonline():
     global online_users
     username = session_get_username()
@@ -58,7 +61,6 @@ def api_heartbeat_imonline():
     update_time = round(time.time() * 1000)
     online_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
-
 
 def api_heartbeat_imgaming():
     global gaming_users
@@ -69,53 +71,60 @@ def api_heartbeat_imgaming():
     gaming_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
 
-
-def user_status_update():
+def user_online_status_update():
     global online_users
-    global gaming_users
     while True:
         now = round(time.time() * 1000)
         online_result = {
             k: v
-            for k, v in online_users.items() if now - v < HEARTBEAT_TIMEOUT
+            for k, v in online_users.items() if now - v < ONLINE_HEARTBEAT_TIMEOUT * 1000
         }
+        online_users = online_result
+        print('online: {}'.format(online_users))
+        time.sleep(ONLINE_HEARTBEAT_INTERVAL)
+
+def user_gaming_status_update():
+    global gaming_users
+    while True:
+        now = round(time.time() * 1000)
         gaming_result = {}
         escaped_users = []
         for k, v in gaming_users.items():
-            if now - v < HEARTBEAT_TIMEOUT:
+            if now - v < GAMING_HEARTBEAT_TIMEOUT * 1000:
                 gaming_result[k] = v
             else:
                 escaped_users.append(k)
-        online_users = online_result
         gaming_users = gaming_result
-        print('online: {}'.format(online_users))
         print('gaming: {}'.format(gaming_users))
         print('escaped: {}'.format(escaped_users))
-        time.sleep(HEARTBEAT_INTERVAL)
 
+        logic.check_escaped(escaped_users)
+        time.sleep(GAMING_HEARTBEAT_INTERVAL)
 
 def main_game_loop():
+
     while True:
         logic.__game_loop__()
         time.sleep(GAMELOOP_INTERVAL)
 
-
 ############################## INITIAL ###############################
-
 
 def backend_init():
     for _dir in (consts.data_base_path, msg_data_path, user_data_path):
         if not _dir.exists():
             os.mkdir(_dir)
 
-    heartbeat = threading.Thread(target=user_status_update)
-    heartbeat.daemon = True
-    heartbeat.start()
+    online_heartbeat = threading.Thread(target=user_online_status_update)
+    online_heartbeat.daemon = True
+    online_heartbeat.start()
+
+    gaming_heartbeat = threading.Thread(target=user_gaming_status_update)
+    gaming_heartbeat.daemon = True
+    gaming_heartbeat.start()
 
     gameloop = threading.Thread(target=main_game_loop)
     gameloop.daemon = True
     gameloop.start()
-
 
 ############################# SESSION #############################
 
