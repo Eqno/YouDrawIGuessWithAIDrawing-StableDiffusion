@@ -15,7 +15,7 @@ if os.path.basename(CWD) == 'model' or os.path.basename(CWD) == 'server':
 IMAGE_SAVE_PATH = CWD / 'data' / 'pic'
 
 if not IMAGE_SAVE_PATH.exists():
-    os.mkdir(IMAGE_SAVE_PATH)
+    os.makedirs(IMAGE_SAVE_PATH)
 
 
 class Text2image(object):
