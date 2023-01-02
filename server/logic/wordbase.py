@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+import os, random
 from . import consts
 
 WORD_BASE_PATH = consts.cwd / 'data' / 'wordbase'
@@ -22,11 +22,18 @@ def load_word_set(name: str):
         print('word set not exist')
         return []
 
-    with open(filepath, 'rt') as f:
+    with open(filepath, 'rt', encoding='utf-8') as f:
         word_set = []
         for line in f:
             word_set.append(line)
-
+        return word_set
+    
+def get_random_set():
+    name_list = get_set_list()
+    if len(name_list) > 0:
+        set_name = random.choice(name_list)
+        return load_word_set(set_name)
+    return None
 
 def create_word_set(name: str, data: list):
     filepath = WORD_BASE_PATH / name
@@ -34,7 +41,7 @@ def create_word_set(name: str, data: list):
         print('word set already exist')
         return
 
-    with open(filepath, 'wt') as f:
+    with open(filepath, 'wt', encoding='utf-8') as f:
         f.write('\n'.join(data))
 
 

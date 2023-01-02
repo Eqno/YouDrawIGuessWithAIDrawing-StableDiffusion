@@ -3,6 +3,7 @@ import random, re
 from . import PlayerRole
 from . import GameMode
 from . import GameState
+from . import wordbase
 from .kv_queue import KVqueue
 from .stable_diffusion_binding import stable_diffusion_init
 
@@ -29,6 +30,8 @@ class Game:
 
         self.mode = mode
         self.state = GameState.WAITING
+
+        self.wordset = ['咖波']
 
         self.ans = None
         self.start = False
@@ -123,6 +126,12 @@ class Game:
             if len(self.guests) > 0 and guest_ready:
 
                 self.state = GameState.PLAYING
+
+                word_set = wordbase.get_random_set()
+                if word_set is not None:
+                    random.shuffle(word_set)
+                    self.wordset = word_set
+
                 self.round_num = round_num
                 self.goto_next_round()
         
@@ -328,13 +337,25 @@ class Game:
         else:
             return None
 
+    def get_from_wordset(self):
+
+        if len(self.wordset) > 1:
+            return self.wordset.pop(0)
+        elif len(self.wordset) > 0:
+            return self.wordset[0]
+        return None
+
     def goto_next_round(self):
 
         if self.round_num is None:
             return False, 'please begin game first'
 
         self.loop_time = None
-        self.ans = '咖波2'
+        self.ans = self.get_from_wordset()
+
+        if self.ans is None:
+            return False, 'there is no more words to be answer'
+
         self.loop_flag = [False, False, False, False]
 
         self.host.win = False
