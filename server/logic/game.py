@@ -20,9 +20,8 @@ GUEST_MAX_NUM = 5
 
 task_queue = KVqueue()
 img_queue = KVqueue()
-img_loaded = {}
 
-# sd_thread = stable_diffusion_init(task_queue, img_queue)
+sd_thread = stable_diffusion_init(task_queue, img_queue)
 
 
 class Game:
@@ -33,6 +32,8 @@ class Game:
         self.state = GameState.WAITING
 
         self.wordset = ['咖波']
+        self.image_path = None
+        self.image_loaded = False
 
         self.ans = None
         self.start = False
@@ -220,7 +221,6 @@ class Game:
 
     def collect_img(self, info, negative, rand_seed):
         global task_queue
-        global img_loaded
 
         if self.state == GameState.PLAYING \
             and self.host is not None:
@@ -252,7 +252,7 @@ class Game:
                     'negative': negative,
                     'rand_seed': rand_seed
                 })
-                img_loaded[self.host.name] = False
+                self.image_loaded = False
                 return True, 'add task to generate image'
 
         return False, 'collect img failed'
@@ -262,14 +262,12 @@ class Game:
         return username and filename
         '''
         global img_queue
-        global img_loaded
         
         _, image_path = img_queue.pop_from_key(username)
 
         if image_path is not None:
-            img_loaded[username] = True
-
-        return img_loaded.get(username, False), image_path
+            self.image_loaded = True
+            self.image_path = image_path
 
     def get_info(self):
 
@@ -277,13 +275,13 @@ class Game:
             return True, 'game has ended'
         if self.state == GameState.WAITING:
             return False, 'player could only get info when playing'
-
-        image_loaded, image_path = False, None
+        
         if self.host is not None:
-            image_loaded, image_path = self.pop_img(self.host.name)
+            self.pop_img(self.host.name)
+
         return True, {
-            'image_loaded': image_loaded,
-            'image_path': image_path,
+            'image_loaded': self.image_loaded,
+            'image_path': self.image_path,
             'info_record': self.info_record
         }
 
@@ -369,6 +367,7 @@ class Game:
             return False, 'please begin game first'
 
         self.loop_time = None
+        self.image_path = None
         self.ans = self.get_from_wordset()
 
         if self.ans is None:

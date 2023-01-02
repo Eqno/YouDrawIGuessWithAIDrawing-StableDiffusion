@@ -678,6 +678,9 @@ def api_game_core_get_info():
     retcode, message = logic.game_get_info(username)
 
     if retcode:
+        image_path = message.get('image_path', None)
+        if image_path:
+            message['image_path'] = '/image/{filename}.png'.format(filename=image_path)
         return generate_return_data(StatusCode.SUCCESS, { 'data': message })
     return generate_return_data(StatusCode.ERR_GAME_GET_INFO_FAILED, message)
 

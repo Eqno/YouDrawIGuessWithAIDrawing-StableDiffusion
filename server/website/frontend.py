@@ -87,8 +87,7 @@ def user_avatar(username):
 
 
 def get_image(filename):
-    return flask.send_file(consts.cwd / 'static' / filename, mimetype='image/png')
-
+    return flask.send_file(consts.cwd / 'data' / 'pic' / filename, mimetype='image/png')
 
 frontend_pages = {
     '/': index,
