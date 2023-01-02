@@ -8,16 +8,65 @@
 <body>
   {% include 'nav.html' %}
 
+  <section class="section">
+    <div class="container content is-medium">
+      <h2>这是什么</h2>
+      <p>
+        这是一个 “你画我猜” 的游戏，但与常见的 “你画我猜” 游戏不同，在这里画图的不再是玩家，而是 Stable Diffusion。
+      </p>
 
+      <h2>Stable Diffusion 是什么</h2>
+      <p>
+        Stable Diffusion是一种深度学习、文本到图像模型，于 2022 年发布。它主要用于生成以文本描述为条件的详细图像，但它也可以应用于其他任务，例如修复、修复和生成图像到-由文本提示引导的图像翻译。<a href="#cite-1">[1]</a>
+      </p>
+      
+      <h2>这个游戏该怎么玩</h2>
+      <p>
+        与大多数 “你画我猜” 游戏类似，“猜谜者” 需要根据看到的图片来猜系统给出的词语，但 “出题者” 需要简单了解 Stable Diffusion 的使用方法。
+      </p>
+      <p>
+        “出题者” 需要根据系统给出的词语，为 Stable Diffusion 提供一些词语来引导 Stable Diffusion 产生你想要的图片，以此来使 “猜谜者” 提示。
+      </p>
+      <p>
+        需要注意的是，Stable Diffusion 只能接受英文描述，而且描述间必须使用逗号分隔。
+      </p>
 
-  <script>
-    new Vue({
-      el: '#app',
-      data: {
-        message: 'Hello Vue.js!'
-      }
-    })
-  </script>
+      <h2>有没有什么例子呢</h2>
+      <p>
+        假设给定的词是 “哪吒闹海”，那么直接使用
+      </p>
+      <div class="notification">
+        person fly upon sea
+      </div>
+      <p>
+        作为限定词会得到这样的结果：
+      </p>
+      <figure>
+        <img src="/static/person-fly-upon-sea-simple.png">
+      </figure>
+      <p>
+        多添加一些限定词可以有效引导 Stable Diffusion 生成图片的方向，再设定一些负面限定词可以让 Stable Diffusion 避免生成的图片包含提及的内容：
+      </p>
+      <div class="notification">
+        Positive: person fly upon sea, single person, youth, full body, flying boy, blue sky, blue sea, while cloud
+        Negative: nobody, no one, no person, no dragon, abnormal person, abnormal sea
+      </div>
+      <p>
+        可以得到更准确一些的结果
+      </p>
+      <figure>
+        <img src="/static/person-fly-upon-sea-complex.png">
+      </figure>
+      <p>
+        尽管也没有特别准确，但这就是该游戏的魅力所在！让 AI 根据你的想法生成图片，或者根据 AI 生成的图片来猜画图的人在想什么，也是很有意思的事情！
+      </p>
+
+      <h2>参考文献</h2>
+      <ol>
+        <li id="cite-1"><a href="https://en.wikipedia.org/wiki/Stable_Diffusion">https://en.wikipedia.org/wiki/Stable_Diffusion</a></li>
+      </ol>
+    </div>
+  </section>
 
   {% include 'footer.html' %}
 
