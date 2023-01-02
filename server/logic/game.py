@@ -280,6 +280,11 @@ class Game:
             self.pop_img(self.host.name)
             host_name = self.host.name
 
+        progress = self.get_progress()
+        if progress is None:
+            progress = 0
+        else: progress *= 100
+
         return True, {
             'ans': {
                 'host_name': host_name,
@@ -287,6 +292,7 @@ class Game:
             },
             'data': {
                 'image_loaded': self.image_loaded,
+                'image_progress': progress,
                 'image_path': self.image_path,
                 'info_record': self.info_record
             }
