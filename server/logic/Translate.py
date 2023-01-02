@@ -115,10 +115,8 @@ class YouDaoTranslator:
         :param mode: 翻译语言模式，en2zh或zh2en
         :return: 翻译结果
         '''
-        if not q:
-            return 'q is empty!'
-        if len(q) > MAX_LENGTH:
-            return 'q is too long!'
+        if not q or len(q) > MAX_LENGTH:
+            return ''
 
         self.q = q
         self._set_trs_mode(mode)

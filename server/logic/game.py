@@ -255,6 +255,14 @@ class Game:
                 positive = self.translator.translate(info, "zh2en")
                 negative = self.translator.translate(negative, "zh2en")
 
+                if type(positive) == list and len(positive) > 0:
+                    positive = positive[0]
+                if type(negative) == list and len(negative) > 0:
+                    negative = negative[0]
+
+                print('==============================')
+                print('positive: ', positive, '\nnegative: ', negative)
+
                 task_queue.push(self.host.name, {
                     'username': self.host.name,
                     'positive': positive,
