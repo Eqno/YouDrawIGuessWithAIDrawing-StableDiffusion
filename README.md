@@ -2,7 +2,7 @@
 
 ## 使用方法
 
-运行 `server.py` 启动服务器
+运行 `main.py` 启动服务器
 
 ```bash
 python3 server.py
