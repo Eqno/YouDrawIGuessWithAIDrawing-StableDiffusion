@@ -173,7 +173,7 @@ def check_escaped(escaped_users: list):
     
     print('players: {}'.format(players))
 
-def __game_loop__():
+def game_loop():
 
     need_to_pop = []
     for index, game in enumerate(games):
