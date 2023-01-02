@@ -204,7 +204,7 @@
         positive: '',
         negative: '',
         rand_seed: '',
-
+        
         load_finished: false,
         keyword: '咖波',
 
@@ -237,6 +237,7 @@
                 window.location.href = '/settlement';
               } else {
                 this.messages = res.body.data.info_record;
+                this.keyword = res.body.data.image_ans;
                 this.load_finished = res.body.data.image_loaded;
 
                 if (res.body.data.image_path != null) {

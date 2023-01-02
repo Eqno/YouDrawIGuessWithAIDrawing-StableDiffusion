@@ -148,7 +148,11 @@ class Game:
             if player.win is True:
                 return False, 'player has won'
 
-            if re.search(self.ans, info, re.IGNORECASE) is not None:
+            print('=======================================\n', self.ans, info)
+
+            if re.findall(self.ans, info, re.IGNORECASE) is not None:
+
+                print('=================================================\ncorrect!')
 
                 if self.loop_time is not None:
                     
@@ -168,8 +172,6 @@ class Game:
 
                     return True, 'ans is correct'
                 else:
-                    
-                    print('correct!')
 
                     player.win = True
                     self.host.win = True
@@ -276,13 +278,21 @@ class Game:
         if self.state == GameState.WAITING:
             return False, 'player could only get info when playing'
         
+        host_name = ''
         if self.host is not None:
             self.pop_img(self.host.name)
+            host_name = self.host.name
 
         return True, {
-            'image_loaded': self.image_loaded,
-            'image_path': self.image_path,
-            'info_record': self.info_record
+            'ans': {
+                'host_name': host_name,
+                'image_ans': self.ans,
+            },
+            'data': {
+                'image_loaded': self.image_loaded,
+                'image_path': self.image_path,
+                'info_record': self.info_record
+            }
         }
 
     def game_loop(self):

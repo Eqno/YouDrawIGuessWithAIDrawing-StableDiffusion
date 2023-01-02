@@ -678,9 +678,19 @@ def api_game_core_get_info():
     retcode, message = logic.game_get_info(username)
 
     if retcode:
-        image_path = message.get('image_path', None)
-        if image_path:
-            message['image_path'] = '/image/{filename}.png'.format(filename=image_path)
+        if type(message) is dict:
+            ans, data = message.get('ans', dict()), message.get('data', dict())
+
+            image_path = data.get('image_path', None)
+            if image_path is not None:
+                data['image_path'] = '/image/{filename}.png'.format(filename=image_path)
+
+            host_name = ans.get('host_name', None)
+            if host_name == username:
+                data['image_ans'] = ans.get('image_ans', '')
+
+            message = data
+
         return generate_return_data(StatusCode.SUCCESS, { 'data': message })
     return generate_return_data(StatusCode.ERR_GAME_GET_INFO_FAILED, message)
 
