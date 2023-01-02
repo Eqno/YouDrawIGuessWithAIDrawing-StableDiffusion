@@ -20,6 +20,7 @@ GUEST_MAX_NUM = 5
 
 task_queue = KVqueue()
 img_queue = KVqueue()
+img_loaded = {}
 
 # sd_thread = stable_diffusion_init(task_queue, img_queue)
 
@@ -219,6 +220,7 @@ class Game:
 
     def collect_img(self, info, negative, rand_seed):
         global task_queue
+        global img_loaded
 
         if self.state == GameState.PLAYING \
             and self.host is not None:
@@ -250,16 +252,24 @@ class Game:
                     'negative': negative,
                     'rand_seed': rand_seed
                 })
+                img_loaded[self.host.name] = False
                 return True, 'add task to generate image'
 
         return False, 'collect img failed'
 
-    def pop_img(self):
+    def pop_img(self, username):
         '''
         return username and filename
         '''
         global img_queue
-        return img_queue.pop()
+        global img_loaded
+        
+        _, image_path = img_queue.pop_from_key(username)
+
+        if image_path is not None:
+            img_loaded[username] = True
+
+        return img_loaded.get(username, False), image_path
 
     def get_info(self):
 
@@ -267,7 +277,15 @@ class Game:
             return True, 'game has ended'
         if self.state == GameState.WAITING:
             return False, 'player could only get info when playing'
-        return True, self.info_record
+
+        image_loaded, image_path = False, None
+        if self.host is not None:
+            image_loaded, image_path = self.pop_img(self.host.name)
+        return True, {
+            'image_loaded': image_loaded,
+            'image_path': image_path,
+            'info_record': self.info_record
+        }
 
     def game_loop(self):
 

@@ -118,7 +118,7 @@
         input_ans: '',
         timer: '',
 
-        load_finished: true,
+        load_finished: false,
 
         messages: []
       },
@@ -145,7 +145,12 @@
               if (res.body.data == 'game has ended') {
                 window.location.href = '/settlement';
               } else {
-                this.messages = res.body.data;
+                this.messages = res.body.data.info_record;
+                this.load_finished = res.body.data.image_loaded;
+                
+                if (res.body.data.image_path != null) {
+                  this.image_url = res.body.data.image_path;
+                }
               }
             } else {
               console.log('Getting image fails, message:', res.body.message);
