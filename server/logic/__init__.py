@@ -71,7 +71,7 @@ def player_join_game(join_mode:str = None, current_name:str = None, target_name:
 
     return current_player.join_game(mode=join_mode, role=current_role)
 
-def __get_player_in_game__(name:str):
+def get_player_in_game(name:str):
 
     player = players.get(name, None)
 
@@ -85,7 +85,7 @@ def __get_player_in_game__(name:str):
 
 def player_get_others(player_name:str):
 
-    retcode, player = __get_player_in_game__(player_name)
+    retcode, player = get_player_in_game(player_name)
     if not retcode: return retcode, player
 
     game_state = 'unknown'
@@ -126,7 +126,7 @@ def player_get_others(player_name:str):
 
 def player_set_ready(player_name:str, ready:bool):
 
-    retcode, player = __get_player_in_game__(player_name)
+    retcode, player = get_player_in_game(player_name)
     if not retcode: return retcode, player
 
     if ready is not True and ready is not False:
@@ -135,13 +135,13 @@ def player_set_ready(player_name:str, ready:bool):
 
 def game_submit_info(player_name:str, info:str, negative:str, rand_seed:int):
 
-    retcode, player = __get_player_in_game__(player_name)
+    retcode, player = get_player_in_game(player_name)
     if not retcode: return retcode, player
     return player.give_info(info, negative, rand_seed)
 
 def game_get_info(player_name:str):
 
-    retcode, player = __get_player_in_game__(player_name)
+    retcode, player = get_player_in_game(player_name)
     if not retcode: return retcode, player
     return player.get_info()
 
