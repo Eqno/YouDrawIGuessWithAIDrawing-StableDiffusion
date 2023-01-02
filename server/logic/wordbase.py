@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import os
+from . import consts
 
-WORD_BASE_PATH = os.getcwd() + '/../data/wordbase/'
+WORD_BASE_PATH = consts.cwd / 'data' / 'wordbase'
 
-if not os.path.exists(WORD_BASE_PATH):
+if not WORD_BASE_PATH.exists():
     os.makedirs(WORD_BASE_PATH)
 
 print(WORD_BASE_PATH)
@@ -14,44 +17,31 @@ def get_set_list() -> list:
 
 
 def load_word_set(name: str):
-    word_set = []
-    try:
-        with open(WORD_BASE_PATH + name, 'r') as f:
-            word_set = f.read().split('\n')
-            f.close()
-    except:
+    filepath = WORD_BASE_PATH / name
+    if not filepath.exists():
         print('word set not exist')
-    return word_set
+        return []
+
+    with open(filepath, 'rt') as f:
+        word_set = []
+        for line in f:
+            word_set.append(line)
 
 
 def create_word_set(name: str, data: list):
-    file_path = WORD_BASE_PATH + name
-    if not os.path.exists(file_path):
-        try:
-            with open(file_path, 'w') as f:
-                s = ''
-                for i in data:
-                    s += i + '\n'
-                f.write(s)
-                f.close()
-        except:
-            print('word set create failed')
-    else:
+    filepath = WORD_BASE_PATH / name
+    if filepath.exists():
         print('word set already exist')
+        return
+
+    with open(filepath, 'wt') as f:
+        f.write('\n'.join(data))
 
 
 def append_word_set(name: str, data: list):
-    file_path = WORD_BASE_PATH + name
-    if os.path.exists(file_path):
-        try:
-            with open(file_path, 'a') as f:
-                s = ''
-                for i in data:
-                    s += i + '\n'
-                f.write(s)
-                f.close()
-        except:
-            print('word set append failed')
-    else:
+    filepath = WORD_BASE_PATH / name
+    if not filepath.exists():
         print('word set not exist')
-    pass
+
+    with open(filepath, 'a') as f:
+        f.write('\n'.join(data))

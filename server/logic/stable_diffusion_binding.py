@@ -4,19 +4,14 @@ import os
 import sys
 import time
 import hashlib
-import pathlib
 import threading
 
 sys.path.append(os.path.dirname(__file__))
 from kv_queue import KVqueue
 
-cwd = pathlib.Path(os.getcwd())
-if os.path.basename(cwd) == 'logic':
-    cwd = cwd.parent
-if os.path.basename(cwd) == 'server':
-    cwd = cwd.parent
+from . import consts
 
-sys.path.append(str(cwd / 'model'))
+sys.path.append(str(consts.cwd / 'model'))
 import server_binding as stable_diffusion
 
 generated_img_size = 256
