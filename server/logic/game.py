@@ -265,8 +265,8 @@ class Game:
 
         if self.state == GameState.HASENDED:
             return True, 'game has ended'
-        if self.state != GameState.PLAYING:
-            return False, 'player could get info when playing'
+        if self.state == GameState.WAITING:
+            return False, 'player could only get info when playing'
         return True, self.info_record
 
     def game_loop(self):
