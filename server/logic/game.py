@@ -4,6 +4,7 @@ from . import PlayerRole
 from . import GameMode
 from . import GameState
 from . import wordbase
+from . import Translate
 from .kv_queue import KVqueue
 from .stable_diffusion_binding import StableDiffusionWrapper
 
@@ -50,6 +51,7 @@ class Game:
         self.all_round = None
         self.round_num = None
 
+        self.translator = None
         self.create_time = time()
 
 
@@ -130,6 +132,7 @@ class Game:
             if len(self.guests) > 0 and guest_ready:
 
                 self.state = GameState.PLAYING
+                self.translator = Translate.YouDaoTranslator()
 
                 word_set = wordbase.get_random_set()
                 if word_set is not None:
@@ -249,9 +252,20 @@ class Game:
                 if task_queue.is_exist(self.host.name):
                     return False, 'already have task in queue'
 
+                positive = self.translator.translate(info, "zh2en")
+                negative = self.translator.translate(negative, "zh2en")
+
+                if type(positive) == list and len(positive) > 0:
+                    positive = positive[0]
+                if type(negative) == list and len(negative) > 0:
+                    negative = negative[0]
+
+                print('==============================')
+                print('positive: ', positive, '\nnegative: ', negative)
+
                 task_queue.push(self.host.name, {
                     'username': self.host.name,
-                    'positive': info,
+                    'positive': positive,
                     'negative': negative,
                     'rand_seed': rand_seed
                 })
