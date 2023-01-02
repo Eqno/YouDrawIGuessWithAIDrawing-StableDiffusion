@@ -104,7 +104,7 @@ def user_gaming_status_update():
 def main_game_loop():
 
     while True:
-        logic.__game_loop__()
+        logic.game_loop()
         time.sleep(GAMELOOP_INTERVAL)
 
 ############################## INITIAL ###############################
