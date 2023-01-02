@@ -228,11 +228,11 @@
         update_info: function () {
           this.$http.get('/api/game/core/get_info').then(function (res) {
             if (res.body.code == 0) {
-              console.log(res.body.message);
-              if (res.body.message == 'game has ended') {
+              console.log(res.body.data);
+              if (res.body.data == 'game has ended') {
                 window.location.href = '/settlement';
               } else {
-                this.messages = res.body.message;
+                this.messages = res.body.data;
               }
             } else {
               console.log('Getting image fails, message:', res.body.message);

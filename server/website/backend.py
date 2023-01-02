@@ -3,7 +3,6 @@
 ############################### IMPORT ###############################
 
 import os
-import sys
 import json
 import time
 import flask
@@ -53,6 +52,7 @@ def words_init():
 online_users = {}
 gaming_users = {}
 
+
 def api_heartbeat_imonline():
     global online_users
     username = session_get_username()
@@ -61,6 +61,7 @@ def api_heartbeat_imonline():
     update_time = round(time.time() * 1000)
     online_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
+
 
 def api_heartbeat_imgaming():
     global gaming_users
@@ -71,17 +72,20 @@ def api_heartbeat_imgaming():
     gaming_users[username] = update_time
     return generate_return_data(StatusCode.SUCCESS)
 
+
 def user_online_status_update():
     global online_users
     while True:
         now = round(time.time() * 1000)
         online_result = {
             k: v
-            for k, v in online_users.items() if now - v < ONLINE_HEARTBEAT_TIMEOUT * 1000
+            for k, v in online_users.items()
+            if now - v < ONLINE_HEARTBEAT_TIMEOUT * 1000
         }
         online_users = online_result
         print('online: {}'.format(online_users))
         time.sleep(ONLINE_HEARTBEAT_INTERVAL)
+
 
 def user_gaming_status_update():
     global gaming_users
@@ -101,13 +105,16 @@ def user_gaming_status_update():
         logic.check_escaped(escaped_users)
         time.sleep(GAMING_HEARTBEAT_INTERVAL)
 
+
 def main_game_loop():
 
     while True:
         logic.game_loop()
         time.sleep(GAMELOOP_INTERVAL)
 
+
 ############################## INITIAL ###############################
+
 
 def backend_init():
     for _dir in (consts.data_base_path, msg_data_path, user_data_path):
@@ -125,6 +132,7 @@ def backend_init():
     gameloop = threading.Thread(target=main_game_loop)
     gameloop.daemon = True
     gameloop.start()
+
 
 ############################# SESSION #############################
 
@@ -650,7 +658,7 @@ def api_game_core_get_info():
     retcode, message = logic.game_get_info(username)
 
     if retcode:
-        return generate_return_data(StatusCode.SUCCESS, { 'message': message })
+        return generate_return_data(StatusCode.SUCCESS, {'data': message})
     return generate_return_data(StatusCode.ERR_GAME_GET_INFO_FAILED, message)
 
 
