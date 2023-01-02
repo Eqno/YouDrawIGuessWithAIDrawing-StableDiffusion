@@ -139,32 +139,36 @@ def game_get_info(player_name:str):
 def check_escaped(escaped_users: list):
 
     for user in escaped_users:
-        player = players[user]
-        if player is not None \
-            and player.game is not None:
+        player = players.get(user, None)
 
-            if player.game.host is not None \
-                and player.game.host.name == user:
-                player.game.host = None
+        if player is not None:
 
-            guests = []
-            if player.game.guests is not None:
-                for guest in player.game.guests:
-                    if guest.name != user:
-                        guests.append(guest)
-            player.game.guests = guests
-        players.pop(user)
+            if player.game is not None:
+
+                if player.game.host is not None \
+                    and player.game.host.name == user:
+                    player.game.host = None
+
+                guests = []
+                if player.game.guests is not None:
+                    for guest in player.game.guests:
+                        if guest.name != user:
+                            guests.append(guest)
+                player.game.guests = guests
+
+            players.pop(user)
     
     print('players: {}'.format(players))
 
 def __game_loop__():
 
     for game in games:
+        if game.state == GameState.PLAYING:
 
-        retcode, message = game.get_loop_time()
-        if not retcode:
-            print('===== GAME END =====\n' + message)
-            game.state = GameState.HASENDED
+            retcode, message = game.game_loop()
+            if not retcode:
+                print('===== GAME END =====\n' + message)
+                game.state = GameState.HASENDED
 
 from .game import Game
 from .player import Player

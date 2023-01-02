@@ -520,10 +520,10 @@
           });
         },
         join_game: function (name) {
-
+          window.location.href = '/selectrole?mode=match&name=' + name;
         },
         invite_game: function (name) {
-
+          window.location.href = '/selectrole?mode=custom&name=' + name;
         },
       },
       watch: {

@@ -254,14 +254,21 @@ class Game:
 
     def get_info(self):
 
+        if self.state == GameState.HASENDED:
+            return True, 'game has ended'
         if self.state != GameState.PLAYING:
             return False, 'player could get info when playing'
         return True, self.info_record
 
-    def get_loop_time(self):
+    def game_loop(self):
+
+        if self.host is None:
+            return False, 'host escaped'
+
+        if len(self.guests) == 0:
+            return False, 'guests escaped'
 
         if self.loop_time is not None:
-            
             loop_time = self.loop_time - time()
 
             if loop_time < 5.5 and self.loop_flag[0] is False:
@@ -325,12 +332,7 @@ class Game:
         self.ans = '咖波2'
         self.loop_flag = [False, False, False, False]
 
-        if self.host is None:
-            return False, 'host escaped'
         self.host.win = False
-
-        if len(self.guests) == 0:
-            return False, 'guests escaped'
         for guest in self.guests:
             guest.win = False
 

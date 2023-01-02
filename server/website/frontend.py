@@ -62,19 +62,22 @@ def selectrole():
                                  heartbeat_gaming=True,
                                  base_url=flask.request.base_url)
 
+def settlement():
+    return flask.render_template('settlement.html',
+                                 title='结算',
+                                 heartbeat_gaming=True,
+                                 base_url=flask.request.base_url)
 
 def friends():
     return flask.render_template('friends.html',
                                  title='好友',
                                  base_url=flask.request.base_url)
 
-
 def userinfo(username):
     return flask.render_template('userinfo.html',
                                  title='用户信息',
                                  username=username,
                                  base_url=flask.request.base_url)
-
 
 def user_avatar(username):
     avatar = consts.user_data_path / username / consts.avatar_file_name
@@ -95,8 +98,9 @@ frontend_pages = {
     '/guest': guest,
     '/match': match,
     '/custom': custom,
-    '/selectrole': selectrole,
     '/friends': friends,
+    '/selectrole': selectrole,
+    '/settlement': settlement,
     '/user/<username>': userinfo,
     '/avatar/<username>': user_avatar,
     '/image/<filename>': get_image,
