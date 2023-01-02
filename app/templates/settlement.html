@@ -1,1 +1,174 @@
-123
+<!DOCTYPE html>
+<html>
+
+<head>
+  {% include 'header.html' %}
+  <style>
+    .role-title {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .role-item-avatar {
+      width: 128px;
+      height: 128px;
+      border: 1px solid;
+      border-radius: 8px;
+      border-color: #dbdbdb;
+    }
+    .role-item-name {
+      text-align: center;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      line-height: 30px;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+    .ready-title {
+      text-align: center;
+      margin: auto;
+      margin-top: 20px;
+
+      padding: 20px;
+      border-radius: 8px;
+      white-space: pre;
+    }
+    .ready-title:hover {
+      border: 1px solid;
+      border-color: #485fc7;
+    }
+    .player-ready {
+      border-color: #5ac9e8 !important;
+    }
+    .player-not-ready {
+      border: 2px solid;
+      border-color: #ffffff;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  {% include 'nav.html' %}
+  <section class="section">
+    <div id="app" class="column container">
+      
+      <div class="card">
+        <div class="card-content" style="min-height: 47rem;">
+          
+          <p class="title is-3 role-title">出题者</p>
+
+          {% raw %}
+          <div class="colums" style="margin-bottom: 30px;">
+            <div v-if="host.name != null" class="colum player-not-ready" v-bind:class="{ 'player-ready': host['name']==username }">
+
+              <div style="display: flex; margin-top: 20px;">
+                <img class="role-item-avatar" :src="'/avatar/' + host['name']" style="margin: auto;">
+              </div>
+              <p class="subtitle is-5 role-item-name">{{ host.name }}：{{ host.score }}</p>
+            
+            </div>
+          </div>
+          {% endraw %}
+          
+          <p class="title is-3 role-title">猜谜者</p>
+
+          {% raw %}
+          <div class="columns" style="margin-top: 10px;">
+            <div v-for="guest of guests" class="column player-not-ready"
+              v-bind:class="{ 'player-ready': guest['name']==username, 'is-one-fifth': guest_num[5], 'is-one-quarter': guest_num[4], 'is-one-third': guest_num[3], 'is-half': guest_num[2] }">
+              
+              <div style="display: flex; margin-top: 20px;">
+                  <img class="role-item-avatar" :src="'/avatar/' + guest['name']" style="margin: auto;">
+              </div>
+              <p class="subtitle is-5 role-item-name">{{ guest.name }}：{{ guest.score }}</p>
+
+            </div>
+          </div>
+          {% endraw %}
+
+          <div style="display: flex;">
+            <a href="/" class="title is-3 ready-title is-capoo">返回大厅</a>
+          </div>
+
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        guest_num: {
+          0: false,
+          1: false,
+          2: false,
+          3: false,
+          4: false,
+          5: false,
+          6: false,
+        },
+        username: '',
+
+        role: '',
+        host: {},
+        guests: [],
+      },
+      mounted: function () {
+        this.update_players();
+      },
+      methods: {
+        update_players: function () {
+          this.$http.get('/api/game/room/get_players').then(function (ret) {
+            if (ret.body.code == 0) {
+
+              this.host = ret.body.host;
+              this.guests = ret.body.guests;
+              this.username = nav_app.username;
+
+              if (this.host.name == this.username) {
+                this.role = 'host';
+              } else {
+                for (const i of this.guests) {
+                  if (i.name == this.username) {
+                    this.role = 'guest';
+                    break;
+                  }
+                }
+              }
+              
+              if (ret.body.game_state == 'hasended') {
+                
+              } else if (ret.body.game_state == 'playing') {
+                if (this.role == 'host') {
+                  window.location.href = '/host';
+                } else if (this.role == 'guest') {
+                  window.location.href = '/guest';
+                } else {
+                  console.log('unknown role');
+                }
+              } else if (ret.body.game_state == 'waiting') {
+                window.location.href = '/match';
+              } else {
+                window.location.href = '/';
+              }
+            } else {
+              console.log('There is no logined user.');
+            }
+          }, function (ret) {
+            console.log('Request fails, status:', ret);
+          });
+          for (var i=0; i<=6; i++) {
+            this.guest_num[i] = false;
+          }
+          this.guest_num[this.guests.length] = true;
+        },
+      },
+    })
+  </script>
+  {% include 'footer.html' %}
+</body>
+</html>

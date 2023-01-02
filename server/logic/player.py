@@ -15,6 +15,7 @@ class Player:
 
         self.win = False
         self.score = 0
+        self.escape = False
 
         self.game = None
         self.ready = False
@@ -27,6 +28,7 @@ class Player:
 
         self.win = False
         self.score = 0
+        self.escape = False
 
         self.game = None
         self.ready = False

@@ -61,12 +61,12 @@
 
           {% raw %}
           <div class="colums" style="margin-bottom: 30px;">
-            <div v-if="host.name != null" class="colum player-not-ready" v-bind:class="{ 'player-ready': host['ready'] }">
+            <div v-if="host.name != null" class="colum player-not-ready" v-bind:class="{ 'player-ready': host['ready'] || (host['name']==username && self_ready==true) }">
 
               <div style="display: flex; margin-top: 20px;">
                 <img class="role-item-avatar" :src="'/avatar/' + host['name']" style="margin: auto;">
               </div>
-              <p class="subtitle is-5 role-item-name">{{ host['name'] }}</p>
+              <p class="subtitle is-5 role-item-name">{{ host.name }}</p>
             
             </div>
           </div>
@@ -129,6 +129,11 @@
           this.$http.get('/api/game/room/get_players').then(function (ret) {
             if (ret.body.code == 0) {
               
+              if (ret.body.game_state == 'hasended') {
+                window.location.href = '/settlement';
+                return;
+              }
+
               this.host = ret.body.host;
               this.guests = ret.body.guests;
               this.username = nav_app.username;
@@ -136,7 +141,6 @@
               if (this.host.name == this.username) {
                 
                 this.self_ready = this.host.ready;
-                console.log(this.self_ready);
                 this.role = 'host';
 
               } else {
@@ -144,13 +148,13 @@
                   if (i.name == this.username) {
 
                     this.self_ready = i.ready;
-                    console.log(this.self_ready);
                     this.role = 'guest';
 
                     break;
                   }
                 }
               }
+              
               if (ret.body.game_state == 'playing') {
 
                 if (this.role == 'host') {

@@ -97,21 +97,30 @@ def player_get_others(player_name:str):
     elif player.game.state == GameState.HASENDED:
         game_state = 'hasended'
 
-    host = {}
-    if player.game.host is not None:
-        host = {
-            'ready': player.game.host.ready,
-            'name': player.game.host.name,
-        }
-    guests = []
-    for guest in player.game.guests:
-        guests.append({
-            'ready': guest.ready,
-            'name': guest.name,
-        })
+    host, guests = {}, []
     
-    update_time = round(time.time() * 1000)
-    backend.gaming_users[player_name] = update_time
+    if game_state == 'hasended':
+        if player.game.host is not None:
+            host = {
+                'score': player.game.host.score,
+                'name': player.game.host.name,
+            }
+        for guest in player.game.guests:
+            guests.append({
+                'score': guest.score,
+                'name': guest.name,
+            })
+    else:
+        if player.game.host is not None:
+            host = {
+                'ready': player.game.host.ready,
+                'name': player.game.host.name,
+            }
+        for guest in player.game.guests:
+            guests.append({
+                'ready': guest.ready,
+                'name': guest.name,
+            })
 
     return True, { 'game_state': game_state, 'host': host, 'guests': guests }
 
@@ -142,8 +151,12 @@ def check_escaped(escaped_users: list):
         player = players.get(user, None)
 
         if player is not None:
-
             if player.game is not None:
+
+                if player.game.state == GameState.PLAYING:
+                    player.escape = True
+                    player.score = -100
+                    return
 
                 if player.game.host is not None \
                     and player.game.host.name == user:
@@ -162,13 +175,33 @@ def check_escaped(escaped_users: list):
 
 def __game_loop__():
 
-    for game in games:
+    need_to_pop = []
+    for index, game in enumerate(games):
         if game.state == GameState.PLAYING:
 
             retcode, message = game.game_loop()
             if not retcode:
                 print('===== GAME END =====\n' + message)
                 game.state = GameState.HASENDED
+            
+        elif game.state == GameState.HASENDED:
+
+            game_exsist = False
+            if game.host is not None \
+                and game.host.escape is False:
+                game_exsist = True
+            for guest in game.guests:
+                if guest.escape is False:
+                    game_exsist = True
+                    break
+            if not game_exsist:
+                game.host = None
+                game.guests = None
+                need_to_pop.append(index)
+
+    for i in need_to_pop:
+        print('============ pop game {} ================'.format(i))
+        games.pop(i)
 
 from .game import Game
 from .player import Player

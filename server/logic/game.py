@@ -262,10 +262,15 @@ class Game:
 
     def game_loop(self):
 
-        if self.host is None:
+        if self.host is None or self.host.escape is True:
             return False, 'host escaped'
 
-        if len(self.guests) == 0:
+        has_guest = False
+        for guest in self.guests:
+            if guest.escape is False:
+                has_guest = True
+                break
+        if not has_guest:
             return False, 'guests escaped'
 
         if self.loop_time is not None:
