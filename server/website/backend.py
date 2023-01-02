@@ -654,6 +654,11 @@ def api_game_core_submit_info():
     negative = data.get('negative', None)
     rand_seed = data.get('rand_seed', None)
 
+    try:
+        rand_seed = int(rand_seed)
+    except:
+        rand_seed = 0
+
     if info is None:
         return generate_return_data(
             StatusCode.ERR_GAME_DID_NOT_COMMIT_ANITHING)
