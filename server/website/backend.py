@@ -202,7 +202,7 @@ def use_game_score(username, mode, score, repu, others):
             user_info['winnum'] = user_info.get('winnum', 0) + 1
         user_info['allnum'] = user_info.get('allnum', 0) + 1
 
-        record = user_info.get('record', list)
+        record = user_info.get('record', list())
 
         record_mode = '创建房间'
         if mode == 'match': record_mode = '匹配模式'

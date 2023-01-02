@@ -22,9 +22,9 @@ GUEST_MAX_NUM = 5
 task_queue = KVqueue()
 img_queue = KVqueue()
 
-# sd = StableDiffusionWrapper(task_queue, img_queue)
-# sd.start_thread()
-sd = None
+sd = StableDiffusionWrapper(task_queue, img_queue)
+sd.start_thread()
+# sd = None
 
 class Game:
 
@@ -35,7 +35,7 @@ class Game:
 
         self.wordset = ['咖波']
         self.image_path = None
-        self.image_loaded = False
+        self.image_loaded = True
 
         self.ans = None
         self.start = False
