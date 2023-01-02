@@ -15,7 +15,10 @@ class Player:
 
         self.win = False
         self.score = 0
+        self.repu = 2
         self.escape = False
+
+        self.mode = 'match'
 
         self.game = None
         self.ready = False
@@ -28,7 +31,10 @@ class Player:
 
         self.win = False
         self.score = 0
+        self.repu = 2
         self.escape = False
+
+        self.mode = mode
 
         self.game = None
         self.ready = False

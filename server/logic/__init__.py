@@ -156,6 +156,7 @@ def check_escaped(escaped_users: list):
                 if player.game.state == GameState.PLAYING:
                     player.escape = True
                     player.score = -100
+                    player.repu = -10
                     return
 
                 if player.game.host is not None \
@@ -185,9 +186,24 @@ def game_loop():
                 game.state = GameState.HASENDED
 
                 if game.host is not None:
-                    backend.use_game_score(game.host.name, game.host.score)
+                    
+                    other_players = []
+                    for guest in game.guests:
+                        other_players.append(guest.name)
+
+                    backend.use_game_score(game.host.name, game.host.mode, game.host.score, game.host.repu, other_players)
+                
                 for guest in game.guests:
-                    backend.use_game_score(guest.name, guest.score)
+
+                    other_players = []
+                    if game.host is not None:
+                        other_players.append(game.host.name)
+
+                    for _guest in game.guests:
+                        if guest.name != _guest.name:
+                            other_players.append(_guest.name)
+
+                    backend.use_game_score(guest.name, guest.mode, guest.score, guest.repu, other_players)
         
         elif game.state == GameState.HASENDED:
 

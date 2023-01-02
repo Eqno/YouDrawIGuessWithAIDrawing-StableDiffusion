@@ -103,8 +103,8 @@
 
                     <div class="columns" style="position: relative;">
                         <div class="column game-column"><p class="game-data">积分 {{ userinfo.ranking }}</p></div>
-                        <div class="column game-column"><p class="game-data">胜场 100/200</p></div>
-                        <div class="column game-column"><p class="game-data">胜率 50.00%</p></div>
+                        <div class="column game-column"><p class="game-data">胜场 {{ userinfo.winnum }}/{{ userinfo.allnum }}</p></div>
+                        <div class="column game-column"><p class="game-data">信誉 {{ userinfo.reputation }}</p></div>
                     </div>
 
                     <aside class="menu">
@@ -113,28 +113,13 @@
                                 <div class="is-capoo game-record">游戏记录</div>
                             </li>
 
-                            <li>
+                            <li v-for="record of userinfo.record">
                                 <a class="columns m-4 one-record">
-                                    <p class="column is-one-quarter game-mode">匹配模式</p>
+                                    <p class="column is-one-quarter game-mode">{{ record.mode }}</p>
                                     <div class="column">
-                                        <img src="/static/avatar.png" class="is-32x32">
-                                        <img src="/static/avatar.png" class="is-32x32">
-                                        <img src="/static/avatar.png" class="is-32x32">
-                                        <img src="/static/avatar.png" class="is-32x32">
+                                        <img v-for="player of record.others" :src="'/avatar/' + player" class="is-32x32">
                                     </div>
-                                    <p class="column is-one-fifth game-score">+20</p>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="columns m-4 one-record">
-                                    <p class="column is-one-quarter game-mode">匹配模式</p>
-                                    <div class="column">
-                                        <img src="/static/avatar.png" class="is-32x32">
-                                        <img src="/static/avatar.png" class="is-32x32">
-                                        <img src="/static/avatar.png" class="is-32x32">
-                                        <img src="/static/avatar.png" class="is-32x32">
-                                    </div>
-                                    <p class="column is-one-fifth game-score">+10</p>
+                                    <p class="column is-one-fifth game-score">{{ record.score }}</p>
                                 </a>
                             </li>
                         </ul>

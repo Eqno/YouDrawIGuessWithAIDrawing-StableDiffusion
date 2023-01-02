@@ -21,9 +21,9 @@ GUEST_MAX_NUM = 5
 task_queue = KVqueue()
 img_queue = KVqueue()
 
-sd = StableDiffusionWrapper(task_queue, img_queue)
-sd.start_thread()
-
+# sd = StableDiffusionWrapper(task_queue, img_queue)
+# sd.start_thread()
+sd = None
 
 class Game:
 
@@ -47,6 +47,7 @@ class Game:
         self.end_time = None
         self.loop_time = None
 
+        self.all_round = None
         self.round_num = None
 
         self.create_time = time()
@@ -171,8 +172,11 @@ class Game:
                 else:
 
                     player.win = True
-                    self.host.win = True
                     player.score += WHOLE_WIN_SCORE
+
+                    self.host.win = True
+                    self.host.score += WHOLE_WIN_SCORE
+
                     self.loop_time = time() + LOOP_LAST_TIME
 
                     res = dict({
@@ -299,9 +303,11 @@ class Game:
         }
 
     def get_progress(self):
+        global sd
+
         if self.host is not None:
             hostname = self.host.name
-            if sd.get_working_user() == hostname:
+            if sd is not None and sd.get_working_user() == hostname:
                 return sd.get_progress()
         return None
 
@@ -395,15 +401,19 @@ class Game:
 
         self.loop_flag = [False, False, False, False]
 
+        if self.start is True and self.host.win is False:
+            self.host.score -= 5
         self.host.win = False
+
         for guest in self.guests:
+            if self.start is True and guest.win is False:
+                guest.score -= 5
             guest.win = False
 
         if self.round_num > 0:
-            self.round_num -= 1
-
             if self.start is False:
 
+                self.all_round = self.round_num
                 res = dict({
                     'is_alert': True,
                     'alert_prefix': '系统',
@@ -427,11 +437,12 @@ class Game:
                     'is_alert': True,
                     'alert_prefix': '系统',
                     'players': [],
-                    'content': '进入新一轮'
+                    'content': '进入第 {} 轮'.format(self.all_round - self.round_num + 1)
                 })
                 self.info_record.append(res)
-
+            
+            self.round_num -= 1
             return True, 'next round'
         else:
             self.state = GameState.HASENDED
-            return True, 'game end'
+            return False, 'game end'

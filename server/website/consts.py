@@ -18,3 +18,4 @@ default_words = ['咖波', '大黄狗', '小白兔', '蓝猫', '柴犬']
 
 default_avatar_path = cwd / 'app' / 'static' / 'avatar.png'
 default_ranking = 1000
+default_reputation = 100

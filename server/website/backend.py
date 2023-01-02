@@ -175,13 +175,17 @@ def api_account_userinfo():
         userinfo = {}
         userinfo['username'] = raw_user_info['username']
         userinfo['signature'] = raw_user_info.get('signature', '')
+        userinfo['allnum'] = raw_user_info.get('allnum', 0)
+        userinfo['winnum'] = raw_user_info.get('winnum', 0)
         userinfo['ranking'] = raw_user_info.get('ranking',
                                                 consts.default_ranking)
-
+        userinfo['reputation'] = raw_user_info.get('reputation',
+                                                   consts.default_reputation)
+        userinfo['record'] = raw_user_info.get('record', [])
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
 
 
-def use_game_score(username, score):
+def use_game_score(username, mode, score, repu, others):
 
     user_file_path = user_data_path / username / info_file_name
     if not user_file_path.exists():
@@ -192,6 +196,24 @@ def use_game_score(username, score):
 
         user_info['ranking'] = user_info.get('ranking',
                                              consts.default_ranking) + score
+        user_info['reputation'] = min(100, user_info.get('reputation',
+                                                         consts.default_reputation) + repu)
+        if score > 0:
+            user_info['winnum'] = user_info.get('winnum', 0) + 1
+        user_info['allnum'] = user_info.get('allnum', 0) + 1
+
+        record = user_info.get('record', list)
+
+        record_mode = '创建房间'
+        if mode == 'match': record_mode = '匹配模式'
+        
+        record.insert(0, {
+            'mode': record_mode,
+            'others': others,
+            'score': score
+        })
+        user_info['record'] = record
+
         f.seek(0)
         json.dump(user_info, fp=f)
         f.truncate()
@@ -237,6 +259,10 @@ def api_account_signup():
         user_info['password'] = password
 
         user_info['ranking'] = consts.default_ranking
+        user_info['winnum'] = 0
+        user_info['allnum'] = 0
+        user_info['reputation'] = consts.default_reputation
+        user_info['record'] = []
 
         user_info['friends'] = []
         user_info['applications_sent'] = []
@@ -520,7 +546,8 @@ def api_account_get_messages():
     chat_path = msg_data_path / chat_filename
 
     if not chat_path.exists():
-        return generate_return_data(StatusCode.SUCCESS, {'messages': []})
+        with open(chat_path, 'w') as f:
+            pass
 
     timestamp = int(data.get('timestamp', 0))
 
@@ -564,6 +591,10 @@ def api_account_send_message():
 
     chat_filename = get_chat_filename([username, target_username])
     chat_path = msg_data_path / chat_filename
+
+    if not chat_path.exists():
+        with open(chat_path, 'w') as f:
+            pass
 
     content = data['content']
     this_timestamp = int(round(time.time() * 1000))
