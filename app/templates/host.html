@@ -127,7 +127,7 @@
           </div>
           <div class="loding-content" v-if="!load_finished">
             <p class="loding-text title is-5" style="margin-top: 30px;">AI 画图中，请稍等片刻...</p>
-            <progress class="progress is-success" value="progress" max="100" style="margin-bottom: 30px;">60%</progress>
+            <progress class="progress is-success" :value="progress" max="100" style="margin-bottom: 30px;"></progress>
           </div>
         </div>
       </div>
