@@ -183,7 +183,12 @@ def game_loop():
             if not retcode:
                 print('===== GAME END =====\n' + message)
                 game.state = GameState.HASENDED
-            
+
+                if game.host is not None:
+                    backend.use_game_score(game.host.name, game.host.score)
+                for guest in game.guests:
+                    backend.use_game_score(guest.name, guest.score)
+        
         elif game.state == GameState.HASENDED:
 
             game_exsist = False
