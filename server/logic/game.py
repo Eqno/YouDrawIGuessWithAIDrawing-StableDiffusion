@@ -5,7 +5,7 @@ from . import GameMode
 from . import GameState
 from . import wordbase
 from .kv_queue import KVqueue
-from .stable_diffusion_binding import stable_diffusion_init
+from .stable_diffusion_binding import StableDiffusionWrapper
 
 from time import time
 
@@ -21,7 +21,8 @@ GUEST_MAX_NUM = 5
 task_queue = KVqueue()
 img_queue = KVqueue()
 
-# sd_thread = stable_diffusion_init(task_queue, img_queue)
+sd = StableDiffusionWrapper(task_queue, img_queue)
+sd.start_thread()
 
 
 class Game:
@@ -290,6 +291,13 @@ class Game:
                 'info_record': self.info_record
             }
         }
+
+    def get_progress(self):
+        if self.host is not None:
+            hostname = self.host.name
+            if sd.get_working_user() == hostname:
+                return sd.get_progress()
+        return None
 
     def game_loop(self):
 

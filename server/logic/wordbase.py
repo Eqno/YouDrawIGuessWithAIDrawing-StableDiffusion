@@ -8,8 +8,6 @@ WORD_BASE_PATH = consts.cwd / 'data' / 'wordbase'
 if not WORD_BASE_PATH.exists():
     os.makedirs(WORD_BASE_PATH)
 
-print(WORD_BASE_PATH)
-
 
 # 返回所有词集的名称
 def get_set_list() -> list:
@@ -27,13 +25,15 @@ def load_word_set(name: str):
         for line in f:
             word_set.append(line)
         return word_set
-    
+
+
 def get_random_set():
     name_list = get_set_list()
     if len(name_list) > 0:
         set_name = random.choice(name_list)
         return load_word_set(set_name)
     return None
+
 
 def create_word_set(name: str, data: list):
     filepath = WORD_BASE_PATH / name

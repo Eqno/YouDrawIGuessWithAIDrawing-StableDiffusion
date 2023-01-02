@@ -43,6 +43,9 @@ class Text2image(object):
                                          jit_compile=False,
                                          download_weights=False)
 
+    def get_progress(self):
+        return self.generator.get_progress()
+
     def __generate_image_with_func_params(self,
                                           positive_list: list,
                                           negative_list: list,

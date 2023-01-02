@@ -180,6 +180,7 @@ def api_account_userinfo():
 
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
 
+
 def use_game_score(username, score):
 
     user_file_path = user_data_path / username / info_file_name
@@ -189,12 +190,14 @@ def use_game_score(username, score):
     with open(user_file_path, 'r+') as f:
         user_info = json.load(f)
 
-        user_info['ranking'] = user_info.get('ranking', consts.default_ranking) + score
+        user_info['ranking'] = user_info.get('ranking',
+                                             consts.default_ranking) + score
         f.seek(0)
         json.dump(user_info, fp=f)
         f.truncate()
-    
+
     return True, 'use game score succeed'
+
 
 def api_account_login():
     data = flask.request.get_json()
@@ -656,8 +659,10 @@ def api_game_core_submit_info():
 
     try:
         rand_seed = int(rand_seed)
+        if rand_seed < 0:
+            rand_seed = -1
     except:
-        rand_seed = 0
+        rand_seed = -1
 
     if info is None:
         return generate_return_data(
@@ -673,7 +678,6 @@ def api_game_core_submit_info():
 
 
 def api_game_core_get_info():
-
     username = session_get_username()
     retcode, message = logic.game_get_info(username)
 

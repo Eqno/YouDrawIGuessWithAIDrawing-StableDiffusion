@@ -25,6 +25,36 @@ def prompt_str_to_list(prompts: str) -> list:
     return non_empty_result
 
 
+class StableDiffusionWrapper(object):
+    model = None
+    thread = None
+    working = None
+
+    def __init__(self, task_queue: KVqueue, img_queue: KVqueue):
+        model_instance = stable_diffusion.Text2image(generated_img_size, generated_img_size)
+
+        main_thread = threading.Thread(target=stable_diffusion_thread, args=[self, task_queue, img_queue])
+        main_thread.daemon = True
+
+        self.model = model_instance
+        self.thread = main_thread
+
+    def get_model(self):
+        return self.model
+
+    def start_thread(self):
+        self.thread.start()
+
+    def get_progress(self):
+        return self.model.get_progress()
+
+    def _update_working_user(self, username):
+        self.working = username
+
+    def get_working_user(self):
+        return self.working
+
+
 def generate_image(model_instance,
                    filename_prefix: str,
                    positive_str: str,
@@ -40,6 +70,8 @@ def generate_image(model_instance,
     raw_filename = '{}-{}'.format(filename_prefix, int(time.time()))
     filename = hashlib.md5(raw_filename.encode()).hexdigest()
     print('{} -> {}'.format(raw_filename, filename))
+    print(positive)
+    print(negative)
     status, _ = model_instance.generate_image_with_func_params(
         positive, negative, filename, rand_seed=random_seed)
     if status:
@@ -47,8 +79,10 @@ def generate_image(model_instance,
     return None
 
 
-def stable_diffusion_thread(model_instance, task_queue: KVqueue,
+def stable_diffusion_thread(wrapper: StableDiffusionWrapper, task_queue: KVqueue,
                             img_queue: KVqueue):
+    model_instance = wrapper.get_model()
+
     while True:
         time.sleep(1)
         if task_queue.is_empty():
@@ -56,25 +90,14 @@ def stable_diffusion_thread(model_instance, task_queue: KVqueue,
         username, task = task_queue.pop()
         if task is None:
             continue
-        print('sd-thread working')
+
+        wrapper._update_working_user(username)
         ret = generate_image(model_instance, username, task['positive'],
                              task['negative'], task['rand_seed'])
-        print('sd-thread done, ret=', ret)
+        wrapper._update_working_user(None)
+
         # Node that the `ret` could be `None`
         img_queue.push(username, ret)
-
-
-def stable_diffusion_init(task_queue: KVqueue, img_queue: KVqueue):
-    model_instance = stable_diffusion.Text2image(generated_img_size,
-                                                 generated_img_size)
-
-    main_thread = threading.Thread(
-        target=stable_diffusion_thread,
-        args=[model_instance, task_queue, img_queue])
-    main_thread.daemon = True
-    main_thread.start()
-
-    return main_thread
 
 
 def selftest_thread(tq: KVqueue, iq: KVqueue):

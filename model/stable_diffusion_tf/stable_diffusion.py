@@ -26,6 +26,7 @@ class StableDiffusion:
         self.diffusion_model = diffusion_model
         self.decoder = decoder
         self.encoder = encoder
+        self.progress = 0
 
         if jit_compile:
             self.text_encoder.compile(jit_compile=True)
@@ -50,6 +51,9 @@ class StableDiffusion:
         input_mask=None,
         input_image_strength=0.5,
     ):
+        # Reset progress
+        self.progress = 0
+
         # Tokenize prompt (i.e. starting context)
         inputs = self.tokenizer.encode(prompt)
         assert len(inputs) < 77, "Prompt is too long (should be < 77 tokens)"
@@ -113,6 +117,7 @@ class StableDiffusion:
         progbar = tqdm(list(enumerate(timesteps))[::-1])
         for index, timestep in progbar:
             progbar.set_description(f"{index:3d} {timestep:3d}")
+            self.progress = 1 - (index / len(timesteps))
             e_t = self.get_model_output(
                 latent,
                 timestep,
@@ -133,6 +138,7 @@ class StableDiffusion:
                     timesteps, batch_size, seed , input_image=input_image_tensor, input_img_noise_t=timestep
                 )
                 latent = latent_orgin * latent_mask_tensor + latent * (1- latent_mask_tensor)
+        self.progress = 1
 
         # Decoding stage
         decoded = self.decoder.predict_on_batch(latent)
@@ -143,6 +149,9 @@ class StableDiffusion:
           decoded = input_image_array * (1-input_mask_array) + np.array(decoded) * input_mask_array
 
         return np.clip(decoded, 0, 255).astype("uint8")
+    
+    def get_progress(self):
+        return self.progress
 
     def timestep_embedding(self, timesteps, dim=320, max_period=10000):
         half = dim // 2
