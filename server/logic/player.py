@@ -20,6 +20,7 @@ class Player:
         self.ready = False
 
     def join_game(self,
+                  mode = 'match',
                   game = None,
                   role: PlayerRole = PlayerRole.UNSPECIFIED):
         self.role = role
@@ -31,24 +32,24 @@ class Player:
         self.ready = False
 
         games = get_all_game_list()
+        if mode is None or mode == 'match':
 
-        if game is not None:
+            if game is not None:
+                return game.add_player(self)
 
-            return game.add_player(self)
+            elif len(games) > 0:
 
-        elif len(games) > 0:
+                match_games = []
+                for game in games:
+                    if game.mode == GameMode.MATCH and game.state == GameState.WAITING:
+                        match_games.append(game)
 
-            match_games = []
-            for game in games:
-                if game.mode == GameMode.MATCH and game.state == GameState.WAITING:
-                    match_games.append(game)
-
-            if len(match_games) > 0:
-                match_games.sort(key=cmp, reverse=True)
-                retcode, message = match_games[0].add_player(self)
-                
-                if retcode:
-                    return True, message
+                if len(match_games) > 0:
+                    match_games.sort(key=cmp, reverse=True)
+                    retcode, message = match_games[0].add_player(self)
+                    
+                    if retcode:
+                        return True, message
         
         index, message = create_game_instance(GameMode.MATCH)
 

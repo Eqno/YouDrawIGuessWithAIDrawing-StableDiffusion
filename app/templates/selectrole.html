@@ -167,7 +167,8 @@
           if (this.guest_selected) role = 2
           if (this.unspecified_selected) role = 3
 
-          this.$http.post('/api/game/room/join_game', { username: '', role: role }, { emulateJSON: false }).then(function (ret) {
+          var mode = new URLSearchParams(window.location.search).get('mode');
+          this.$http.post('/api/game/room/join_game', { mode: mode, username: '', role: role }, { emulateJSON: false }).then(function (ret) {
             console.log(ret.body);
             
             if (ret.body.code == 0) {

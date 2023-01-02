@@ -585,6 +585,7 @@ def api_game_room_join_game():
 
     data = flask.request.get_json()
 
+    join_mode = data.get('mode', None)
     current_username = session_get_username()
     target_username = data.get('username', None)
     current_role = data.get('role', None)
@@ -594,10 +595,10 @@ def api_game_room_join_game():
         return generate_return_data(StatusCode.ERR_GAME_PLAYER_NUM_EXCEED_MAX,
                                     {'error_message': message})
 
-    retcode, message = logic.player_join_game(current_name=current_username,
+    retcode, message = logic.player_join_game(join_mode=join_mode,
+                                              current_name=current_username,
                                               target_name=target_username,
                                               current_role=current_role)
-
     if not retcode:
         return generate_return_data(
             StatusCode.ERR_GAME_PLAYER_JOIN_GAME_FAILED,

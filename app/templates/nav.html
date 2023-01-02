@@ -25,10 +25,10 @@
             {{ test_page }}
           </a>
           <hr class="navbar-divider">
-          <a href="{{ url_for('selectrole') }}" class="navbar-item">
+          <a href="{{ url_for('selectrole') }}?mode=match" class="navbar-item">
             {{ match_mode }}
           </a>
-          <a href="{{ url_for('custom') }}" class="navbar-item">
+          <a href="{{ url_for('selectrole') }}?mode=custom" class="navbar-item">
             {{ custom_mode }}
           </a>
           <hr class="navbar-divider">

@@ -47,7 +47,7 @@ def create_player_instance(player_name: str):
 
     return False, 'instance num exceed max: {}'.format(PLAYER_MAX_NUM)
 
-def player_join_game(current_name:str, target_name:str = None, current_role:int = 3):
+def player_join_game(join_mode:str = None, current_name:str = None, target_name:str = None, current_role:int = 3):
 
     current_player = players.get(current_name, None)
 
@@ -57,7 +57,7 @@ def player_join_game(current_name:str, target_name:str = None, current_role:int 
     if current_player.game is not None:
         return False, 'current player is already in game now'
 
-    if len(target_name) > 0:
+    if join_mode == 'match' and len(target_name) > 0:
         
         target_player = players.get(target_name, None)
         
@@ -67,9 +67,9 @@ def player_join_game(current_name:str, target_name:str = None, current_role:int 
         if target_player.game is None:
             return False, 'target player is not in game yet'
 
-        return current_player.join_game(target_player.game, current_role)
+        return current_player.join_game(mode=join_mode, game=target_player.game, role=current_role)
 
-    return current_player.join_game(role=current_role)
+    return current_player.join_game(mode=join_mode, role=current_role)
 
 def __get_player_in_game__(name:str):
 
