@@ -148,11 +148,7 @@ class Game:
             if player.win is True:
                 return False, 'player has won'
 
-            print('=======================================\n', self.ans, info)
-
             if re.findall(self.ans, info, re.IGNORECASE) is not None:
-
-                print('=================================================\ncorrect!')
 
                 if self.loop_time is not None:
                     
