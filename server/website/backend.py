@@ -180,6 +180,21 @@ def api_account_userinfo():
 
         return generate_return_data(StatusCode.SUCCESS, {'userinfo': userinfo})
 
+def use_game_score(username, score):
+
+    user_file_path = user_data_path / username / info_file_name
+    if not user_file_path.exists():
+        return False, 'user file path not exists'
+
+    with open(user_file_path, 'r+') as f:
+        user_info = json.load(f)
+
+        user_info['ranking'] = user_info.get('ranking', consts.default_ranking) + score
+        f.seek(0)
+        json.dump(user_info, fp=f)
+        f.truncate()
+    
+    return True, 'use game score succeed'
 
 def api_account_login():
     data = flask.request.get_json()
@@ -262,9 +277,9 @@ def api_account_update_signature():
 
     data = flask.request.get_json()
     signature = data['signature']
-    user_filepath = user_data_path / username / info_file_name
+    user_file_path = user_data_path / username / info_file_name
 
-    with open(user_filepath, 'r+') as f:
+    with open(user_file_path, 'r+') as f:
         user_info = json.load(f)
         user_info['signature'] = signature
         f.seek(0)
