@@ -126,8 +126,8 @@
             </figure>
           </div>
           <div class="loding-content" v-if="!load_finished">
-            <p class="loding-text title is-5">AI 画图中，请稍等片刻...</p>
-            <progress class="progress is-success" value="60" max="100">60%</progress>
+            <p class="loding-text title is-5" style="margin-top: 30px;">AI 画图中，请稍等片刻...</p>
+            <progress class="progress is-success" value="60" max="100" style="margin-bottom: 30px;">60%</progress>
           </div>
         </div>
       </div>
@@ -238,7 +238,7 @@
               } else {
                 this.messages = res.body.data.info_record;
                 this.load_finished = res.body.data.image_loaded;
-                
+
                 if (res.body.data.image_path != null) {
                   this.image_url = res.body.data.image_path;
                 }

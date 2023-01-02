@@ -21,7 +21,7 @@ GUEST_MAX_NUM = 5
 task_queue = KVqueue()
 img_queue = KVqueue()
 
-sd_thread = stable_diffusion_init(task_queue, img_queue)
+# sd_thread = stable_diffusion_init(task_queue, img_queue)
 
 
 class Game:
