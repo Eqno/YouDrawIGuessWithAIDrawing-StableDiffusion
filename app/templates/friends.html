@@ -377,6 +377,7 @@
           if (this.msg_updater == null) {
             this.msg_updater = setInterval(this.update_new_messages, 500);
           }
+          this.$refs.msgbox.scrollTop = this.$refs.msgbox.lastElementChild.offsetTop;
         },
         get_unread_num: function () {
           this.$http.get('/api/account/get_unread_num').then(function (res) {
@@ -414,7 +415,6 @@
                 }
                 this.last_msg_time = msg.timestamp;
               }
-              this.$refs.msgbox.scrollTop = this.$refs.msgbox.lastElementChild.offsetTop;
             } else {
               console.log('Getting chat info fails, message:', res.body.message);
               this.error_message = res.body.message;
@@ -437,7 +437,7 @@
           this.$http.post('/api/account/send_message', { username: this.left_username, content: this.chatbox_message }, { emulateJSON: false }).then(function (res) {
             if (res.body.code == 0) {
               this.chatbox_message = '';
-              this.update_new_messages();
+              // this.update_new_messages();
             } else {
               console.log('Sending message fails, message:', res.body.message);
               this.error_message = res.body.message;
@@ -523,7 +523,7 @@
           window.location.href = '/selectrole?mode=custom&name=' + name;
         },
         invite_game: function (name) {
-          this.chat_with(name);
+          // this.chat_with(name);
           this.$http.post('/api/account/send_message', { username: name, content: '我创建了一个房间，点击“加入游戏”来跟我一起玩吧！' }, { emulateJSON: false }).then(function (res) {
             if (res.body.code == 0) {
               this.update_new_messages();
